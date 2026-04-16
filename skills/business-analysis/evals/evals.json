@@ -1,0 +1,319 @@
+{
+  "skill_name": "business-analysis",
+  "evals": [
+    {
+      "id": 1,
+      "type": "prompt-check",
+      "prompt": "New client — Thrive Retreats in Kingscliff, NSW Australia. Website: thriveretreats.com.au. They do wellness retreats and yoga teacher trainings. They want Meta Ads only.",
+      "expected_output": "Should create client folder, init wiki, crawl the website, extract brand, document all offerings (wellness retreats AND yoga teacher training as separate offerings), load wellness-retreats sector lens, run digital presence audit, do client intake, and provide offering prioritization analysis.",
+      "assertions": [
+        {
+          "name": "folder_created",
+          "description": "Client folder created at Desktop/Thrive Retreat/Thrive Retreat/ with sources/, wiki/, deliverables/"
+        },
+        {
+          "name": "wiki_initialized",
+          "description": "Wiki has base pages: business.md, brand-identity.md, digital-presence.md, offerings.md, index.md, log.md"
+        },
+        {
+          "name": "brand_extracted",
+          "description": "brand-config.json saved to deliverables/ with actual colors from the website"
+        },
+        {
+          "name": "wellness_lens_loaded",
+          "description": "Sector lens for wellness/retreats loaded — extraction includes practitioner credentials, accommodation details, retreat calendar"
+        },
+        {
+          "name": "multiple_offerings_documented",
+          "description": "offerings.md has separate sections for wellness retreats AND yoga teacher training (not merged into one)"
+        },
+        {
+          "name": "source_labels_present",
+          "description": "Wiki pages use [EXTRACTED] and [INFERRED] labels on data points"
+        },
+        {
+          "name": "digital_presence_audited",
+          "description": "digital-presence.md populated with website quality, social media, and review data"
+        },
+        {
+          "name": "offering_prioritization",
+          "description": "business.md contains an offering prioritization analysis comparing retreats vs teacher training"
+        },
+        {
+          "name": "downstream_flagged",
+          "description": "log.md flags readiness for market-research skill with specific offering name"
+        },
+        {
+          "name": "platform_preference_noted",
+          "description": "Meta Ads only preference captured in business.md for downstream skills"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "type": "prompt-check",
+      "prompt": "I need to onboard Sri Krishna Mandir, a Hindu temple in Singapore. Website: srikrishnamandir.org. They want Meta Ads only. No known competitors.",
+      "expected_output": "Should create client folder, init wiki, crawl the website, extract brand, document offerings (religious services, cultural programs, events, etc.), load local-services sector lens, handle temple-specific community context.",
+      "assertions": [
+        {
+          "name": "local_services_lens",
+          "description": "Local services sector lens loaded — includes community & cultural context section for temples"
+        },
+        {
+          "name": "temple_offerings_identified",
+          "description": "Offerings identified beyond just 'temple' — e.g., regular services, special events, cultural programs, community activities"
+        },
+        {
+          "name": "community_context",
+          "description": "digital-presence.md or business.md captures community demographics, diaspora context in Singapore"
+        },
+        {
+          "name": "donation_model_documented",
+          "description": "Business model captures donation/seva-based revenue model, not standard pricing"
+        },
+        {
+          "name": "no_competitors_handled",
+          "description": "Competitor field marked BLANK with reason rather than guessing competitor temples"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "type": "prompt-check",
+      "prompt": "My existing client Happy Buddha Retreat in Australia is adding a new offering — corporate wellness offsites for teams. I need to update their business analysis with this new offering. They already have a wiki.",
+      "expected_output": "Should NOT re-init the wiki. Should add a new section to offerings.md for corporate wellness offsites. Should update business.md with the new offering context. Should flag that existing wiki data is still valid.",
+      "assertions": [
+        {
+          "name": "no_reinit",
+          "description": "Does NOT re-initialize the wiki — detects existing wiki and proceeds to update"
+        },
+        {
+          "name": "new_offering_added",
+          "description": "Adds corporate wellness offsites as a new section in offerings.md without overwriting existing offerings"
+        },
+        {
+          "name": "business_md_updated",
+          "description": "business.md updated with new offering context, not rewritten from scratch"
+        },
+        {
+          "name": "existing_data_preserved",
+          "description": "Existing wiki pages and their content preserved — only additions, no deletions"
+        },
+        {
+          "name": "different_audience_noted",
+          "description": "Corporate offsites target audience (HR managers, team leads) documented as distinct from individual retreat guests"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "type": "prompt-check",
+      "prompt": "New client — Zen Garden Day Spa in Melbourne. Website: zengardendayspa.com.au. WordPress site. They want Meta Ads only. Focus on brand extraction accuracy.",
+      "expected_output": "Should run extract_brand.py which fetches external CSS stylesheets (not just inline styles), filters WP preset colors, and extracts actual theme brand colors. Should NOT report WP defaults like #0693e3 or #ff6900 as brand colors.",
+      "assertions": [
+        {
+          "name": "external_css_fetched",
+          "description": "extract_brand.py fetches external CSS stylesheets linked via <link rel='stylesheet'>, not just inline <style> tags"
+        },
+        {
+          "name": "wp_presets_filtered",
+          "description": "WordPress preset colors (#0693e3, #ff6900, #cf2e2e, #fcb900, #00d084, #9b51e0, #abb8c3) do NOT appear in brand-config.json"
+        },
+        {
+          "name": "grayscale_hsl_based",
+          "description": "Grayscale detection uses HSL saturation (S < 10%), not RGB spread — dark greens/navies classified as chromatic"
+        },
+        {
+          "name": "icon_fonts_excluded",
+          "description": "Icon fonts (Font Awesome, icomoon, dashicons) do NOT appear in brand fonts"
+        },
+        {
+          "name": "font_weights_normalized",
+          "description": "Font names normalized: Gilroy-Bold → Gilroy, Montserrat-Light → Montserrat"
+        },
+        {
+          "name": "google_fonts_validated",
+          "description": "Google Fonts imports validated against actual CSS usage — vestigial imports flagged, not reported as brand fonts"
+        },
+        {
+          "name": "brand_config_saved",
+          "description": "brand-config.json saved to deliverables/ with colors, fonts, logo, and confidence level"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "type": "prompt-check",
+      "prompt": "New client — Sai Baba Temple of Houston. Website: saibaba.us. Non-WordPress site with CSS variables for brand colors. They want Meta Ads only.",
+      "expected_output": "Should extract brand colors from CSS variables (--navy, --gold, --cream etc.) while filtering utility status colors (--red, --green, --error, --success). Should NOT report Material Design or Bootstrap utility colors as brand colors.",
+      "assertions": [
+        {
+          "name": "css_var_colors_captured",
+          "description": "CSS variables named as colors (--navy, --gold, --cream) captured as brand colors"
+        },
+        {
+          "name": "utility_colors_filtered",
+          "description": "Utility/status colors (#d32f2f, #4caf50, #f44336, #ff9800, #2196f3) do NOT appear in brand-config.json"
+        },
+        {
+          "name": "utility_var_names_filtered",
+          "description": "CSS variables named --red, --green, --error, --success, --warning filtered out as non-brand"
+        },
+        {
+          "name": "non_wp_handling",
+          "description": "Script works correctly on non-WordPress sites without WP-specific parsing errors"
+        },
+        {
+          "name": "cultural_context_noted",
+          "description": "Brand identity captures cultural/religious context relevant to temple branding"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "type": "output-check",
+      "prompt": "Run extract_brand.py unit tests to verify filtering logic works correctly.",
+      "expected_output": "All unit tests in run_evals.py pass: grayscale detection, WP preset filter, utility color filter, icon font filter, utility var names, font normalization, CSS var color names.",
+      "assertions": [
+        {
+          "name": "run_evals_all_pass",
+          "description": "python run_evals.py exits with code 0 and reports 0 failures"
+        },
+        {
+          "name": "grayscale_tests_pass",
+          "description": "HSL-based grayscale detection correctly classifies dark greens/navies as chromatic and true grays as grayscale"
+        },
+        {
+          "name": "filter_tests_pass",
+          "description": "WP presets, utility colors, icon fonts, utility var names all correctly filtered"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "type": "output-check",
+      "prompt": "Run lint_wiki.py against client wiki to validate content quality.",
+      "expected_output": "Wiki linter checks: metadata headers present, source labels on data points, BLANK fields explained, Change History sections current, index.md references all pages, wiki-config.json synced with actual files.",
+      "assertions": [
+        {
+          "name": "lint_wiki_runs",
+          "description": "python lint_wiki.py executes without errors on a valid client wiki"
+        },
+        {
+          "name": "source_labels_checked",
+          "description": "Linter flags pages with <60% source label coverage"
+        },
+        {
+          "name": "blank_fields_checked",
+          "description": "Linter flags BLANK fields that lack explanations"
+        },
+        {
+          "name": "change_history_checked",
+          "description": "Linter verifies Change History section exists with dated entries"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "type": "prompt-check",
+      "prompt": "New client — Quoti (getquoti.ai). Webflow site, SaaS for home services. Typography-driven brand with bold display font. Wants Meta Ads.",
+      "expected_output": "Should detect Webflow platform and filter default Webflow blues (#3898ec, #2895f7, #0082f3). Should extract Obviously + Switzer fonts. Should flag VISUAL_EDITOR_SITE anomaly because Webflow stores most styling outside CSS. allChromaticColors should contain the actual palette for manual review.",
+      "assertions": [
+        {
+          "name": "webflow_detected",
+          "description": "is_webflow: true in output"
+        },
+        {
+          "name": "webflow_blues_filtered",
+          "description": "#3898ec and #2895f7 appear in platform_defaults_filtered, NOT in colors or allChromaticColors"
+        },
+        {
+          "name": "webflow_icons_filtered",
+          "description": "webflow-icons does NOT appear as fontFamily or fontSecondary"
+        },
+        {
+          "name": "brand_fonts_extracted",
+          "description": "Obviously and Switzer appear as fontFamily and fontSecondary"
+        },
+        {
+          "name": "visual_editor_anomaly",
+          "description": "VISUAL_EDITOR_SITE anomaly flagged with guidance to verify colors visually"
+        },
+        {
+          "name": "accent_over_text",
+          "description": "Prominence scoring boosts accent usage (background-color, border) over text-only colors"
+        },
+        {
+          "name": "hue_diversity_secondary",
+          "description": "Secondary color is from a different hue family (>30° apart) from primary when possible"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 9,
+      "type": "prompt-check",
+      "prompt": "New client: Priya's Home Kitchen, home-based cloud kitchen in Gurugram. No website, only Instagram @priyashomekitchen and Zomato/Swiggy listings.",
+      "expected_output": "Should skip website crawl and brand extraction (no URL to crawl). Document website as BLANK with reason. Extract business data from Instagram and Zomato/Swiggy listings instead. Offerings derived from delivery platform menus. Digital presence focused on marketplace presence and social media, not website.",
+      "assertions": [
+        {
+          "name": "website_crawl_skipped",
+          "description": "Crawl step skipped or marked N/A — no website URL provided. Documented as BLANK with reason."
+        },
+        {
+          "name": "brand_extraction_from_social",
+          "description": "Brand identity extracted from Instagram profile and delivery platform listings instead of website CSS"
+        },
+        {
+          "name": "offerings_from_marketplace",
+          "description": "Offerings documented from Zomato/Swiggy menu items — not left empty due to missing website"
+        },
+        {
+          "name": "digital_presence_adapted",
+          "description": "digital-presence.md focuses on marketplace ratings, Instagram engagement, delivery platform visibility — not website metrics"
+        },
+        {
+          "name": "blank_fields_documented",
+          "description": "Website-dependent fields (site speed, CTA clarity, SEO baseline) marked BLANK with one-sentence reason each"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 10,
+      "type": "prompt-check",
+      "prompt": "New client: FreshBrew Coffee, 4 locations across Gurugram (Cyber Hub, Golf Course Road, Sohna Road, Sector 29). Website: freshbrewcoffee.in",
+      "expected_output": "Should document all 4 locations in offerings and business context. Location-specific data points where available. Shared brand identity across locations. Per-location digital presence (separate GBP listings). Multi-location strategy considerations noted for downstream skills.",
+      "assertions": [
+        {
+          "name": "all_locations_documented",
+          "description": "All 4 locations (Cyber Hub, Golf Course Road, Sohna Road, Sector 29) explicitly listed in offerings.md or business.md"
+        },
+        {
+          "name": "shared_brand_identity",
+          "description": "Single brand-config.json produced — brand identity is shared across locations, not duplicated per location"
+        },
+        {
+          "name": "per_location_digital_presence",
+          "description": "digital-presence.md captures per-location GBP listings, ratings, and review counts separately"
+        },
+        {
+          "name": "location_specific_offerings",
+          "description": "Any location-specific menu items, hours, or services documented per location rather than generalized"
+        },
+        {
+          "name": "multi_location_strategy_noted",
+          "description": "business.md or log.md flags multi-location implications for downstream campaign targeting (geo-targeting per location)"
+        }
+      ],
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "skill_name": "ad-copywriter",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate ad copy for Retreat House. Creative brief exists at Desktop/Retreat House/Retreat House/deliverables/retreat-house-creative-brief.json. Both Google and Meta, 4 campaigns, phased strategy.",
+      "expected_output": "Google RSAs for Brand Search + Non-Brand Search (4 ad groups). Meta primary text + headlines for Prospecting and Retargeting. Image prompts using architectural photography prefix. Video storyboards with voiceover for 2 video ads. All character limits respected.",
+      "assertions": [
+        {"name": "rsa_character_limits", "description": "All Google headlines ≤ 30 chars, all descriptions ≤ 90 chars, path fields ≤ 15 chars"},
+        {"name": "meta_text_limits", "description": "Primary text flagged if over 125 chars, headlines ≤ 40 chars, descriptions ≤ 30 chars"},
+        {"name": "image_prompts_use_prefix", "description": "Image prompts start with or incorporate the image_gen_prompt_prefix from creative brief"},
+        {"name": "video_has_vo_script", "description": "Video storyboards include clean voiceover text without stage directions or parentheticals"},
+        {"name": "ab_variants_generated", "description": "A/B test variants from creative brief ab_testing.test_pairs are reflected in copy variants"},
+        {"name": "proof_elements_integrated", "description": "Dezeen, ATHA, $74K/yr stat appear naturally in ad copy, not forced"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write Meta ad copy for a local restaurant in Gurugram. No creative brief exists. Budget $1500/month. They do North Indian cuisine with a rooftop setting. Run in standalone mode.",
+      "expected_output": "Guided questions asked first. PAS framework for prospecting. Instagram-optimized aspect ratios for image prompts. Reels-first video storyboard. Local targeting language.",
+      "assertions": [
+        {"name": "standalone_questions_asked", "description": "6 guided questions asked before copy generation — product, platform, personas, hooks, proof, brand voice"},
+        {"name": "pas_framework_used", "description": "Prospecting copy follows PAS (Problem-Agitate-Solution) framework"},
+        {"name": "instagram_optimized", "description": "Image prompts include 4:5 and 9:16 aspect ratios for Instagram feed and stories/reels"},
+        {"name": "meta_only_output", "description": "No Google RSA or Google CSV generated — Meta only"},
+        {"name": "local_language", "description": "Copy includes local/geographic references appropriate for Gurugram audience"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate Google Ads copy only for a B2B SaaS company. Standalone mode. Product: project management tool for agencies, $49/user/month. Google Search only, no Meta.",
+      "expected_output": "Feature-Benefit-Proof framework for RSAs. Professional tone. 15 headlines per ad group with character limits. No video storyboards needed. No Meta CSV.",
+      "assertions": [
+        {"name": "feature_benefit_proof", "description": "RSA headlines and descriptions follow Feature-Benefit-Proof framework"},
+        {"name": "fifteen_headlines", "description": "Each RSA has 15 distinct headlines, all ≤ 30 characters"},
+        {"name": "b2b_professional_tone", "description": "Copy uses professional B2B language — no casual/playful tone, focuses on efficiency/ROI/team productivity"},
+        {"name": "google_only_output", "description": "No Meta CSV, no Reels/Stories image prompts — Google assets only"},
+        {"name": "price_point_messaging", "description": "$49/user price point referenced in at least some headlines/descriptions"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Write ad copy for an e-commerce fashion brand. Creative brief exists. Both platforms. They have 30+ SKUs across 3 collections. Catalog/carousel campaigns on Meta, Shopping + Search on Google.",
+      "expected_output": "Multiple RSAs for different product categories. Carousel copy with per-card headlines. Product-specific image prompts. Collection-level messaging angles.",
+      "assertions": [
+        {"name": "multi_product_rsa", "description": "Separate RSAs per product category/collection, not one generic RSA"},
+        {"name": "carousel_copy", "description": "Carousel ad copy includes per-card headlines that tell a sequential story or highlight different features"},
+        {"name": "product_specific_prompts", "description": "Image prompts vary by product/collection — not one generic prompt for all"},
+        {"name": "shopping_feed_alignment", "description": "Google copy aligns with Shopping campaign structure — product titles, descriptions match feed optimization"},
+        {"name": "meta_csv_variants", "description": "Meta CSV includes multiple ad variants with A/B labels per collection"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Generate ad copy for Ananda Wellness Retreat. Creative brief exists. Meta only. 7-day yoga retreat, $1200/person. Seasonal peaks Oct-Mar.",
+      "expected_output": "BAB framework for transformation narrative. Video storyboards with voiceover for retreat experience. Reels-optimized vertical prompts. Seasonal urgency in copy. Testimonial-driven retargeting.",
+      "assertions": [
+        {"name": "bab_framework", "description": "Prospecting copy follows Before-After-Bridge framework — transformation narrative (stressed → renewed → book the retreat)"},
+        {"name": "video_storyboard_complete", "description": "Video storyboard has 4-6 frames with visual, text overlay, voiceover, motion, music for each"},
+        {"name": "vo_clean_for_ai", "description": "Voiceover script is clean text — no parentheticals, no stage directions, natural contractions, short sentences"},
+        {"name": "seasonal_messaging", "description": "Copy references seasonal availability or urgency appropriate for Oct-Mar peak"},
+        {"name": "reels_vertical_prompts", "description": "Image prompts include 9:16 vertical compositions for Reels/Stories placement"}
+      ]
+    }
+  ]
+}

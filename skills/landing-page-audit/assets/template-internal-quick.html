@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{PAGE_NAME}} — Quick Audit</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --dark: #0F172A;
+    --dark-card: #1E293B;
+    --dark-surface: #334155;
+    --text: #F8FAFC;
+    --text-muted: #94A3B8;
+    --critical: #EF4444;
+    --major: #F59E0B;
+    --minor: #10B981;
+    --primary: #3B82F6;
+    --font: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: var(--dark); color: var(--text); line-height: 1.6; padding: 32px; max-width: 900px; margin: 0 auto; }
+
+  h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .meta { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
+
+  /* --- COMPACT SCORE BAR --- */
+  .score-bar {
+    display: flex; gap: 16px; margin-bottom: 32px;
+    padding: 20px; background: var(--dark-card);
+    border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
+  }
+  .score-item { flex: 1; text-align: center; }
+  .score-item .value { font-size: 28px; font-weight: 800; font-size: 32px; }
+  .score-item .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .score-green { color: var(--minor); }
+  .score-amber { color: var(--major); }
+  .score-red { color: var(--critical); }
+
+  /* --- ISSUE LIST --- */
+  .severity-header {
+    font-size: 14px; font-weight: 700; margin: 24px 0 12px;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .issue-row {
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 12px; align-items: start;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .issue-row:last-child { border-bottom: none; }
+
+  .severity-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    margin-top: 6px;
+  }
+  .severity-dot.critical { background: var(--critical); }
+  .severity-dot.major { background: var(--major); }
+  .severity-dot.minor { background: var(--minor); }
+
+  .issue-text { }
+  .issue-text .title { font-weight: 600; margin-bottom: 2px; }
+  .issue-text .fix { color: var(--text-muted); font-size: 13px; }
+  .issue-text .fix strong { color: var(--minor); font-weight: 600; }
+
+  .pillar-tag {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+    background: var(--dark-surface); color: var(--text-muted);
+    white-space: nowrap; margin-top: 4px;
+  }
+
+  /* --- SUB-SCORES COMPACT --- */
+  .subscore-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px; margin-bottom: 32px;
+  }
+  .subscore-card {
+    background: var(--dark-card); border-radius: 10px;
+    padding: 16px; border: 1px solid rgba(255,255,255,0.06);
+  }
+  .subscore-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: var(--text-muted); }
+  .subscore-row {
+    display: flex; justify-content: space-between;
+    font-size: 12px; padding: 3px 0;
+  }
+  .subscore-row .val { font-weight: 700; }
+
+  /* --- QUICK NOTES --- */
+  .notes {
+    background: var(--dark-card); border-radius: 12px;
+    padding: 20px; margin-top: 32px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .notes h3 { font-size: 14px; margin-bottom: 8px; }
+  .notes p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+
+  .footer { color: var(--text-muted); font-size: 11px; margin-top: 40px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+  @media print {
+    body { background: #fff; color: #1a1a1a; }
+    .score-item .value { color: #1a1a1a; }
+    .score-green { color: #059669; }
+    .score-amber { color: #D97706; }
+    .score-red { color: #DC2626; }
+  }
+</style>
+</head>
+<body>
+
+<h1>{{PAGE_NAME}} — Quick Audit</h1>
+<div class="meta">{{PAGE_URL}} · {{AUDIT_DATE}} · {{PAGE_TYPE}}</div>
+
+<!-- SCORE BAR -->
+<div class="score-bar">
+  <div class="score-item">
+    <div class="value {{OVERALL_SCORE_CLASS}}">{{OVERALL_SCORE}}</div>
+    <div class="label">Overall</div>
+  </div>
+  <div class="score-item">
+    <div class="value {{CRO_SCORE_CLASS}}">{{CRO_SCORE}}</div>
+    <div class="label">CRO</div>
+  </div>
+  <div class="score-item">
+    <div class="value {{VISUAL_SCORE_CLASS}}">{{VISUAL_SCORE}}</div>
+    <div class="label">Visual UX</div>
+  </div>
+  <div class="score-item">
+    <div class="value {{PERSUASION_SCORE_CLASS}}">{{PERSUASION_SCORE}}</div>
+    <div class="label">Persuasion</div>
+  </div>
+</div>
+
+<!-- SUB-SCORES -->
+<div class="subscore-grid">
+  <div class="subscore-card">
+    <h4>CRO Fundamentals</h4>
+    <!-- {{CRO_SUBSCORES_COMPACT}} -->
+  </div>
+  <div class="subscore-card">
+    <h4>Visual UI/UX</h4>
+    <!-- {{VISUAL_SUBSCORES_COMPACT}} -->
+  </div>
+  <div class="subscore-card">
+    <h4>Persuasion & Copy</h4>
+    <!-- {{PERSUASION_SUBSCORES_COMPACT}} -->
+  </div>
+</div>
+
+<!-- RANKED ISSUES -->
+<div class="severity-header" style="color:var(--critical);">CRITICAL — Fix Before Ads</div>
+<!-- {{CRITICAL_ISSUES}} -->
+
+<div class="severity-header" style="color:var(--major);">MAJOR — Sprint 1</div>
+<!-- {{MAJOR_ISSUES}} -->
+
+<div class="severity-header" style="color:var(--minor);">MINOR — Polish</div>
+<!-- {{MINOR_ISSUES}} -->
+
+<!-- INTERNAL NOTES -->
+<div class="notes">
+  <h3>Notes</h3>
+  <p>{{INTERNAL_NOTES}}</p>
+</div>
+
+<!-- DOWNSTREAM FLAGS -->
+<div class="notes" style="margin-top:12px;">
+  <h3>Downstream Connections</h3>
+  <p>{{DOWNSTREAM_FLAGS}}</p>
+</div>
+
+<div class="footer">Internal quick audit · Not for client delivery · {{AUDIT_DATE}}</div>
+
+</body>
+</html>

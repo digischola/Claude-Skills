@@ -1,0 +1,64 @@
+{
+  "skill_name": "post-launch-optimization",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Analyze Thrive Retreats campaigns",
+      "expected_output": "Full optimization report + dashboard for Thrive Retreats Meta account. Pulls data via Windsor.ai MCP. First run establishes baselines.",
+      "assertions": [
+        {"name": "windsor_data_pull", "description": "Called Windsor.ai MCP get_data for Meta queries (MQ1-MQ6 + MQ-Daily)"},
+        {"name": "11_layers", "description": "Report covers all 11 analysis layers (or skips with reason for first-run)"},
+        {"name": "health_status", "description": "Each campaign has green/amber/red/baseline status with data backing"},
+        {"name": "action_priority", "description": "Top 3-5 actions ranked with impact × confidence × ease scores"},
+        {"name": "source_labels", "description": "Every finding tagged with [DATA], [CALCULATED], [BENCHMARK], or [INFERRED]"},
+        {"name": "report_saved", "description": "Report saved to Thrive Retreats deliverables folder"},
+        {"name": "dashboard_generated", "description": "HTML dashboard with dark mode, health cards, trend sparklines"},
+        {"name": "config_created", "description": "optimization-config.json created with correct account IDs and conversion event"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Quick check on ISKM campaigns",
+      "expected_output": "Fire check mode — Layer 1 only. Brief chat summary flagging any emergencies. No report or dashboard generated.",
+      "assertions": [
+        {"name": "fire_check_mode", "description": "Recognized 'quick check' trigger and ran lightweight mode"},
+        {"name": "single_query", "description": "Only pulled campaign health query, not full 14-query set"},
+        {"name": "brief_output", "description": "Output is ≤10 lines in chat, not a full report"},
+        {"name": "flags_emergencies", "description": "Flags overspend, paused campaigns, CPA spikes if any"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Run weekly optimization for Happy Buddha",
+      "expected_output": "Full optimization for Google Ads account. Correct connector (google_ads), correct account ID. Skips Meta queries.",
+      "assertions": [
+        {"name": "correct_platform", "description": "Identified Happy Buddha as Google Ads only, skipped Meta queries"},
+        {"name": "google_queries", "description": "Ran GQ1-GQ6 + GQ-Daily for google_ads connector"},
+        {"name": "keyword_analysis", "description": "Layer 2 includes keyword performance and quality scores"},
+        {"name": "search_terms", "description": "Layer 3 includes search term analysis with negative keyword recommendations"},
+        {"name": "auction_insights", "description": "Layer 6 attempts auction insights query"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Optimize all my campaigns across all clients",
+      "expected_output": "Runs optimization for each connected account separately. Per-client reports saved to respective client folders.",
+      "assertions": [
+        {"name": "multi_client", "description": "Identified all connected accounts from get_connectors"},
+        {"name": "separate_reports", "description": "Generated separate report per client, not one combined report"},
+        {"name": "correct_folders", "description": "Each report saved to the correct client folder structure"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "My CPA on Thrive went up this week, what happened?",
+      "expected_output": "Pulls Thrive data, focuses analysis on CPA diagnosis. Identifies root cause (creative fatigue, audience saturation, competitive pressure, or anomaly).",
+      "assertions": [
+        {"name": "focused_analysis", "description": "Prioritizes CPA-relevant layers (1, 2, 4, 6, 9) over full 11-layer sweep"},
+        {"name": "root_cause", "description": "Identifies probable cause with data evidence"},
+        {"name": "trend_context", "description": "Shows daily trend to distinguish spike vs sustained increase"},
+        {"name": "actionable", "description": "Provides specific actions to address the CPA increase"}
+      ]
+    }
+  ]
+}

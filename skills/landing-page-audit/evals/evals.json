@@ -1,0 +1,109 @@
+{
+  "skill_name": "landing-page-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need you to audit this landing page for my client Samir's Indian Kitchen in Sydney. They're running Meta ads to this page for online reservations but the conversion rate is terrible. Here's the URL: https://samirskitchen.com.au/book-a-table and I've uploaded a mobile screenshot. The page has a big hero image of the restaurant interior, then a paragraph about the history of the restaurant, then a reservation form way at the bottom with 8 fields. No reviews or testimonials visible. CTA button says 'Submit'. They want more bookings from their Meta campaigns.",
+      "expected_output": "HTML dashboard with: overall score likely 3-5/10 range given the described issues. CRITICAL findings should include: CTA buried below fold, generic 'Submit' button text, 8-field form friction, no social proof/trust signals visible. Fix recommendations should include exact rewritten CTA copy, specific fields to remove from form, where to place Google/TripAdvisor review scores, and layout restructure putting booking form above fold on mobile.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Can you review this landing page for Thrive Retreats in Kingscliff? They run wellness retreats and yoga teacher trainings. Page is at https://thriveretreats.com.au/200hr-ytt and I have both mobile and desktop screenshots. The page has a nice hero with a yoga class photo, headline says 'Welcome to Thrive Retreats', subhead mentions the 200-hour YTT. Below that are 6 feature cards listing what's included, a section with 3 testimonials (just first names, no photos), pricing table, and a 'Register Now' button at the very bottom. They're about to start running Google Ads to this page. Brand colors are teal and warm sand.",
+      "expected_output": "HTML dashboard with: overall score likely 5-7/10 — has good elements but needs optimization. CRITICAL: headline wastes space on 'Welcome to' instead of value prop, CTA only at bottom. MAJOR: testimonials weak (no photos, no last names, no specifics), feature cards are features not benefits, no urgency for limited spots. Fixes should include rewritten headline (e.g., 'Become a Certified Yoga Teacher in 8 Weeks — Beachside in Kingscliff'), benefit-reframed feature cards, enhanced testimonials, CTA above fold, and urgency element for cohort dates.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "hey can you look at this LP for a new client CrownTECH IT Relocation in Toronto? they help businesses relocate their IT infrastructure when moving offices. page is https://crowntechit.com/relocate — i took a mobile screenshot. the page is pretty text-heavy, has their logo big at the top, then a headline 'IT Relocation Services', three paragraphs about their process, a contact form asking for name email phone company size project timeline budget range and message, and a blue 'Get Quote' button. no testimonials, no trust signals, no case studies. they want to run google search ads targeting 'office IT relocation toronto'",
+      "expected_output": "HTML dashboard with: overall score likely 3-4/10 — B2B lead gen page with major conversion barriers. CRITICAL: headline is generic (just restates the service name), no value proposition, form has 7+ fields for a first touch, no trust signals at all for a service that involves touching a company's critical infrastructure. MAJOR: text-heavy with no visual breaks, logo oversized eating above-fold space, no social proof, no objection handling (companies worry about downtime, data loss, timeline). Fixes should include rewritten headline with outcome focus, reduced form (name, email, company name only), trust signal additions (certifications, client logos, case study snippet), and copy restructure from process-dump to benefit-led."
+    },
+    {
+      "id": 4,
+      "type": "prompt-check",
+      "prompt": "Audit this landing page: Well-designed SaaS signup page with clear headline, single CTA above fold, 3 trust badges, video testimonial, 2-field form (email + name), social proof counter showing '10,000+ teams', fast load, clean mobile layout.",
+      "expected_output": "Score should be 8-9/10. Issues should be MINOR only (micro-copy tweaks, accessibility improvements). Audit should explicitly acknowledge what the page does well. Recommendations should be optimization-level refinements, not structural overhauls.",
+      "assertions": [
+        {
+          "name": "score_above_7",
+          "description": "Overall Conversion Readiness Score is 8 or above — reflects a well-built page"
+        },
+        {
+          "name": "only_minor_issues",
+          "description": "No CRITICAL or MAJOR issues flagged — all findings are MINOR polish items"
+        },
+        {
+          "name": "positive_acknowledgments_present",
+          "description": "Audit explicitly calls out what the page does well (CTA placement, form simplicity, social proof) — not just a list of problems"
+        },
+        {
+          "name": "optimization_recommendations",
+          "description": "Recommendations are optimization-level (A/B test headline variants, micro-copy tweaks) — not overhaul suggestions"
+        },
+        {
+          "name": "no_critical_issues",
+          "description": "Zero CRITICAL issues in the priority-ranked list — page is not actively killing conversions"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "type": "prompt-check",
+      "prompt": "Audit landing page for ISKM Singapore temple event page. Built with Elementor on WordPress. Chrome screenshot shows blank below hero section.",
+      "expected_output": "Should acknowledge Elementor screenshot limitation. Fall back to HTML analysis via WebFetch for structural data. Visual audit marked as limited. Dashboard includes caveat note about screenshot reliability. Full CRO and copy audit still completed using HTML source.",
+      "assertions": [
+        {
+          "name": "elementor_limitation_noted",
+          "description": "Audit explicitly acknowledges that Elementor pages may not render fully in automated screenshots"
+        },
+        {
+          "name": "html_fallback_used",
+          "description": "Falls back to WebFetch HTML analysis for structural audit when screenshots are incomplete"
+        },
+        {
+          "name": "visual_audit_limited_flag",
+          "description": "Visual UI/UX pillar flagged as limited — confidence reduced due to incomplete visual data"
+        },
+        {
+          "name": "screenshot_caveat_in_dashboard",
+          "description": "Dashboard includes a visible note that screenshots may not reflect actual page appearance for Elementor sites"
+        },
+        {
+          "name": "full_cro_and_copy_audit_still_done",
+          "description": "CRO and Persuasion/Copy pillars still fully audited using HTML source — audit does not abort due to screenshot failure"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "type": "prompt-check",
+      "prompt": "Audit landing page for CloudSync Pro — file backup SaaS. URL: cloudsyncpro.com/pricing. Page has 3 pricing tiers, feature comparison table, FAQ accordion, no testimonials, generic stock hero image, 'Start Free Trial' CTA only visible after scrolling past pricing grid.",
+      "expected_output": "Score should be 4-6/10. CTA visibility flagged as CRITICAL (buried below pricing grid). Missing social proof flagged as MAJOR. Pricing page used as landing page — recommend building a dedicated ad landing page. SaaS-specific criteria applied (free trial friction, tier clarity, feature comparison usability).",
+      "assertions": [
+        {
+          "name": "cta_visibility_critical",
+          "description": "CTA buried below pricing grid flagged as CRITICAL — must be visible above fold or repeated"
+        },
+        {
+          "name": "missing_social_proof_flagged",
+          "description": "Absence of testimonials, case studies, or social proof flagged as MAJOR issue"
+        },
+        {
+          "name": "pricing_page_limitation_noted",
+          "description": "Audit notes that a pricing page is not ideal as an ad landing page — different intent than a dedicated conversion page"
+        },
+        {
+          "name": "dedicated_landing_page_recommended",
+          "description": "Recommends building a separate dedicated landing page for ad traffic rather than sending to pricing page"
+        },
+        {
+          "name": "saas_specific_criteria_applied",
+          "description": "Audit applies SaaS-relevant criteria: free trial friction, tier clarity, feature comparison usability, value proposition for each tier"
+        }
+      ],
+      "files": []
+    }
+  ]
+}

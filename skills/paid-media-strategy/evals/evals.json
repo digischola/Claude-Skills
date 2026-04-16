@@ -1,0 +1,65 @@
+{
+  "skill_name": "paid-media-strategy",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just finished market research for a local restaurant in Gurugram. They want to run Meta Ads only, budget is around $1500/month. Help me build the campaign strategy.",
+      "expected_output": "Meta-only strategy with Sales/Leads campaigns, broad targeting + interest stacking, retargeting funnel, Reels-first creative direction, phased 90-day plan. Budget split across prospecting and retargeting. Guided questions should ask about conversion tracking, creative assets, and current booking/ordering system.",
+      "assertions": [
+        {"name": "platform_specific", "description": "Strategy is Meta-only — no Google Ads recommendations unless explicitly noted as future consideration"},
+        {"name": "guided_questions_asked", "description": "3-5 targeted questions asked before strategy generation, including conversion maturity and creative assets"},
+        {"name": "decision_logic_explained", "description": "Every campaign type, bidding strategy, and audience choice includes WHY rationale, not just WHAT"},
+        {"name": "budget_math_correct", "description": "Campaign budgets sum to total monthly budget, daily = monthly/30"},
+        {"name": "source_labels_present", "description": "Data points labeled [EXTRACTED] (from wiki), [INFERRED] (strategy logic), or BLANK with reason"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "CrownTech IT Relocation needs a Google + Meta strategy. They're B2B, targeting Toronto. Budget $8K/month across both platforms. Market research is done — check the wiki.",
+      "expected_output": "Dual-platform strategy. Google: Brand Search + Non-brand Search + PMax with lead form assets. Meta: Sales campaigns for lead gen + retargeting. 60/40 Google/Meta split for B2B with search intent. Longer sales cycle considerations. LinkedIn-adjacent audience targeting on Meta. CSV media plan with campaign-level and monthly projections.",
+      "assertions": [
+        {"name": "cross_platform_allocation", "description": "Explicit Google vs Meta budget split with rationale based on B2B search intent dynamics"},
+        {"name": "b2b_sales_cycle", "description": "Strategy accounts for longer B2B sales cycle — offline conversion import, lead quality over volume, nurturing"},
+        {"name": "wiki_consumed", "description": "References specific data from wiki (competitors, benchmarks, buyer personas) with [EXTRACTED] labels"},
+        {"name": "phased_execution", "description": "3-phase plan with clear milestones and decision criteria for phase transitions"},
+        {"name": "csv_produced", "description": "CSV media plan with campaign overview, ad group details, monthly projection, and KPI targets"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Magic Receipt AI is a receipt scanning app. Meta Ads only for now. They need app install strategy. Budget TBD — help me figure out the right budget.",
+      "expected_output": "App install strategy using App Promotion objective, AAC as primary campaign type. SDK/SKAN tracking requirements flagged. Budget recommendation based on target CPI and volume goals. Creative direction for app demo videos and UGC. Guided questions should ask about SDK setup, monetization model, and current install volume.",
+      "assertions": [
+        {"name": "app_specific_logic", "description": "Uses App Promotion objective, AAC campaign type, discusses SDK/MMP/SKAN requirements"},
+        {"name": "tracking_prerequisite", "description": "Flags conversion tracking setup as prerequisite — won't recommend launch without proper attribution"},
+        {"name": "budget_recommendation", "description": "Provides budget recommendation with unit economics math (CPI × target installs = budget)"},
+        {"name": "advantage_plus_qualification", "description": "Checks whether volume qualifies for Advantage+ App Campaigns vs manual campaigns"},
+        {"name": "creative_app_focused", "description": "Creative direction specific to app installs — demo videos, app store screenshots, UGC testimonials"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Strategy for Ananda Wellness Retreat, Rishikesh. Meta Ads only. $3,000/month budget. Primary offering: 7-day yoga retreat ($1,200/person). Seasonal peaks: Oct-Mar. Low season Jun-Aug. Booking conversion. Wiki from market-research exists.",
+      "expected_output": "Meta-only campaign architecture. Seasonal budget shifting (higher spend Oct-Mar, reduced Jun-Aug). Retreat-specific creative direction (transformation narrative, before/after). Booking window strategy (lead time awareness). Off-season lead nurturing phase to build pipeline for peak season.",
+      "assertions": [
+        {"name": "meta_only_architecture", "description": "Strategy is Meta-only — no Google Ads campaigns included. Campaign types use Meta objectives (Sales, Leads)."},
+        {"name": "seasonal_budget_allocation", "description": "Budget allocation shifts by season — higher spend during Oct-Mar peak, reduced or nurturing-focused during Jun-Aug low season"},
+        {"name": "retreat_creative_direction", "description": "Creative direction includes retreat-specific angles: transformation narrative, immersive experience visuals, testimonial-driven social proof"},
+        {"name": "booking_window_strategy", "description": "Strategy accounts for retreat booking lead time — campaigns start well before retreat dates, not just during the retreat period"},
+        {"name": "off_season_nurturing_phase", "description": "Off-season (Jun-Aug) has a defined nurturing strategy — lead collection, email list building, early-bird offers — not just reduced spend"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Strategy for Sri Lakshmi Temple, Houston TX. Both Google + Meta. $2,000/month. Goals: increase event attendance (weekend pujas, festivals) AND online donations. Two distinct conversion actions.",
+      "expected_output": "Dual-objective campaign structure. Google for intent (people searching for temples, Hindu events in Houston). Meta for awareness (community reach, event promotion to diaspora). Separate campaigns for events vs donations. Cultural sensitivity in creative direction and copy guidance.",
+      "assertions": [
+        {"name": "dual_objective_structure", "description": "Campaign architecture has separate campaigns or ad sets for events (attendance) and donations — not merged into one campaign"},
+        {"name": "google_intent_campaigns", "description": "Google Ads used for intent capture — targeting searches like 'Hindu temple Houston', 'puja near me', 'Diwali events Houston'"},
+        {"name": "meta_awareness_campaigns", "description": "Meta Ads used for community awareness and event promotion — interest/demographic targeting for Indian diaspora in Houston"},
+        {"name": "events_vs_donations_separated", "description": "Events and donations have different campaign objectives, creative, and conversion tracking — strategy acknowledges these are distinct conversion actions"},
+        {"name": "cultural_sensitivity_noted", "description": "Creative direction includes cultural sensitivity guidance — respectful imagery, community-first messaging, appropriate tone for religious organization"}
+      ]
+    }
+  ]
+}

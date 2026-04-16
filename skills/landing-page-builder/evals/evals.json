@@ -1,0 +1,70 @@
+{
+  "skill_name": "landing-page-builder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build a landing page for Thrive Retreats' Stress Less Retreat",
+      "expected_output": "Downstream mode — reads wiki, brand-config.json, creative brief. Generates retreat booking page (10-14 sections) with Thrive branding. HTML prototype + page-spec JSON.",
+      "assertions": [
+        {"name": "downstream_context", "description": "Loaded brand-config.json, offerings.md, and any available creative brief from wiki"},
+        {"name": "page_type", "description": "Identified as retreat_booking page type (high-ticket $300-2000)"},
+        {"name": "section_count", "description": "10-14 sections following retreat booking architecture from landing-page-research.md"},
+        {"name": "above_fold", "description": "Hero has headline, CTA, and trust signal visible above fold on mobile 375px"},
+        {"name": "brand_applied", "description": "Uses Thrive brand colors (#e71c24 accent, #2a3832 forest), fonts, logo"},
+        {"name": "copy_quality", "description": "Headlines follow formula from copy-frameworks.md, CTAs are first-person action+benefit"},
+        {"name": "responsive", "description": "Mobile responsive with media queries, sticky CTA, thumb-zone CTAs"},
+        {"name": "validator_pass", "description": "Passes validate_output.py with 0 critical issues"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a landing page for a weekend yoga workshop in Ashfield, Sydney. $120 per person, beginner friendly, 3 hours.",
+      "expected_output": "Standalone mode — asks guided questions, generates workshop/event page (6-10 sections). Shorter, logistics-focused.",
+      "assertions": [
+        {"name": "standalone_mode", "description": "Recognized no wiki, asked for details or used provided info"},
+        {"name": "page_type", "description": "Identified as workshop_event page type (mid-ticket $50-300)"},
+        {"name": "section_count", "description": "6-10 sections following workshop architecture"},
+        {"name": "logistics_strip", "description": "Key details strip near top: date, time, location, duration, price"},
+        {"name": "short_copy", "description": "600-1500 words total, concise for simple event"},
+        {"name": "registration_form", "description": "Short form with 3-5 fields max, no unnecessary fields"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Build a lead gen page for a free wellness consultation",
+      "expected_output": "Lead gen page (4-7 sections). Minimal form, strong social proof, how-it-works section.",
+      "assertions": [
+        {"name": "page_type", "description": "Identified as lead_gen page type"},
+        {"name": "section_count", "description": "4-7 sections, under 1000 words"},
+        {"name": "form_fields", "description": "3 or fewer required fields (name, email, optional phone)"},
+        {"name": "how_it_works", "description": "3-step process section included"},
+        {"name": "risk_reducer", "description": "Microcopy near CTA: 'No spam', 'Takes 30 seconds', or similar"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "The landing page audit found these issues with Retreat House's current page: CTA below fold on mobile, no social proof above fold, form has 9 fields, no FAQ section. Build a new page that fixes all of them.",
+      "expected_output": "Downstream mode — reads audit results and fixes every CRITICAL/HIGH issue. Validates fixes against audit checklist.",
+      "assertions": [
+        {"name": "audit_aware", "description": "Referenced audit findings and addressed each one specifically"},
+        {"name": "cta_above_fold", "description": "CTA visible above fold on mobile (hero constrained, CTA prominent)"},
+        {"name": "proof_above_fold", "description": "Social proof element in or near hero section"},
+        {"name": "form_reduced", "description": "Form reduced to 3-5 fields from 9"},
+        {"name": "faq_added", "description": "FAQ section added with 6-10 objection-handling questions"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Build a 200-hour yoga teacher training landing page for a new studio. $3,500 AUD, Yoga Alliance certified, next cohort January 2027, max 15 students.",
+      "expected_output": "Teacher training page (8-12 sections). Heavy on curriculum, accreditation, career outcomes. Multi-step application form.",
+      "assertions": [
+        {"name": "page_type", "description": "Identified as teacher_training page type (high-commitment $2000+)"},
+        {"name": "section_count", "description": "8-12 sections following teacher training architecture"},
+        {"name": "accreditation", "description": "Yoga Alliance certification prominently featured"},
+        {"name": "curriculum_detail", "description": "Program structure with modules/phases, not just a bullet list"},
+        {"name": "pricing_anchored", "description": "Pricing uses anchoring and/or payment plan framing"},
+        {"name": "authentic_scarcity", "description": "Limited to 15 students and January 2027 cohort as real scarcity"}
+      ]
+    }
+  ]
+}

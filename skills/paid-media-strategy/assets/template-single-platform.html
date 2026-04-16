@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{BUSINESS_NAME}} — Paid Media Strategy</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: {{PRIMARY_COLOR|#3B82F6}};
+    --primary-hover: {{PRIMARY_HOVER|#2563EB}};
+    --dark: {{DARK_BG|#0F172A}};
+    --dark-card: {{DARK_CARD|#1E293B}};
+    --dark-surface: {{DARK_SURFACE|#334155}};
+    --text: #F8FAFC; --text-muted: #94A3B8;
+    --green: #10B981; --red: #EF4444; --amber: #F59E0B; --purple: #8B5CF6; --cyan: #06B6D4;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:var(--font); background:var(--dark); color:var(--text); line-height:1.6; -webkit-font-smoothing:antialiased; }
+  .nav { position:sticky; top:0; z-index:100; background:rgba(15,23,42,0.95); backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,0.06); padding:0 24px; display:flex; align-items:center; gap:8px; height:56px; overflow-x:auto; }
+  .nav a { color:var(--text-muted); text-decoration:none; font-size:13px; font-weight:500; padding:8px 12px; border-radius:6px; white-space:nowrap; transition:all 0.2s; }
+  .nav a:hover,.nav a.active { color:var(--text); background:var(--dark-surface); }
+  .nav .brand { color:var(--primary); font-weight:700; font-size:14px; margin-right:12px; }
+  section { padding:64px 24px; max-width:1200px; margin:0 auto; }
+  .section-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--primary); margin-bottom:8px; }
+  .section-title { font-size:28px; font-weight:700; margin-bottom:8px; }
+  .section-desc { color:var(--text-muted); font-size:15px; margin-bottom:32px; max-width:680px; }
+  .hero { background:linear-gradient(135deg,var(--dark) 0%,var(--dark-card) 50%,var(--dark) 100%); border-bottom:1px solid rgba(255,255,255,0.06); padding:80px 24px 64px; text-align:center; }
+  .hero h1 { font-size:36px; font-weight:800; margin-bottom:8px; }
+  .hero .subtitle { color:var(--text-muted); font-size:16px; margin-bottom:48px; }
+  .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; max-width:900px; margin:0 auto; }
+  .kpi-card { background:var(--dark-card); border-radius:14px; padding:20px; text-align:center; border:1px solid rgba(255,255,255,0.06); transition:transform 0.2s,box-shadow 0.2s; }
+  .kpi-card:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .kpi-val { font-size:28px; font-weight:800; color:var(--primary); }
+  .kpi-label { font-size:12px; color:var(--text-muted); margin-top:4px; font-weight:500; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; }
+  .card { background:var(--dark-card); border-radius:16px; padding:24px; border:1px solid rgba(255,255,255,0.06); transition:transform 0.2s; }
+  .card:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,0.25); }
+  .card h4 { font-size:16px; margin-bottom:8px; }
+  .card p { font-size:14px; color:var(--text-muted); }
+  .badge { display:inline-block; font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
+  .badge-google { background:rgba(59,130,246,0.15); color:#60A5FA; }
+  .badge-meta { background:rgba(139,92,246,0.15); color:#A78BFA; }
+  .badge-phase { background:rgba(16,185,129,0.15); color:var(--green); }
+  .chart-wrap { position:relative; height:280px; margin:20px 0; }
+  .tree { font-size:14px; line-height:2; padding:16px 20px; background:var(--dark-surface); border-radius:12px; font-family:'SF Mono',Consolas,monospace; white-space:pre; overflow-x:auto; }
+  .tip { position:relative; cursor:help; border-bottom:1px dashed var(--text-muted); }
+  .tiptext { visibility:hidden; opacity:0; position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); width:280px; background:#000; color:#fff; font-size:12px; padding:10px 14px; border-radius:8px; line-height:1.5; text-align:left; z-index:50; transition:opacity 0.2s; pointer-events:none; }
+  .tip:hover .tiptext { visibility:visible; opacity:1; }
+  .copy-btn { background:none; border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); font-size:12px; padding:4px 8px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
+  .copy-btn:hover { border-color:var(--primary); color:var(--primary); }
+  .collapse-btn { background:none; border:none; color:var(--primary); font-size:13px; font-weight:600; cursor:pointer; padding:6px 0; display:flex; align-items:center; gap:6px; }
+  .collapse-btn:hover { text-decoration:underline; }
+  .collapse-btn .arrow { transition:transform 0.3s; display:inline-block; font-size:10px; }
+  .collapse-btn.open .arrow { transform:rotate(180deg); }
+  .collapse-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease,padding 0.3s; }
+  .collapse-body.open { max-height:3000px; padding:16px 0; }
+  .phase-bar { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .phase { background:var(--dark-card); border-radius:14px; padding:20px; border-left:4px solid var(--primary); }
+  .phase h4 { font-size:15px; margin-bottom:6px; }
+  .phase .period { font-size:12px; color:var(--primary); font-weight:600; margin-bottom:10px; }
+  .phase ul { list-style:none; padding:0; }
+  .phase li { font-size:13px; color:var(--text-muted); padding:4px 0; padding-left:16px; position:relative; }
+  .phase li::before { content:''; position:absolute; left:0; top:11px; width:6px; height:6px; border-radius:50%; background:var(--primary); }
+  .funnel-stage { display:flex; align-items:center; gap:16px; padding:14px 20px; margin:6px auto; border-radius:12px; background:var(--dark-card); border:1px solid rgba(255,255,255,0.06); transition:transform 0.2s; }
+  .funnel-stage:hover { transform:scale(1.01); }
+  .funnel-label { font-size:14px; font-weight:600; min-width:120px; }
+  .funnel-bar { flex:1; height:24px; border-radius:6px; background:var(--dark-surface); overflow:hidden; }
+  .funnel-fill { height:100%; border-radius:6px; background:var(--primary); transition:width 0.8s ease; }
+  .funnel-metric { font-size:13px; color:var(--text-muted); min-width:140px; text-align:right; }
+  .glossary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .glossary-item { background:var(--dark-card); border-radius:10px; padding:14px 16px; }
+  .glossary-item dt { font-size:13px; font-weight:700; color:var(--primary); margin-bottom:4px; }
+  .glossary-item dd { font-size:12px; color:var(--text-muted); }
+  .footer { text-align:center; padding:40px 24px; color:var(--text-muted); font-size:12px; border-top:1px solid rgba(255,255,255,0.06); }
+  @media(max-width:768px){ .grid-2,.phase-bar,.glossary-grid{grid-template-columns:1fr;} .hero h1{font-size:26px;} section{padding:40px 16px;} .kpi-row{grid-template-columns:1fr 1fr;} }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  .animate{animation:fadeUp 0.6s ease forwards;opacity:0;}
+  .delay-1{animation-delay:0.1s;}.delay-2{animation-delay:0.2s;}.delay-3{animation-delay:0.3s;}.delay-4{animation-delay:0.4s;}.delay-5{animation-delay:0.5s;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="brand">{{BUSINESS_NAME}}</a>
+  <a href="#overview">Overview</a>
+  <a href="#campaigns">Campaigns</a>
+  <a href="#budget">Budget</a>
+  <a href="#audiences">Audiences</a>
+  <a href="#creative">Creative</a>
+  <a href="#funnel">Funnel & KPIs</a>
+  <a href="#timeline">Timeline</a>
+  <a href="#glossary">Glossary</a>
+</nav>
+
+<div class="hero" id="overview">
+  <div class="section-label">Paid Media Strategy</div>
+  <h1>{{BUSINESS_NAME}}</h1>
+  <p class="subtitle">{{PLATFORM}} · {{OBJECTIVE}} · {{STRATEGY_DATE}}</p>
+  <div class="kpi-row">
+    <!-- {{HERO_KPI_CARDS}} -->
+  </div>
+  <p style="color:var(--text-muted);font-size:13px;margin-top:40px;">Prepared by {{CONSULTANT}} · {{STRATEGY_DATE}}</p>
+</div>
+
+<section id="campaigns">
+  <div class="section-label">Campaign Architecture</div>
+  <h2 class="section-title">Campaign Structure <span class="badge {{PLATFORM_BADGE_CLASS}}">{{PLATFORM}}</span></h2>
+  <p class="section-desc">{{CAMPAIGN_ARCHITECTURE_SUMMARY}}</p>
+  <div class="tree">{{CAMPAIGN_TREE}}</div>
+  <button class="collapse-btn" onclick="toggle(this)" style="margin-top:16px;">Structure Rationale <span class="arrow">&#9660;</span></button>
+  <div class="collapse-body"><div class="card"><p>{{CAMPAIGN_RATIONALE}}</p></div></div>
+</section>
+
+<section id="budget">
+  <div class="section-label">Budget Allocation</div>
+  <h2 class="section-title">Monthly Budget: <span class="tip">{{TOTAL_BUDGET}}<span class="tiptext">{{BUDGET_RATIONALE_TOOLTIP}}</span></span></h2>
+  <p class="section-desc">Split by campaign based on priority and expected volume.</p>
+  <div class="grid-2">
+    <div class="chart-wrap"><canvas id="budgetChart"></canvas></div>
+    <div><!-- {{BUDGET_RULE_CARDS}} --></div>
+  </div>
+  <button class="collapse-btn" onclick="toggle(this)" style="margin-top:16px;">Budget Rationale & Unit Economics <span class="arrow">&#9660;</span></button>
+  <div class="collapse-body"><div class="card"><p>{{BUDGET_DEEP_DIVE}}</p></div></div>
+</section>
+
+<section id="audiences">
+  <div class="section-label">Audience & Targeting</div>
+  <h2 class="section-title">Targeting Strategy</h2>
+  <p class="section-desc">{{AUDIENCE_STRATEGY_SUMMARY}}</p>
+  <div class="grid-3">
+    <!-- {{AUDIENCE_CARDS}} -->
+  </div>
+  <button class="collapse-btn" onclick="toggle(this)" style="margin-top:16px;">Exclusion Lists & Layering Logic <span class="arrow">&#9660;</span></button>
+  <div class="collapse-body"><div class="card"><p>{{AUDIENCE_DEEP_DIVE}}</p></div></div>
+</section>
+
+<section id="creative">
+  <div class="section-label">Creative Direction</div>
+  <h2 class="section-title">Format & Messaging</h2>
+  <p class="section-desc">{{CREATIVE_DIRECTION_SUMMARY}}</p>
+  <div class="grid-3">
+    <!-- {{CREATIVE_FORMAT_CARDS}} -->
+  </div>
+  <div style="margin-top:24px;">
+    <h3 style="font-size:18px;margin-bottom:16px;">Messaging Angles</h3>
+    <div class="grid-2">
+      <!-- {{MESSAGING_ANGLE_CARDS}} -->
+    </div>
+  </div>
+  <button class="collapse-btn" onclick="toggle(this)" style="margin-top:16px;">Full Creative Brief <span class="arrow">&#9660;</span></button>
+  <div class="collapse-body"><div class="card"><p>{{CREATIVE_BRIEF}}</p></div></div>
+</section>
+
+<section id="funnel">
+  <div class="section-label">Funnel & KPI Targets</div>
+  <h2 class="section-title">Conversion Funnel</h2>
+  <p class="section-desc">Estimated performance at each stage based on industry benchmarks and strategy logic.</p>
+  <div style="max-width:800px;">
+    <!-- {{FUNNEL_STAGES}} -->
+  </div>
+  <div style="margin-top:32px;">
+    <h3 style="font-size:18px;margin-bottom:16px;">KPI Targets</h3>
+    <div class="grid-3">
+      <!-- {{KPI_TARGET_CARDS}} -->
+    </div>
+  </div>
+  <div class="chart-wrap" style="margin-top:24px;"><canvas id="benchmarkChart"></canvas></div>
+</section>
+
+<section id="timeline">
+  <div class="section-label">Execution Plan</div>
+  <h2 class="section-title">90-Day Phased Timeline</h2>
+  <p class="section-desc">Three phases from launch to scale.</p>
+  <div class="phase-bar">
+    <div class="phase animate delay-1" style="border-left-color:var(--amber);">
+      <div class="period">Phase 1: Days 1-30</div>
+      <h4>Foundation</h4>
+      <ul><!-- {{PHASE_1_GOALS}} --></ul>
+    </div>
+    <div class="phase animate delay-2" style="border-left-color:var(--primary);">
+      <div class="period">Phase 2: Days 30-60</div>
+      <h4>Optimize</h4>
+      <ul><!-- {{PHASE_2_GOALS}} --></ul>
+    </div>
+    <div class="phase animate delay-3" style="border-left-color:var(--green);">
+      <div class="period">Phase 3: Days 60-90</div>
+      <h4>Scale</h4>
+      <ul><!-- {{PHASE_3_GOALS}} --></ul>
+    </div>
+  </div>
+  <button class="collapse-btn" onclick="toggle(this)" style="margin-top:16px;">Week-by-Week Detail <span class="arrow">&#9660;</span></button>
+  <div class="collapse-body"><div class="card"><p>{{WEEKLY_DETAIL}}</p></div></div>
+</section>
+
+<section id="glossary">
+  <div class="section-label">Reference</div>
+  <h2 class="section-title">Glossary</h2>
+  <button class="collapse-btn" onclick="toggle(this)">Show Terms <span class="arrow">&#9660;</span></button>
+  <div class="collapse-body">
+    <div class="glossary-grid">
+      <!-- {{GLOSSARY_ITEMS}} -->
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <p>Paid Media Strategy · {{BUSINESS_NAME}} · {{STRATEGY_DATE}}</p>
+  <p style="margin-top:4px;">Template: Single Platform ({{PLATFORM}}) · Prepared by {{CONSULTANT}}</p>
+</div>
+
+<script>
+function toggle(b){b.classList.toggle('open');b.nextElementSibling.classList.toggle('open')}
+function copyText(btn){navigator.clipboard.writeText(btn.dataset.copy);const o=btn.textContent;btn.textContent='Copied!';btn.style.color='var(--green)';setTimeout(()=>{btn.textContent=o;btn.style.color='';},1500)}
+window.addEventListener('scroll',()=>{let c='';document.querySelectorAll('section[id],.hero[id]').forEach(s=>{if(scrollY>=s.offsetTop-100)c=s.id});document.querySelectorAll('.nav a:not(.brand)').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+c))});
+
+new Chart(document.getElementById('budgetChart'),{type:'doughnut',data:{labels:[{{BUDGET_LABELS}}],datasets:[{data:[{{BUDGET_VALUES}}],backgroundColor:[{{BUDGET_COLORS}}],borderWidth:0,cutout:'65%'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#F8FAFC',font:{size:12},padding:16}}}}});
+
+new Chart(document.getElementById('benchmarkChart'),{type:'bar',data:{labels:[{{BENCHMARK_LABELS}}],datasets:[{label:'Industry Avg',data:[{{BENCHMARK_INDUSTRY}}],backgroundColor:'rgba(148,163,184,0.3)',borderRadius:6},{label:'Your Target',data:[{{BENCHMARK_TARGET}}],backgroundColor:'rgba(59,130,246,0.6)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#F8FAFC',font:{size:12}}}},scales:{x:{ticks:{color:'#94A3B8'},grid:{display:false}},y:{ticks:{color:'#94A3B8'},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+</script>
+</body>
+</html>

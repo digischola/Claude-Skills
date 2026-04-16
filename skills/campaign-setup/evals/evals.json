@@ -1,0 +1,89 @@
+{
+  "skill_name": "campaign-setup",
+  "evals": [
+    {
+      "id": "retreat-house-phase1-google-only",
+      "description": "Downstream mode: consume Retreat House paid-media-strategy + ad-copywriter + landing-page-builder outputs. Phase 1 = Google only. Expect 8 CSVs + checklist + runbook. 0 CRITICAL from validator.",
+      "inputs": {
+        "client_dir": "Retreat House/Retreat House",
+        "mode": "downstream",
+        "platforms": ["google"],
+        "phase": 1
+      },
+      "expected_outputs": {
+        "files_present": [
+          "deliverables/campaign-setup/google-ads/01-campaigns.csv",
+          "deliverables/campaign-setup/google-ads/02-ad-groups.csv",
+          "deliverables/campaign-setup/google-ads/03-keywords.csv",
+          "deliverables/campaign-setup/google-ads/04-responsive-search-ads.csv",
+          "deliverables/campaign-setup/google-ads/05-sitelink-extensions.csv",
+          "deliverables/campaign-setup/google-ads/06-callout-extensions.csv",
+          "deliverables/campaign-setup/google-ads/08-negative-keywords.csv",
+          "deliverables/campaign-setup/google-ads/README.md",
+          "deliverables/campaign-setup/pre-launch-checklist.md",
+          "deliverables/campaign-setup/launch-runbook.md"
+        ],
+        "validator_critical": 0,
+        "placeholder_tokens_expected": ">= 1 (account ID + conversion action names at minimum)"
+      }
+    },
+    {
+      "id": "standalone-saas-b2b",
+      "description": "Standalone mode: no upstream deliverables. Skill asks 12-question intake. Expect Google + Meta CSVs with heavy <REPLACE_ME> annotations.",
+      "inputs": {
+        "mode": "standalone",
+        "client_type": "SaaS B2B",
+        "platforms": ["google", "meta"]
+      },
+      "expected_outputs": {
+        "files_present": [
+          "deliverables/campaign-setup/google-ads/01-campaigns.csv",
+          "deliverables/campaign-setup/meta-ads/meta-bulk-import.csv",
+          "deliverables/campaign-setup/pre-launch-checklist.md"
+        ],
+        "validator_critical": 0,
+        "placeholder_tokens_expected": ">= 10",
+        "readme_must_include": "STANDALONE MODE"
+      }
+    },
+    {
+      "id": "char-limit-violations",
+      "description": "Inject ad copy that exceeds Google RSA 30-char / 90-char limits. Validator must flag every violation as CRITICAL.",
+      "inputs": {
+        "mode": "test",
+        "headlines_over_limit": 3,
+        "descriptions_over_limit": 2
+      },
+      "expected_outputs": {
+        "validator_critical": ">= 5",
+        "validator_message_contains": "chars (max 30)"
+      }
+    },
+    {
+      "id": "orphan-references",
+      "description": "CSVs reference a campaign name that doesn't exist in 01-campaigns.csv. Validator must flag as CRITICAL.",
+      "inputs": {
+        "mode": "test",
+        "orphan_ad_groups": 1,
+        "orphan_keywords": 2
+      },
+      "expected_outputs": {
+        "validator_critical": ">= 3",
+        "validator_message_contains": "not found"
+      }
+    },
+    {
+      "id": "meta-asset-manifest-pending",
+      "description": "Meta bulk CSV references <PENDING_UPLOAD> tokens because user hasn't uploaded assets yet. Validator must WARN (not CRITICAL) and block launch via checklist Section 0.",
+      "inputs": {
+        "mode": "test",
+        "meta_pending_assets": 4
+      },
+      "expected_outputs": {
+        "validator_warning": ">= 1",
+        "validator_message_contains": "PENDING_UPLOAD",
+        "checklist_section_0_must_list": true
+      }
+    }
+  ]
+}

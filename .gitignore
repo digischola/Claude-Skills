@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS / temp
+*.log
+*.tmp
+.env
+.env.local
+
+# Local smoke-test scratch (not part of the skills themselves)
+/tmp_*

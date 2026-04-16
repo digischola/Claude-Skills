@@ -1,0 +1,232 @@
+{
+  "skill_name": "market-research",
+  "evals": [
+    {
+      "id": 1,
+      "type": "prompt-check",
+      "prompt": "I just signed a new client — Samir's Indian Kitchen in Gurugram. They're a mid-range North Indian restaurant with 2 locations. Do a full market research before I start their Meta and Google campaigns. Here's their website: samirskitchen.com",
+      "expected_output": "Should generate a Perplexity mega-prompt covering all 11 dimensions for the restaurant industry in Gurugram. Should include Porter's, PESTEL, SWOT, Blue Ocean frameworks. After Perplexity data is provided, should produce markdown report + HTML dashboard with Chart.js visualizations and restaurant-appropriate branding.",
+      "assertions": [
+        {
+          "name": "generates_perplexity_prompt",
+          "description": "Output includes a customized Perplexity deep research prompt covering all 11 dimensions"
+        },
+        {
+          "name": "local_market_customization",
+          "description": "Perplexity prompt includes Gurugram/NCR specific market questions, not generic India-wide"
+        },
+        {
+          "name": "catchment_radius_appropriate",
+          "description": "Uses 5-10km catchment radius appropriate for a restaurant, not 50km+"
+        },
+        {
+          "name": "both_platforms_covered",
+          "description": "Research dimensions include both Meta Ads AND Google Ads benchmarks since client needs both"
+        },
+        {
+          "name": "porters_five_forces_included",
+          "description": "Perplexity prompt includes Porter's Five Forces analysis for restaurant industry"
+        },
+        {
+          "name": "pestel_included",
+          "description": "Perplexity prompt includes PESTEL analysis with India-specific factors"
+        },
+        {
+          "name": "swot_included",
+          "description": "Perplexity prompt includes SWOT analysis framework"
+        },
+        {
+          "name": "blue_ocean_included",
+          "description": "Perplexity prompt includes Blue Ocean / underserved market opportunities"
+        },
+        {
+          "name": "buyer_personas_included",
+          "description": "Perplexity prompt requests buyer personas with purchase journey and objection handling"
+        },
+        {
+          "name": "keyword_data_step_present",
+          "description": "Skill asks about collecting Google Ads Keyword Planner and/or Meta Ads data"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "type": "prompt-check",
+      "prompt": "My existing client Thrive Retreats in Kingscliff NSW just launched a new product — Thrive Flow Teacher Training. It's a yoga teacher training certification. I need fresh market research for this specific product before building the campaign. Website: thriveretreats.com.au. They only need Meta Ads.",
+      "expected_output": "Should recognize this is an existing client with a new product launch. Perplexity prompt should cover all 11 dimensions focused on yoga teacher training market in Australia/NSW. Platform focus should be Meta Ads only, not Google Ads.",
+      "assertions": [
+        {
+          "name": "recognizes_existing_client_new_product",
+          "description": "Acknowledges this is an existing client and focuses research on the new product, not the entire business"
+        },
+        {
+          "name": "industry_specific_dimensions",
+          "description": "Research covers yoga/wellness education market specifics — certification requirements, enrollment cycles, trust signals"
+        },
+        {
+          "name": "audience_psychology_depth",
+          "description": "Buyer personas section goes beyond demographics into decision triggers, objections, and emotional drivers specific to yoga teacher training seekers"
+        },
+        {
+          "name": "meta_only_platform_focus",
+          "description": "Platform benchmarks focused on Meta Ads (CPM, ROAS, creative formats), not Google Ads"
+        },
+        {
+          "name": "all_11_dimensions_in_prompt",
+          "description": "Perplexity prompt covers all 11 dimensions including Porter's, PESTEL, SWOT, Blue Ocean"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "type": "output-check",
+      "prompt": "New B2B client — TechServe Solutions, an IT managed services company in Melbourne. Website: techserve.com.au. They want both Google and Meta Ads. Here's the Perplexity deep research output: [see evals/mock-perplexity-output.md]",
+      "mock_data": "evals/mock-perplexity-output.md",
+      "expected_output": "Should analyze Perplexity output end-to-end across all 11 dimensions. Produce markdown report with source labels, confidence ratings, marketing implications per section. HTML dashboard with Chart.js charts, tooltips, collapsibles, and CrownTECH branding.",
+      "assertions": [
+        {
+          "name": "source_labels_present",
+          "description": "Every data point in the report has [EXTRACTED] or [INFERRED] label"
+        },
+        {
+          "name": "blank_fields_with_reasons",
+          "description": "Missing data appears as BLANK with one-sentence explanation, not filled with guesses"
+        },
+        {
+          "name": "confidence_ratings_per_section",
+          "description": "Each of the 11 sections has HIGH/MEDIUM/LOW confidence rating"
+        },
+        {
+          "name": "brand_extraction_attempted",
+          "description": "Dashboard uses colors/fonts extracted from client website via extract_brand.py, not defaults"
+        },
+        {
+          "name": "marketing_implications_per_section",
+          "description": "Every dimension section ends with Marketing Implications connecting findings to campaign decisions"
+        },
+        {
+          "name": "recommendation_labels",
+          "description": "Strategic recommendations labeled 'data-supported' or 'directional'"
+        },
+        {
+          "name": "chartjs_visualizations",
+          "description": "HTML dashboard uses Chart.js for data visualization (radar for Porter's, bar for market size, doughnut for budget)"
+        },
+        {
+          "name": "tooltips_on_kpis",
+          "description": "Dashboard has tooltips on every KPI and stat explaining context and source"
+        },
+        {
+          "name": "collapsible_sections",
+          "description": "Dashboard uses collapsible sections for detailed sub-content"
+        },
+        {
+          "name": "keyword_data_integrated",
+          "description": "If Google Ads keyword CSV was provided, data is embedded in the Keywords section of the dashboard"
+        },
+        {
+          "name": "porters_pestel_swot_present",
+          "description": "Dashboard includes Porter's Five Forces (radar chart), PESTEL (6 cards), and SWOT (2x2 grid) visualizations"
+        },
+        {
+          "name": "both_outputs_generated",
+          "description": "Both markdown report AND HTML dashboard are produced and saved to deliverables/"
+        },
+        {
+          "name": "wiki_updated",
+          "description": "Client wiki pages updated with findings, sources saved to sources/ folder"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "type": "prompt-check",
+      "prompt": "New client — Smith & Associates, a commercial law firm in Sydney. Website: smithlaw.com.au. They want Google Ads only. Known competitors: Clayton Utz, Herbert Smith Freehills.",
+      "expected_output": "Should seed competitor names into the Perplexity prompt. Platform focus Google Ads only. All 11 dimensions customized for legal services industry in Sydney. Should ask about Google Ads Keyword Planner data collection.",
+      "assertions": [
+        {
+          "name": "competitor_names_seeded",
+          "description": "Perplexity prompt includes the known competitor names (Clayton Utz, Herbert Smith Freehills)"
+        },
+        {
+          "name": "google_only_focus",
+          "description": "Platform benchmarks focused on Google Ads (CPC, CTR, CPL), Meta benchmarks excluded or minimal"
+        },
+        {
+          "name": "legal_industry_specifics",
+          "description": "Research dimensions include legal-specific factors: compliance, bar association, ethical advertising rules"
+        },
+        {
+          "name": "sydney_geographic_scope",
+          "description": "Geographic scope is Sydney/NSW specific, not generic Australia-wide"
+        },
+        {
+          "name": "keyword_collection_step",
+          "description": "Skill mentions collecting Google Ads Keyword Planner data (Chrome tools or CSV export)"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "type": "prompt-check",
+      "prompt": "Perplexity research for GreenLeaf Organics, organic grocery delivery in Bangalore. Perplexity output attached but missing: Porter's analysis, PESTEL, and channel partners data. Only 8 of 11 dimensions have data.",
+      "expected_output": "Should mark Porter's, PESTEL, and channel partners as BLANK with reasons. Generate targeted follow-up queries for the 3 missing dimensions. Proceed with available data for the other 8 dimensions. Report shows confidence ratings LOW for missing sections. Maximum 2 follow-up rounds before proceeding with gaps.",
+      "assertions": [
+        {
+          "name": "blank_dimensions_marked",
+          "description": "Porter's, PESTEL, and channel partners sections marked BLANK with one-sentence explanation each — not filled with guesses"
+        },
+        {
+          "name": "follow_up_queries_generated",
+          "description": "1-2 targeted follow-up Perplexity queries generated specifically for the 3 missing dimensions"
+        },
+        {
+          "name": "confidence_ratings_reflect_gaps",
+          "description": "Confidence ratings for Porter's, PESTEL, and channel partners set to LOW — not MEDIUM or HIGH"
+        },
+        {
+          "name": "report_proceeds_with_available_data",
+          "description": "Report and dashboard still produced with the 8 available dimensions — does not block on missing data"
+        },
+        {
+          "name": "max_two_followup_rounds",
+          "description": "Follow-up protocol respects the 2-round maximum — after 2 rounds, proceeds with gaps marked BLANK"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "type": "prompt-check",
+      "prompt": "Research for Elite Tutors, premium home tutoring service in Delhi NCR. Google Ads only. Known competitors: Vedantu, BYJU's tuition, Superprof India.",
+      "expected_output": "Perplexity prompt should explicitly include dimension 9 (Channel Partners & Referral Ecosystem). Analysis covers referral sources specific to tutoring: school partnerships, parent community groups, education consultants, relocation services. Google Ads-only platform focus.",
+      "assertions": [
+        {
+          "name": "channel_partners_in_prompt",
+          "description": "Perplexity prompt includes dimension 9 — channel partners and referral ecosystem — with tutoring-specific referral questions"
+        },
+        {
+          "name": "referral_sources_identified",
+          "description": "Analysis identifies at least 3 distinct referral source categories relevant to home tutoring"
+        },
+        {
+          "name": "school_partnership_angle",
+          "description": "School partnerships explicitly explored as a channel partner opportunity for premium tutoring"
+        },
+        {
+          "name": "parent_community_channels",
+          "description": "Parent community groups (WhatsApp groups, RWA communities, school parent networks) identified as referral channels"
+        },
+        {
+          "name": "education_consultant_referrals",
+          "description": "Education consultants and relocation services explored as referral sources for premium tutoring in Delhi NCR"
+        }
+      ],
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{PAGE_NAME}} — Landing Page Audit</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: {{PRIMARY_COLOR|#3B82F6}};
+    --primary-hover: {{PRIMARY_HOVER|#2563EB}};
+    --dark: {{DARK_BG|#0F172A}};
+    --dark-card: {{DARK_CARD|#1E293B}};
+    --dark-surface: {{DARK_SURFACE|#334155}};
+    --text: #F8FAFC;
+    --text-muted: #94A3B8;
+    --critical: #EF4444;
+    --major: #F59E0B;
+    --minor: #10B981;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: var(--dark); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  .nav { position: sticky; top: 0; z-index: 100; background: rgba(15,23,42,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 24px; display: flex; align-items: center; gap: 8px; height: 56px; overflow-x: auto; }
+  .nav a { color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500; padding: 8px 12px; border-radius: 6px; white-space: nowrap; transition: all 0.2s; }
+  .nav a:hover, .nav a.active { color: var(--text); background: var(--dark-surface); }
+  .nav .brand { color: var(--primary); font-weight: 700; font-size: 14px; margin-right: 12px; }
+
+  section { padding: 64px 24px; max-width: 1200px; margin: 0 auto; }
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 8px; }
+  .section-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .section-desc { color: var(--text-muted); font-size: 15px; margin-bottom: 32px; max-width: 680px; }
+
+  .hero { background: linear-gradient(135deg, var(--dark) 0%, var(--dark-card) 50%, var(--dark) 100%); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 80px 24px 64px; text-align: center; }
+  .hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+  .hero .subtitle { color: var(--text-muted); font-size: 16px; margin-bottom: 48px; }
+  .hero .meta { color: var(--text-muted); font-size: 13px; margin-top: 40px; }
+
+  .score-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 24px; max-width: 900px; margin: 0 auto; }
+  .gauge-card { background: var(--dark-card); border-radius: 16px; padding: 24px; text-align: center; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s, box-shadow 0.2s; }
+  .gauge-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .gauge-card.main { border-color: var(--primary); }
+  .gauge-label { font-size: 13px; color: var(--text-muted); margin-top: 12px; font-weight: 500; }
+  .gauge-canvas { width: 100% !important; max-width: 160px; margin: 0 auto; }
+  .gauge-card .tip { position: relative; cursor: help; }
+  .gauge-card .tiptext { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); width: 260px; background: #000; color: #fff; font-size: 12px; padding: 10px 14px; border-radius: 8px; line-height: 1.5; text-align: left; z-index: 50; transition: opacity 0.2s; }
+  .gauge-card .tip:hover .tiptext { visibility: visible; opacity: 1; }
+
+  .screenshot-section { background: var(--dark-card); border-radius: 20px; padding: 32px; border: 1px solid rgba(255,255,255,0.06); }
+  .screenshot-container { position: relative; width: 100%; max-width: 375px; margin: 0 auto 32px; border-radius: 12px; overflow: hidden; background: var(--dark-surface); }
+  .screenshot-container:has(img) { min-height: 600px; }
+  .screenshot-container img { width: 100%; display: block; }
+  .screenshot-placeholder { width: 100%; min-height: 180px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 13px; border: 2px dashed rgba(255,255,255,0.1); border-radius: 12px; }
+  .marker { position: absolute; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.4); transition: transform 0.2s; animation: pulse 2s infinite; }
+  .marker:hover { transform: scale(1.2); }
+  .marker.critical { background: var(--critical); }
+  .marker.major { background: var(--major); }
+  .marker.minor { background: var(--minor); }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+  .legend-table { width: 100%; border-collapse: collapse; }
+  .legend-table td { padding: 10px 14px; font-size: 14px; vertical-align: top; }
+  .legend-table tr { border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .legend-num { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+
+  .pillar-card { background: var(--dark-card); border-radius: 20px; padding: 32px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s; }
+  .pillar-card:hover { transform: translateY(-2px); }
+  .pillar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .pillar-title { font-size: 22px; font-weight: 700; }
+  .pillar-score-badge { font-size: 18px; font-weight: 700; padding: 6px 16px; border-radius: 20px; }
+  .score-green { background: rgba(16,185,129,0.15); color: var(--minor); }
+  .score-amber { background: rgba(245,158,11,0.15); color: var(--major); }
+  .score-red { background: rgba(239,68,68,0.15); color: var(--critical); }
+  .sub-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .sub-score-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--dark-surface); border-radius: 10px; font-size: 14px; }
+  .sub-score-val { font-weight: 700; font-size: 16px; }
+  .radar-wrap { max-width: 350px; margin: 0 auto 24px; }
+  .insight-callout { background: rgba(59,130,246,0.08); border-left: 3px solid var(--primary); padding: 16px 20px; border-radius: 0 12px 12px 0; font-size: 14px; margin-top: 16px; }
+  .insight-callout strong { color: var(--primary); }
+
+  .issue-group-title { font-size: 16px; font-weight: 700; margin: 32px 0 16px; display: flex; align-items: center; gap: 8px; }
+  .issue-card { background: var(--dark-card); border-radius: 14px; padding: 20px 24px; margin-bottom: 12px; border-left: 4px solid transparent; transition: transform 0.2s; line-height: 1.7; }
+  .issue-card:hover { transform: translateY(-1px); }
+  .issue-card.critical { border-left-color: var(--critical); }
+  .issue-card.major { border-left-color: var(--major); }
+  .issue-card.minor { border-left-color: var(--minor); }
+  .issue-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .issue-impact { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .issue-pillar-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--dark-surface); color: var(--text-muted); margin-left: 8px; }
+
+  .collapse-btn { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 0; display: flex; align-items: center; gap: 6px; }
+  .collapse-btn:hover { text-decoration: underline; }
+  .collapse-btn .arrow { transition: transform 0.3s; display: inline-block; font-size: 10px; }
+  .collapse-btn.open .arrow { transform: rotate(180deg); }
+  .collapse-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s; }
+  .collapse-body.open { max-height: 2000px; padding: 16px 0; }
+  .collapse-body .fix-block { background: var(--dark-surface); border-radius: 10px; padding: 16px 20px; font-size: 14px; line-height: 1.7; }
+  .fix-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .fix-current { color: var(--critical); }
+  .fix-recommended { color: var(--minor); }
+  .fix-why { color: var(--text-muted); margin-top: 8px; font-size: 13px; }
+
+  .action-phase { background: var(--dark-card); border-radius: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.06); }
+  .action-phase h4 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .action-item { padding: 8px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 10px; }
+  .action-item:last-child { border-bottom: none; }
+  .action-num { width: 22px; height: 22px; border-radius: 50%; background: var(--dark-surface); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+  /* --- B2B SPECIFIC --- */
+  .credibility-panel {
+    background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(245,158,11,0.04));
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 16px; padding: 24px; margin: 16px 0;
+  }
+  .credibility-panel h5 { color: var(--critical); font-size: 15px; margin-bottom: 12px; }
+
+  .cred-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cred-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px; background: var(--dark-card);
+    border-radius: 10px; font-size: 13px;
+  }
+  .cred-item .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .cred-item .label { font-weight: 600; font-size: 13px; }
+  .cred-item .status { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .form-analysis {
+    background: var(--dark-card); border-radius: 16px;
+    padding: 24px; margin: 16px 0;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .form-analysis h5 { font-size: 15px; margin-bottom: 16px; color: var(--primary); }
+  .field-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-verdict { font-weight: 600; font-size: 12px; }
+  .field-verdict.keep { color: var(--minor); }
+  .field-verdict.remove { color: var(--critical); }
+  .field-verdict.optional { color: var(--major); }
+
+  .footer { text-align: center; padding: 40px 24px; color: var(--text-muted); font-size: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+  @media (max-width: 768px) { .score-row { grid-template-columns: 1fr 1fr; } .sub-scores, .cred-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 26px; } section { padding: 40px 16px; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeUp 0.6s ease forwards; opacity: 0; }
+  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; } .delay-4 { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="brand">{{BRAND_NAME}}</a>
+  <a href="#overview">Overview</a>
+  <a href="#screenshots">Screenshots</a>
+  <a href="#credibility">Credibility</a>
+  <a href="#cro">CRO</a>
+  <a href="#visual">Visual UX</a>
+  <a href="#persuasion">Persuasion</a>
+  <a href="#issues">Issues</a>
+  <a href="#actions">Action Plan</a>
+</nav>
+
+<div class="hero" id="overview">
+  <div class="section-label">Landing Page Conversion Audit</div>
+  <h1>{{PAGE_NAME}}</h1>
+  <p class="subtitle">{{PAGE_URL}}</p>
+  <div class="score-row">
+    <div class="gauge-card main animate delay-1"><canvas id="gaugeOverall" class="gauge-canvas" height="160"></canvas><div class="gauge-label"><span class="tip">Conversion Readiness<span class="tiptext">Weighted: CRO (40%) + Visual UX (30%) + Persuasion (30%). {{OVERALL_INTERPRETATION}}</span></span></div></div>
+    <div class="gauge-card animate delay-2"><canvas id="gaugeCRO" class="gauge-canvas" height="160"></canvas><div class="gauge-label"><span class="tip">CRO Fundamentals<span class="tiptext">Headline, CTA, form, trust, social proof, above-fold. Weight: 40%.</span></span></div></div>
+    <div class="gauge-card animate delay-3"><canvas id="gaugeVisual" class="gauge-canvas" height="160"></canvas><div class="gauge-label"><span class="tip">Visual UI/UX<span class="tiptext">Hierarchy, layout, contrast, typography, mobile, flow. Weight: 30%.</span></span></div></div>
+    <div class="gauge-card animate delay-4"><canvas id="gaugePersuasion" class="gauge-canvas" height="160"></canvas><div class="gauge-label"><span class="tip">Persuasion & Copy<span class="tiptext">Message match, benefits, specificity, objections, microcopy. Weight: 30%.</span></span></div></div>
+  </div>
+  <p class="meta">Prepared by {{CONSULTANT}} · {{AUDIT_DATE}} · Page type: B2B Lead Gen</p>
+</div>
+
+<section id="screenshots">
+  <div class="section-label">Visual Analysis</div>
+  <h2 class="section-title">Annotated Screenshots</h2>
+  <p class="section-desc">Issues mapped on the page. Red = critical, yellow = major, green = minor.</p>
+  <div class="screenshot-section">
+    <h3 style="font-size:16px; margin-bottom:16px; color:var(--text-muted);">Mobile View</h3>
+    <div class="screenshot-container"><!-- {{SCREENSHOT_MARKERS}} --><div class="screenshot-placeholder">Mobile screenshot — replace with &lt;img&gt;</div></div>
+    <table class="legend-table"><!-- {{SCREENSHOT_LEGEND}} --></table>
+  </div>
+</section>
+
+<!-- B2B SPECIFIC: CREDIBILITY & TRUST PANEL -->
+<section id="credibility">
+  <div class="credibility-panel">
+    <h5>Credibility Assessment (Critical for B2B Services)</h5>
+    <p style="font-size:14px; color:var(--text-muted); margin-bottom:16px;">B2B buyers need evidence this company can handle critical business operations. Missing credibility signals kill conversions faster than any other factor.</p>
+    <div class="cred-grid">
+      <!-- {{CREDIBILITY_ITEMS}} -->
+    </div>
+  </div>
+
+  <!-- FORM FIELD ANALYSIS -->
+  <div class="form-analysis">
+    <h5>Form Field Analysis</h5>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">B2B forms need to balance lead qualification with friction. First-touch forms should collect the minimum needed to start a conversation — qualify deeper on the sales call.</p>
+    <div>
+      <!-- {{FORM_FIELDS_ANALYSIS}} -->
+    </div>
+    <p style="font-size:13px; color:var(--text-muted); margin-top:16px;">{{FORM_SUMMARY}}</p>
+  </div>
+</section>
+
+<section id="cro">
+  <div class="section-label">Pillar 1</div>
+  <div class="pillar-card">
+    <div class="pillar-header"><h2 class="pillar-title">CRO Fundamentals</h2><span class="pillar-score-badge {{CRO_SCORE_CLASS}}">{{CRO_SCORE}}/10</span></div>
+    <div class="radar-wrap"><canvas id="radarCRO" height="300"></canvas></div>
+    <div class="sub-scores"><!-- {{CRO_SUB_SCORES}} --></div>
+    <!-- {{CRO_DETAILED_FINDINGS}} -->
+    <div class="insight-callout"><strong>Key Insight:</strong> {{CRO_KEY_INSIGHT}}</div>
+  </div>
+</section>
+
+<section id="visual">
+  <div class="section-label">Pillar 2</div>
+  <div class="pillar-card">
+    <div class="pillar-header"><h2 class="pillar-title">Visual UI/UX</h2><span class="pillar-score-badge {{VISUAL_SCORE_CLASS}}">{{VISUAL_SCORE}}/10</span></div>
+    <div class="radar-wrap"><canvas id="radarVisual" height="300"></canvas></div>
+    <div class="sub-scores"><!-- {{VISUAL_SUB_SCORES}} --></div>
+    <!-- {{VISUAL_DETAILED_FINDINGS}} -->
+    <div class="insight-callout"><strong>Key Insight:</strong> {{VISUAL_KEY_INSIGHT}}</div>
+  </div>
+</section>
+
+<section id="persuasion">
+  <div class="section-label">Pillar 3</div>
+  <div class="pillar-card">
+    <div class="pillar-header"><h2 class="pillar-title">Persuasion & Copy</h2><span class="pillar-score-badge {{PERSUASION_SCORE_CLASS}}">{{PERSUASION_SCORE}}/10</span></div>
+    <div class="radar-wrap"><canvas id="radarPersuasion" height="300"></canvas></div>
+    <div class="sub-scores"><!-- {{PERSUASION_SUB_SCORES}} --></div>
+    <!-- {{PERSUASION_DETAILED_FINDINGS}} -->
+    <div class="insight-callout"><strong>Key Insight:</strong> {{PERSUASION_KEY_INSIGHT}}</div>
+  </div>
+</section>
+
+<section id="issues">
+  <div class="section-label">All Findings</div>
+  <h2 class="section-title">Priority-Ranked Issues</h2>
+  <p class="section-desc">Every issue ranked by conversion impact.</p>
+  <div class="issue-group-title"><span style="color:var(--critical);">🔴</span> Critical — Fix Before Ads</div><!-- {{CRITICAL_ISSUES}} -->
+  <div class="issue-group-title"><span style="color:var(--major);">🟡</span> Major — First Sprint</div><!-- {{MAJOR_ISSUES}} -->
+  <div class="issue-group-title"><span style="color:var(--minor);">🟢</span> Minor — When Time Allows</div><!-- {{MINOR_ISSUES}} -->
+</section>
+
+<section id="actions">
+  <div class="section-label">Recommendations</div>
+  <h2 class="section-title">Action Plan</h2>
+  <div class="action-phase" style="border-left:4px solid var(--critical);"><h4>Immediate — Before Ad Launch</h4><!-- {{IMMEDIATE_ACTIONS}} --></div>
+  <div class="action-phase" style="border-left:4px solid var(--major);"><h4>Sprint 1 — First Two Weeks</h4><!-- {{SPRINT1_ACTIONS}} --></div>
+  <div class="action-phase" style="border-left:4px solid var(--minor);"><h4>Polish</h4><!-- {{POLISH_ACTIONS}} --></div>
+  <div class="action-phase" style="border-left:4px solid var(--primary);"><h4>Estimated Impact</h4><p style="font-size:14px;"><!-- {{ESTIMATED_IMPACT}} --></p></div>
+</section>
+
+<div class="footer">
+  <p>Landing Page Audit · {{BRAND_NAME}} · {{AUDIT_DATE}}</p>
+  <p style="margin-top:4px;">Template: B2B Lead Gen · Prepared by {{CONSULTANT}}</p>
+</div>
+
+<script>
+  function createGauge(id,score,max){const c=score>=7?'#10B981':score>=5?'#F59E0B':'#EF4444';new Chart(document.getElementById(id),{type:'doughnut',data:{datasets:[{data:[score,max-score],backgroundColor:[c,'rgba(255,255,255,0.06)'],borderWidth:0,cutout:'78%'}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{enabled:false}},rotation:-90,circumference:180},plugins:[{id:'ct',afterDraw(ch){const{ctx,chartArea:{left,right,top,bottom}}=ch;const cx=(left+right)/2,cy=bottom-10;ctx.save();ctx.textAlign='center';ctx.fillStyle=c;ctx.font='bold 28px Inter,system-ui';ctx.fillText(score.toFixed(1),cx,cy-8);ctx.fillStyle='#94A3B8';ctx.font='12px Inter,system-ui';ctx.fillText('/'+max,cx,cy+12);ctx.restore();}}]})}
+  function createRadar(id,labels,scores){const c=scores.map(s=>s>=7?'#10B981':s>=5?'#F59E0B':'#EF4444');new Chart(document.getElementById(id),{type:'radar',data:{labels,datasets:[{data:scores,backgroundColor:'rgba(59,130,246,0.12)',borderColor:'rgba(59,130,246,0.8)',borderWidth:2,pointBackgroundColor:c,pointBorderColor:c,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'#94A3B8',backdropColor:'transparent',font:{size:10}},grid:{color:'rgba(255,255,255,0.06)'},angleLines:{color:'rgba(255,255,255,0.06)'},pointLabels:{color:'#F8FAFC',font:{size:11}}}}}})}
+  function toggle(b){b.classList.toggle('open');b.nextElementSibling.classList.toggle('open')}
+  window.addEventListener('scroll',()=>{let c='';document.querySelectorAll('section[id],.hero[id]').forEach(s=>{if(scrollY>=s.offsetTop-100)c=s.id});document.querySelectorAll('.nav a:not(.brand)').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+c))});
+
+  createGauge('gaugeOverall',{{OVERALL_SCORE}},10);
+  createGauge('gaugeCRO',{{CRO_SCORE}},10);
+  createGauge('gaugeVisual',{{VISUAL_SCORE}},10);
+  createGauge('gaugePersuasion',{{PERSUASION_SCORE}},10);
+  createRadar('radarCRO',[{{CRO_RADAR_LABELS}}],[{{CRO_RADAR_SCORES}}]);
+  createRadar('radarVisual',[{{VISUAL_RADAR_LABELS}}],[{{VISUAL_RADAR_SCORES}}]);
+  createRadar('radarPersuasion',[{{PERSUASION_RADAR_LABELS}}],[{{PERSUASION_RADAR_SCORES}}]);
+</script>
+</body>
+</html>
