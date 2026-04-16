@@ -17,15 +17,21 @@ Read these shared context files before starting:
 
 ### Step 1: Input Check & Mode Selection
 
-Check if `{client-folder}/deliverables/{business-name}-creative-brief.json` exists.
+Check in this order — Refresh Mode takes priority because it's the narrowest and most time-sensitive trigger:
 
-**Downstream mode** (creative brief exists):
+**Refresh Mode** (fatigue rotation) — if `{client-folder}/deliverables/*-rotation-brief.json` exists:
+- Load `references/refresh-mode.md` for the full workflow — it overrides Steps 2, 4, 5, 8
+- Load the rotation brief, the original `*-creative-brief.json`, and the wiki
+- State explicitly in output: "Refresh Mode — N fatigued creatives being rotated"
+- Skip Step 2 entirely
+
+**Downstream mode** (creative brief exists, no rotation brief):
 - Read the creative brief JSON — campaigns, personas, hooks, formats, visual_direction, landing_page, ab_testing, proof_elements, brand_voice
 - Read `{client-folder}/wiki/strategy.md` for competitor context
 - Read `{client-folder}/deliverables/brand-config.json` for brand identity
 - Skip to Step 3
 
-**Standalone mode** (no creative brief):
+**Standalone mode** (no creative brief, no rotation brief):
 - Proceed to Step 2
 
 ### Step 2: Guided Questions (Standalone Only)
@@ -168,3 +174,4 @@ Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts
 - [2026-04-16] [Validator] Finding: Deep-read audit upgraded the `**Voiceover:**` issue from "low priority" to a real bug. The regex does technically match mid-string, but the capture group `(.+)` swallowed the trailing `**`, so VO text came back as `** Hello world` instead of `Hello world`. Polluted word counts, combined-VO-script generation, and stage-direction checks. Same issue on `text overlay:`. → Action: Updated both patterns in `scripts/validate_output.py` to `\*{0,2}voiceover:\*{0,2}\s*(.+)` (and equivalent for text overlay) so leading/trailing `**` around the label is absorbed, not captured. Smoke-tested against plain, bold, bullet+bold, heading, and blockquote+bold forms — all capture clean text.
 - [2026-04-16] [Knowledge promotion] Finding: ad-copywriter was the only skill of 8 without an Output Checklist in SKILL.md — paid-media-strategy, business-analysis, market-research, campaign-setup, landing-page-audit, landing-page-builder, post-launch-optimization all had one. Missing checklist meant completion criteria were implicit and varied session-to-session. → Action: Added 13-item Output Checklist between Step 8 close and Failure Handling. Covers mode detection, character limits, framework labels, source labels, per-platform CSV outputs, image-prompt prefix usage, creative-research rule compliance, VO script cleanliness + duration word budget, message-match honoring, validator pass, wiki update.
 - [2026-04-16] [Validator hardening] Finding: three validator blind spots meant brand + message-match rules existed in SKILL.md but weren't enforced. (a) `image_gen_prompt_prefix` from creative-brief never verified in image-prompts output — skills could silently drop brand-consistent prompts. (b) `landing_page.message_match_notes` never verified in generated copy — losing the ad→LP echo that drives +20-35% conversion lift. (c) VO word-count vs video duration budget never checked — AI-voice delivery would sound rushed when frames went >25 words. → Action: extended `scripts/validate_output.py` to accept an optional `*-creative-brief.json` arg. On load, it (1) runs a 5-word significant-window match to verify the image prompt prefix flows through, (2) does a word-overlap check to confirm message_match_notes language is echoed in the ad copy report at ≥50% coverage, and (3) flags frames with >25 VO words and storyboards whose total VO exceeds `~2.5 wps × declared-seconds × 1.2` budget. Smoke-tested against a mock Bali Retreats brief — all three checks fire correctly on passing and failing inputs.
+- [2026-04-16] [Refresh Mode — learning loop closes] Finding: creative fatigue was detected by post-launch-optimization Layer 4 (URGENT/PLAN/MONITOR status) but had no automated handoff to ad-copywriter — the analyst had to manually translate fatigue flags into a new copy brief each week, losing framework/brand consistency and creating multi-hour iteration loops. → Action: added Refresh Mode as a third operating mode alongside Standalone and Downstream. Trigger: `*-rotation-brief.json` in the client's deliverables folder. Created `references/refresh-mode.md` documenting the rotation-brief schema (fatigued creatives with fatigue signals, original copy, `keep[]` / `change[]` constraints, new_angles_to_try, strategy_guardrails), the workflow overrides for Steps 2/4/5/8, the `[REFRESH]` source label, and versioned ad naming (`_v2`, `_v3`). SKILL.md Step 1 now detects rotation-brief first (highest-priority mode). post-launch-optimization Layer 4 now emits the rotation-brief JSON. New eval #6 covers the full path. **RULE:** Creative refresh is a closed loop: fatigue signal → machine-readable handoff → drop-in replacement copy with original preserved as A/B control. No more manual translation.

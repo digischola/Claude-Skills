@@ -123,6 +123,25 @@ Load this file in Step 3. Contains decision thresholds, analysis logic, and outp
 - PLAN: 1 fatigue signal → start producing replacement creative
 - MONITOR: no fatigue signals → continue running
 
+**Rotation-brief handoff to `ad-copywriter` Refresh Mode:**
+
+When any creative hits URGENT or PLAN status, emit a `{client}-rotation-brief.json` to `{client-folder}/deliverables/`. This is the machine-readable trigger that puts ad-copywriter into Refresh Mode (see `ad-copywriter/references/refresh-mode.md`).
+
+Required top-level keys: `client_name`, `analysis_date`, `source_report`, `source_creative_brief`, `refresh_urgency`, `fatigued_creatives[]`, `strategy_guardrails`.
+
+Each `fatigued_creatives` entry must include:
+- `ad_name`, `platform`, `campaign`, `ad_set`, `format`, `persona`, `framework_used`
+- `fatigue_signals` object: `frequency`, `ctr_decline_pct`, `cpa_increase_pct`, `impressions_lifetime`, `days_live`
+- `original_copy`: primary_text, headline, description, cta (for reference — the refresh keeps CTA type stable)
+- `keep[]` — elements to preserve (framework / persona / cta_type / brand_voice are defaults)
+- `change[]` — elements to rotate (hook_angle / imagery_direction / lead_proof_element typical)
+- `new_angles_to_try[]` — specific hypotheses the analyst wants tested
+- `rationale` — one-sentence "why refresh this one"
+
+Default `strategy_guardrails`: `respect_character_limits: true`, `preserve_cta_target_url: true`, `ab_test_against_original: true`, `min_new_variants_per_fatigued: 2`.
+
+Also flag in the main report's top-actions list: `[REFRESH] N fatigued creatives rotated — see {client}-rotation-brief.json and run ad-copywriter in Refresh Mode.`
+
 ---
 
 ## Layer 5: Testing Framework
@@ -134,22 +153,52 @@ Load this file in Step 3. Contains decision thresholds, analysis logic, and outp
 2. Areas where Layer 2 flagged a problem → test a fix
 3. New creative concepts from Layer 4 winner pattern analysis
 
-**Minimum sample sizes before declaring winner:**
-- Impressions: >1,000 per variant
-- Conversions: >20 per variant
-- Run time: >7 days (covers day-of-week variation)
-- Statistical method: if >2x difference in CPA with >20 conversions each, declare winner. Under that, need more data.
+**Minimum sample sizes before declaring winner** (all three must be met):
+- Impressions: ≥1,000 per variant
+- Conversions: ≥20 per variant
+- Run time: ≥7 days (covers day-of-week variation)
+
+**Statistical method — use `scripts/ab_stats.py`, never eyeball the lift.**
+
+The old heuristic ("2x CPA difference + 20 conversions = winner") produced false winners on noise. The skill now uses a two-proportion z-test on conversion rate.
+
+```bash
+python3 scripts/ab_stats.py <conv_a> <imp_a> <conv_b> <imp_b> [days_running]
+```
+
+Or as a module inside report generation:
+```python
+from ab_stats import compare
+r = compare(conv_a=60, imp_a=2000, conv_b=90, imp_b=2000, days_running=14)
+# r.verdict ∈ { "WINNER:A", "WINNER:B", "NO_WINNER", "NEED_MORE_DATA" }
+# r.p_value, r.ci_low, r.ci_high, r.min_sample_per_variant
+```
+
+**Decision rules the script encodes:**
+- `WINNER:X` — p-value < 0.05 AND all three minimum-sample gates met.
+- `NO_WINNER` — sample gates met but p-value ≥ 0.05 → the observed lift is within noise.
+- `NEED_MORE_DATA` — any gate fails (conversions, impressions, or days). Script returns the exact gate(s) missed so the report can say "need X more conversions" not just "inconclusive".
+
+**Report language per verdict:**
+- WINNER → `[WINNER:B] CVR 4.5% vs 3.0% (p=0.0125, 95% CI [0.32%, 2.68%]). Scale B, pause A.`
+- NO_WINNER → `[NO_WINNER] CVR 3.5% vs 3.2% (p=0.61). Continue testing or declare null, don't reallocate budget.`
+- NEED_MORE_DATA → `[NEED_MORE_DATA] Only 5 conversions on A, 12 on B — min 20 per variant. Keep both running, re-evaluate in 7 days.`
 
 **Testing rules:**
 - Max 2 tests per ad set simultaneously
 - Only change one variable per test (copy, image, audience, placement — not multiple)
-- Document what's being tested and hypothesis
+- Document what's being tested and the hypothesis
+- Never declare a winner without running `ab_stats.py` — the "obvious" winner often isn't.
 
-**Output:**
+**Output templates:**
 ```
 [TEST] Campaign X > Ad Set Y: Test new headline variant against current winner.
 Hypothesis: Question-based headline will improve CTR.
 Minimum run: 7 days, need 20+ conversions per variant.
+
+[WINNER:B] Campaign X > Ad Set Y: Variant B wins on CVR (4.5% vs 3.0%).
+Source: ab_stats.py  p=0.0125  95% CI on lift [0.32%, 2.68%] pts.
+Action: scale B to 80% of ad-set budget, pause A.
 ```
 
 ---
@@ -278,24 +327,72 @@ Priority Score = Impact × Confidence × Ease
 
 ## Layer 11: Session Memory
 
-**Purpose:** Track what was recommended last time and whether it worked.
+**Purpose:** Track what was recommended last time and whether it was actually implemented. Previously this was a manual step — analyst had to eyeball last week's report and compare. Now automated via `scripts/track_recommendations.py`.
 
-**Inputs:** Previous `{business-name}-optimization-report.md`
+**Inputs:** Previous `{business-name}-optimization-report.md` + current live entity state (ad status, budget, keyword status) from Windsor.ai.
 
-**Analysis:**
-1. Read previous report's action list
-2. Check current data: did the recommended actions get implemented?
-   - If a "KILL" recommendation was made → is that ad/keyword still active?
-   - If a "SCALE" recommendation was made → did budget increase?
-   - If metrics improved after recommendations → note what worked
-3. Compare current baselines to previous baselines:
-   - CPA trend over multiple analyses
-   - ROAS trend
-   - Spend efficiency trend
+**Automated audit — use `scripts/track_recommendations.py`:**
+
+```bash
+python3 scripts/track_recommendations.py <previous-report.md> <current-state.json>
+```
+
+Or as a module inside report generation:
+```python
+from track_recommendations import extract_actions, audit_implementation, format_audit
+prior = extract_actions(open(previous_report_path).read())
+current_state = {
+    "ads":      { ad_name: {"status": "PAUSED"} for ad_name, data in windsor_ads.items() },
+    "ad_sets":  { name: {"daily_budget": 35.0} for name, data in windsor_ad_sets.items() },
+    "keywords": { kw: {"status": "NEGATIVE"} for kw, data in google_negatives.items() },
+}
+audit = audit_implementation(prior, current_state)
+markdown_table = format_audit(audit)  # drop straight into the report
+```
+
+**What it checks:**
+| Prior action  | Verification                                                           |
+|---------------|-----------------------------------------------------------------------|
+| `[KILL] Ad X` | Is ad X's current status PAUSED / DELETED / ARCHIVED?                  |
+| `[PAUSE]` …   | Same as KILL                                                           |
+| `[SCALE]` ad set | Did daily_budget increase vs the prior $N → $M stated in the report? |
+| `[ADJUST]` ad set | Did daily_budget change vs prior?                                  |
+| `[NEGATIVE]` keyword | Is the keyword now on the negatives list?                       |
+| `[TEST]`      | Always `UNVERIFIABLE` — tests need a full cycle before resolution     |
+
+**Output verdicts:**
+- `IMPLEMENTED` ✅ — current state matches the recommended change
+- `NOT_IMPLEMENTED` ❌ — the change was recommended but didn't happen (analyst forgot / client declined / friction blocked)
+- `UNVERIFIABLE` ⚪ — no entity name extractable, or ongoing (tests)
+- `PARTIAL` 🟡 — reserved for future multi-step verifications
+
+**Plus a trend comparison:**
+1. Current baselines vs prior baselines (CPA / ROAS / spend efficiency trend)
+2. Which metrics moved after last week's actions — signal of what's working
 
 **First-run behavior:** No previous report → skip Layer 11, establish baselines.
 
-**Output:** "Since last analysis" comparison section + recommendation follow-up tracker.
+**Output block for the report:**
+
+```markdown
+## Since Last Analysis (2026-04-09 → 2026-04-16)
+
+### Recommendation Implementation Tracker
+| # | Action | Entity | Status | Note |
+|---|--------|--------|--------|------|
+| 1 | KILL | ad: Emily_TT_Hero_v1 | ✅ IMPLEMENTED | status=PAUSED |
+| 2 | SCALE | ad_set: Prospecting-Wellness | ✅ IMPLEMENTED | budget raised to $35 |
+| 3 | NEGATIVE | keyword: free yoga | ❌ NOT_IMPLEMENTED | still ACTIVE |
+
+**Implementation rate:** 2/3 actions completed.
+
+### Baseline Trend
+- Meta CPA:  $122 → $108  (↓12%, healthy direction)
+- Google CPA: $123 → $134 (↑9%, watch — possible seasonality)
+- Blended ROAS: 3.93x → 4.17x (↑6%)
+```
+
+**Rule:** If `NOT_IMPLEMENTED` count > 50% of actions for two analyses in a row, the loop is broken — flag it in executive summary. "Recommendations aren't sticking" is itself a finding.
 
 ---
 
