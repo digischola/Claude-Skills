@@ -133,6 +133,22 @@ Update `{client-folder}/wiki/index.md` — update downstream status.
 
 Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts.
 
+## Output Checklist
+
+- [ ] Mode correctly identified (downstream from creative brief vs standalone with guided intake)
+- [ ] Platform specs loaded; character limits enforced (RSA 30 / 90 / 15; Meta 125 / 40 / 30)
+- [ ] Framework labeled per campaign (PAS / BAB / Feature-Benefit-Proof / AIDA / Social Proof Stack)
+- [ ] Source labels applied to every copy block: `[BRIEF]` / `[GENERATED]` / `[ADAPTED]`
+- [ ] Google Ads CSV produced with 15 headlines + 4 descriptions per ad group (if Google in scope)
+- [ ] Meta Ads CSV produced with primary text + headline + description + CTA (if Meta in scope)
+- [ ] Image prompts use `image_gen_prompt_prefix` from creative brief (downstream mode)
+- [ ] Image prompts follow creative-research.md rules: light background bias, high contrast, no Google Display text overlay, 1-3 sentences after prefix
+- [ ] Video storyboards use frame layers (Visual / Motion / Text Overlay / Voiceover / Voice Direction / Music)
+- [ ] Voiceover scripts are clean text only (no parentheticals, stage directions, or ALL CAPS); word count within duration target (~35-40 words per 15s, ~70-80 per 30s)
+- [ ] Message match honored when creative brief specifies `landing_page.message_match_notes`
+- [ ] `scripts/validate_output.py` passes with 0 CRITICAL failures
+- [ ] Wiki log updated; downstream flagged for campaign-setup
+
 ## Failure Handling
 
 - Character limit violation → CRITICAL, rewrite the offending copy before output
@@ -150,3 +166,4 @@ Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts
 - [2026-04-16] [GENERAL] Finding: v1 image prompts were 85-140 words (too bloated) and based on aesthetic assumptions, not performance data. Research shows: shorter prompts (1-3 sentences after prefix) produce more consistent AI output, dark images underperform by 70%, high contrast = +32% CTR, Google Display must have NO text overlay. → Action: Added creative-research.md reference file, updated image-prompt-patterns.md with 10 performance rules, prompt templates now include "ultra-realistic photograph" + specific lens + light background bias. Step 6 and Step 7 now load creative-research.md.
 - [2026-04-16] [GENERAL] Finding: validate_output.py video storyboard regex only catches `Voiceover:` but deliverable uses `**Voiceover:**` (markdown bold). Reports 7 "missing" VO when all 10 frames have VO. Image prompt regex also undercounts blockquoted prompts. → Action: Low priority fix — warnings are false positives, not false negatives. Validator still catches real structural issues (missing fields, char limits).
 - [2026-04-16] [Validator] Finding: Deep-read audit upgraded the `**Voiceover:**` issue from "low priority" to a real bug. The regex does technically match mid-string, but the capture group `(.+)` swallowed the trailing `**`, so VO text came back as `** Hello world` instead of `Hello world`. Polluted word counts, combined-VO-script generation, and stage-direction checks. Same issue on `text overlay:`. → Action: Updated both patterns in `scripts/validate_output.py` to `\*{0,2}voiceover:\*{0,2}\s*(.+)` (and equivalent for text overlay) so leading/trailing `**` around the label is absorbed, not captured. Smoke-tested against plain, bold, bullet+bold, heading, and blockquote+bold forms — all capture clean text.
+- [2026-04-16] [Knowledge promotion] Finding: ad-copywriter was the only skill of 8 without an Output Checklist in SKILL.md — paid-media-strategy, business-analysis, market-research, campaign-setup, landing-page-audit, landing-page-builder, post-launch-optimization all had one. Missing checklist meant completion criteria were implicit and varied session-to-session. → Action: Added 13-item Output Checklist between Step 8 close and Failure Handling. Covers mode detection, character limits, framework labels, source labels, per-platform CSV outputs, image-prompt prefix usage, creative-research rule compliance, VO script cleanliness + duration word budget, message-match honoring, validator pass, wiki update.
