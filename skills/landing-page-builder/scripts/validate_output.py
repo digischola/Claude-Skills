@@ -30,6 +30,81 @@ FORM_FIELD_BUDGET = {
     'teacher_training': 8,
 }
 
+# ── WCAG contrast helpers ──
+# Minimal named-color map — cover only what templates realistically use.
+_NAMED_COLORS = {
+    'white': (255, 255, 255), 'black': (0, 0, 0),
+    'red': (255, 0, 0), 'green': (0, 128, 0), 'blue': (0, 0, 255),
+    'yellow': (255, 255, 0), 'grey': (128, 128, 128), 'gray': (128, 128, 128),
+    'silver': (192, 192, 192), 'transparent': None,
+}
+
+def _parse_color(s):
+    """Parse a CSS color string to (r, g, b) tuple, or None if opaque-0 / unparseable.
+    Supports #rgb, #rrggbb, rgb(...), rgba(...) (alpha composited over white), named colors."""
+    if not s:
+        return None
+    s = s.strip().lower().rstrip(';').strip()
+    if s in _NAMED_COLORS:
+        return _NAMED_COLORS[s]
+    # #rgb or #rrggbb
+    m = re.match(r'^#([0-9a-f]{3}|[0-9a-f]{6})\b', s)
+    if m:
+        h = m.group(1)
+        if len(h) == 3:
+            h = ''.join(c * 2 for c in h)
+        return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+    # rgb(r, g, b) / rgba(r, g, b, a) — composite alpha over white (worst-case for contrast)
+    m = re.match(r'^rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)', s)
+    if m:
+        r, g, b = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        a = float(m.group(4)) if m.group(4) else 1.0
+        # Composite over white backdrop (conservative default for light-mode pages)
+        r = int(round(r * a + 255 * (1 - a)))
+        g = int(round(g * a + 255 * (1 - a)))
+        b = int(round(b * a + 255 * (1 - a)))
+        return (r, g, b)
+    return None
+
+def _relative_luminance(rgb):
+    """WCAG 2.1 relative luminance formula."""
+    def _transform(c):
+        c /= 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = _transform(rgb[0]), _transform(rgb[1]), _transform(rgb[2])
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+def _contrast_ratio(rgb1, rgb2):
+    """WCAG 2.1 contrast ratio between two colors (1.0 to 21.0)."""
+    l1, l2 = _relative_luminance(rgb1), _relative_luminance(rgb2)
+    lighter, darker = max(l1, l2), min(l1, l2)
+    return (lighter + 0.05) / (darker + 0.05)
+
+def _extract_css_rule(css, selector):
+    """Extract declarations dict for the first CSS rule matching `selector`.
+    Returns e.g. {'color': '#fff', 'background': '#000'} or {} if not found."""
+    # Match `selector { ... }` — selector can appear in a list `a, .btn, b { ... }` too
+    pattern = re.compile(
+        r'(?:^|,)\s*' + re.escape(selector) + r'\s*(?:,[^{]*)?\{([^}]*)\}',
+        re.IGNORECASE
+    )
+    m = pattern.search(css)
+    if not m:
+        # Try loose match — selector anywhere in a list
+        pattern = re.compile(
+            r'(?:^|,|\s)' + re.escape(selector) + r'(?=[\s,{])[^{]*\{([^}]*)\}',
+            re.IGNORECASE
+        )
+        m = pattern.search(css)
+    if not m:
+        return {}
+    decls = {}
+    for line in m.group(1).split(';'):
+        if ':' in line:
+            k, v = line.split(':', 1)
+            decls[k.strip().lower()] = v.strip()
+    return decls
+
 def log(level, msg):
     global critical, warning, info
     prefix = {"CRITICAL": "  ❌", "WARNING": "  ⚠️", "INFO": "  ℹ️"}
@@ -331,6 +406,61 @@ def validate_html(path):
             log("WARNING", f"{field_count} form fields on {SPEC_PAGE_TYPE} page — budget is {budget} (every extra field drops conversion ~4-7%)")
         elif budget is not None:
             log("INFO", f"Form fields: {field_count} (budget for {SPEC_PAGE_TYPE}: {budget})")
+
+    # ── WCAG contrast check (primary CTA + body text) ──
+    # Extract <style> block content and check contrast on selectors most likely to carry
+    # paid-ad-critical copy: body (reading comfort) and .btn / .cta (conversion CTA).
+    # WCAG 2.1 AA: 4.5:1 for normal text, 3:1 for large text (18pt+ or 14pt+ bold — treat buttons as large).
+    style_blocks = re.findall(r'<style[^>]*>(.*?)</style>', html, flags=re.DOTALL | re.IGNORECASE)
+    css_combined = '\n'.join(style_blocks)
+    # Pull brand-injected custom properties if present so `var(--primary)` resolves
+    var_defs = {}
+    for m in re.finditer(r'--([a-z0-9-]+)\s*:\s*([^;\n]+)', css_combined, re.IGNORECASE):
+        var_defs[m.group(1).strip().lower()] = m.group(2).strip()
+    def _resolve(value):
+        """Resolve CSS custom-property references like `var(--primary)` to their declared value."""
+        if not value:
+            return value
+        m = re.match(r'\s*var\(\s*--([a-z0-9-]+)\s*(?:,[^)]*)?\)\s*$', value, re.IGNORECASE)
+        if m and m.group(1).lower() in var_defs:
+            return var_defs[m.group(1).lower()]
+        return value
+    contrast_pairs = []  # list of (selector, purpose, fg, bg, ratio, min_required)
+    for selector, purpose, min_ratio in [
+        ('body', 'body text', 4.5),
+        ('.btn', 'primary CTA', 3.0),
+        ('.cta', 'CTA', 3.0),
+    ]:
+        decls = _extract_css_rule(css_combined, selector)
+        if not decls:
+            continue
+        fg_raw = decls.get('color')
+        # `background-color` or the color component of `background: <color> ...`
+        bg_raw = decls.get('background-color') or decls.get('background')
+        if bg_raw:
+            # Take the first token, which in shorthand 'background:' is commonly the color
+            bg_raw = bg_raw.split()[0]
+        fg = _parse_color(_resolve(fg_raw)) if fg_raw else None
+        bg = _parse_color(_resolve(bg_raw)) if bg_raw else None
+        # For .btn / .cta, if no bg in the selector itself, fall back to body bg
+        if not bg and selector != 'body':
+            body_decls = _extract_css_rule(css_combined, 'body')
+            body_bg = body_decls.get('background-color') or body_decls.get('background')
+            if body_bg:
+                body_bg = body_bg.split()[0]
+                bg = _parse_color(_resolve(body_bg))
+        if fg and bg:
+            ratio = _contrast_ratio(fg, bg)
+            contrast_pairs.append((selector, purpose, fg, bg, ratio, min_ratio))
+            if ratio < min_ratio:
+                log("WARNING",
+                    f"Low contrast on {purpose} ({selector}): {ratio:.2f}:1 — "
+                    f"below WCAG AA minimum {min_ratio}:1 "
+                    f"(fg {fg_raw.strip()}, bg {bg_raw.strip() if bg_raw else 'inherited'})")
+            else:
+                log("INFO", f"Contrast {purpose} ({selector}): {ratio:.2f}:1 ✓")
+    if not contrast_pairs:
+        log("INFO", "Contrast check skipped — could not resolve body/CTA color pairs")
 
     # ── Lovable portability linter ──
     # Lovable imports HTML best when it's semantic + flex/grid based. Canvas, complex SVG

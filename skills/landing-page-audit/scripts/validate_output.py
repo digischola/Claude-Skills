@@ -184,10 +184,122 @@ def validate_dashboard(html_path: str) -> dict:
     if size_kb < 10:
         results["WARNING"].append("File seems very small — may be incomplete")
 
-    # 13. Companion markdown findings report must exist (SKILL.md Step 5b)
+    # 13. Chart.js dataset vs textual score consistency
+    # The dashboard renders numeric scores in two places: the text body (e.g. "7.5/10" or
+    # `{{CRO_SCORE}}/10`) and the Chart.js calls (createGauge(id, 7.5, 10) or
+    # createRadar(id, labels, [7, 8, 6, ...])). If they disagree, the client sees mismatched
+    # numbers. This check verifies every textual score is represented in at least one
+    # Chart.js numeric argument, and that overall = CRO·0.4 + Visual·0.3 + Persuasion·0.3
+    # within ±0.5 tolerance.
+    text_scores = [float(m) for m in re.findall(r'(?<![\d.])(\d{1,2}(?:\.\d)?)\s*/\s*10\b', html)]
+    text_scores_set = set(round(s, 1) for s in text_scores)
+    chart_scores = set()
+    for m in re.finditer(r'createGauge\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*([\d.]+)\s*,\s*(\d+)', html):
+        chart_scores.add(round(float(m.group(1)), 1))
+    for m in re.finditer(r'createRadar\s*\(\s*[\'"][^\'"]+[\'"]\s*,\s*\[[^\]]*\]\s*,\s*\[([^\]]+)\]', html):
+        for val in m.group(1).split(','):
+            val = val.strip()
+            if re.match(r'^-?[\d.]+$', val):
+                chart_scores.add(round(float(val), 1))
+    if text_scores_set and chart_scores:
+        missing = text_scores_set - chart_scores
+        if missing:
+            # Only flag if >1 score missing — allow small decimal-rounding drift
+            if len(missing) > 1:
+                results["CRITICAL"].append(
+                    f"Chart.js datasets don't include textual scores: {sorted(missing)}. "
+                    f"Chart has {sorted(chart_scores)}, text shows {sorted(text_scores_set)}. "
+                    f"Dashboard will display inconsistent numbers."
+                )
+            else:
+                results["WARNING"].append(
+                    f"One textual score {sorted(missing)} not found in Chart.js data — "
+                    f"may be rounding, verify manually"
+                )
+        else:
+            results["PASS"].append(f"Chart.js datasets match textual scores ({len(text_scores_set)} values)")
+        # Weighted-average sanity check.
+        # Prefer the createGauge values (unambiguous), falling back to text regex with
+        # "overall" / "conversion readiness" keywords.
+        gauge_overall = re.search(r'createGauge\s*\(\s*[\'"]gaugeOverall[\'"]\s*,\s*([\d.]+)', html)
+        gauge_cro = re.search(r'createGauge\s*\(\s*[\'"]gaugeCRO[\'"]\s*,\s*([\d.]+)', html)
+        gauge_vis = re.search(r'createGauge\s*\(\s*[\'"]gaugeVisual[\'"]\s*,\s*([\d.]+)', html)
+        gauge_per = re.search(r'createGauge\s*\(\s*[\'"]gaugePersuasion[\'"]\s*,\s*([\d.]+)', html)
+        if all([gauge_overall, gauge_cro, gauge_vis, gauge_per]):
+            overall = float(gauge_overall.group(1))
+            expected = float(gauge_cro.group(1)) * 0.4 + float(gauge_vis.group(1)) * 0.3 + float(gauge_per.group(1)) * 0.3
+            if abs(overall - expected) > 0.5:
+                results["CRITICAL"].append(
+                    f"Overall score {overall} doesn't match weighted average "
+                    f"(CRO×0.4 + Visual×0.3 + Persuasion×0.3 = {expected:.2f}). "
+                    f"Difference {abs(overall - expected):.2f} exceeds 0.5 tolerance."
+                )
+            else:
+                results["PASS"].append(
+                    f"Overall score {overall} matches weighted average {expected:.2f} ✓"
+                )
+
+    # 14. Screenshot marker → issue list consistency
+    # Each numbered marker on the screenshot should correspond to an issue in the list
+    # with matching number and severity color. Red = CRITICAL, yellow = MAJOR, green = MINOR.
+    # The skill's templates use <div class="marker critical|major|minor">N</div>.
+    markers = re.findall(
+        r'<div[^>]*class\s*=\s*"[^"]*\bmarker\s+(critical|major|minor)\b[^"]*"[^>]*>\s*(\d+)\s*</div>',
+        html, re.IGNORECASE
+    )
+    # Extract issue list entries: `### N. title` or numbered items with severity tags
+    issue_entries = []
+    for m in re.finditer(
+        r'(?i)(?:###\s*|issue\s*#?\s*|<h[34][^>]*>\s*(?:<[^>]+>)?)(\d+)[\.\s]+([^<\n]{3,100})',
+        html
+    ):
+        issue_num = int(m.group(1))
+        surrounding = html[max(0, m.start() - 200):m.end() + 500].lower()
+        sev = None
+        if 'critical' in surrounding or '🔴' in surrounding:
+            sev = 'critical'
+        elif 'major' in surrounding or '🟡' in surrounding:
+            sev = 'major'
+        elif 'minor' in surrounding or '🟢' in surrounding:
+            sev = 'minor'
+        issue_entries.append((issue_num, sev))
+    marker_nums = {int(n) for _, n in markers}
+    issue_nums_with_severity = {(n, s) for n, s in issue_entries if s in ('critical', 'major', 'minor')}
+    critical_major_issues = {n for n, s in issue_nums_with_severity if s in ('critical', 'major')}
+    if markers:
+        orphan_markers = marker_nums - {n for n, _ in issue_entries}
+        if orphan_markers:
+            results["WARNING"].append(
+                f"Screenshot marker(s) with no matching issue: {sorted(orphan_markers)}"
+            )
+        # CRITICAL/MAJOR issues should have markers (MINOR is optional)
+        missing_markers = critical_major_issues - marker_nums
+        if missing_markers:
+            results["WARNING"].append(
+                f"CRITICAL/MAJOR issue(s) without screenshot marker: {sorted(missing_markers)}"
+            )
+        # Severity-class match
+        class_by_num = {int(n): cls.lower() for cls, n in markers}
+        mismatches = []
+        for num, sev in issue_entries:
+            if num in class_by_num and sev and class_by_num[num] != sev:
+                mismatches.append(f"#{num} (marker={class_by_num[num]}, issue={sev})")
+        if mismatches:
+            results["WARNING"].append(
+                f"Marker severity doesn't match issue severity for: {', '.join(mismatches[:5])}"
+            )
+        if not orphan_markers and not missing_markers and not mismatches:
+            results["PASS"].append(
+                f"Screenshot markers consistent with issues ({len(markers)} markers, "
+                f"{len(critical_major_issues)} CRITICAL/MAJOR)"
+            )
+    elif critical_major_issues:
+        results["WARNING"].append(
+            f"{len(critical_major_issues)} CRITICAL/MAJOR issues but no screenshot markers found"
+        )
+
+    # 15. Companion markdown findings report must exist (SKILL.md Step 5b)
     # Pattern: {page-name}-landing-page-audit.html → {page-name}-audit-findings.md
-    # The HTML dashboard is great for client presentation, but the MD is what downstream
-    # skills + email + client calls need. Skipping it = findings locked in HTML only.
     md_path = re.sub(r'-landing-page-audit\.html$', '-audit-findings.md', html_path)
     if md_path == html_path:
         # Filename didn't follow the expected pattern; try a looser fallback.
