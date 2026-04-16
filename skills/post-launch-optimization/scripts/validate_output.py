@@ -198,6 +198,36 @@ def validate_config(path):
     if mode not in ('baseline', 'fixed'):
         log_warning(f"Unknown target mode: {mode} (expected 'baseline' or 'fixed')")
 
+    # Baseline date sanity check — detect stale config from a prior analysis
+    # that wasn't updated. If baseline_set_date is more than ~100 days old and mode
+    # is still 'baseline', the analyst is running decisions against stale baselines.
+    # If it's in the future, something is broken. If history is empty but mode is baseline,
+    # this is legitimately the first run — don't warn.
+    baseline_date_str = targets.get('baseline_set_date')
+    history = config.get('analysis_history', [])
+    if baseline_date_str and mode == 'baseline':
+        try:
+            from datetime import datetime, timezone
+            baseline_date = datetime.fromisoformat(baseline_date_str.replace('Z', '+00:00'))
+            now = datetime.now(baseline_date.tzinfo or timezone.utc)
+            age_days = (now - baseline_date).days
+            if age_days < 0:
+                log_critical(f"baseline_set_date {baseline_date_str} is in the future — config broken")
+            elif age_days > 100 and len(history) >= 4:
+                log_warning(
+                    f"Baseline is {age_days} days old with {len(history)} prior analyses — "
+                    f"consider recalibrating baselines (analysis-framework.md: every 4 analyses)"
+                )
+            else:
+                log_info(f"Baseline age: {age_days} day(s), {len(history)} prior analysis(es)")
+        except (ValueError, TypeError) as e:
+            log_warning(f"Could not parse baseline_set_date '{baseline_date_str}': {e}")
+    elif mode == 'baseline' and not baseline_date_str and history:
+        log_warning(
+            f"targets.mode is 'baseline' but baseline_set_date is missing while "
+            f"{len(history)} prior analyses exist — config out of sync"
+        )
+
     log_info(f"Config stats: {config.get('client_name', 'unknown')}, "
              f"platforms: {list(platforms.keys())}, "
              f"mode: {mode}")

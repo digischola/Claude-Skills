@@ -14,6 +14,7 @@ import sys
 import os
 import re
 import csv
+import json
 from io import StringIO
 
 criticals = []
@@ -21,6 +22,11 @@ warnings = []
 infos = []
 total_criticals = 0
 total_warnings = 0
+
+# Optional upstream creative brief (from paid-media-strategy). When present,
+# it unlocks cross-validation: image_gen_prompt_prefix usage, message_match_notes
+# echoed in copy, etc. Populated by main() before validators run.
+CREATIVE_BRIEF = None
 
 def log_critical(msg): criticals.append(msg)
 def log_warning(msg): warnings.append(msg)
@@ -42,7 +48,28 @@ def classify_file(path):
     if 'meta-ads' in name and name.endswith('.csv'): return 'meta_csv'
     if 'image-prompts' in name: return 'image_prompts'
     if 'video-storyboard' in name: return 'video_storyboards'
+    if 'creative-brief' in name and name.endswith('.json'): return 'creative_brief'
     return None
+
+def _brief_collect_strings(node, keys):
+    """Walk the creative brief dict and collect all string values for given keys."""
+    found = []
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k in keys and isinstance(v, str) and v.strip():
+                found.append(v.strip())
+            elif isinstance(v, (dict, list)):
+                found.extend(_brief_collect_strings(v, keys))
+    elif isinstance(node, list):
+        for item in node:
+            found.extend(_brief_collect_strings(item, keys))
+    return found
+
+def _significant_phrases(text, min_word_len=4):
+    """Extract significant words/phrases from free text for fuzzy presence matching."""
+    # Tokenize on non-word chars; keep words >= min_word_len chars (skips 'a', 'the', etc.)
+    words = re.findall(r"[A-Za-z][A-Za-z'-]+", text)
+    return [w.lower() for w in words if len(w) >= min_word_len]
 
 def validate_report(path):
     with open(path, 'r') as f:
@@ -68,6 +95,29 @@ def validate_report(path):
 
     # Count ad copy blocks (look for headlines)
     headline_blocks = len(re.findall(r'(?i)headline|H\d{1,2}:', content))
+
+    # Creative-brief cross-check: message_match_notes must be echoed in the copy.
+    # The brief's landing_page.message_match_notes captures what the LP hero repeats from
+    # the ad — losing this alignment is a proven conversion killer (+20-35% lift cited).
+    # Approach: extract message_match_notes strings; require at least 50% of significant
+    # words (≥4 chars) to appear somewhere in the copy report.
+    if CREATIVE_BRIEF:
+        mm_notes = _brief_collect_strings(CREATIVE_BRIEF, {'message_match_notes'})
+        if mm_notes:
+            misses = []
+            content_lower = content.lower()
+            for note in mm_notes:
+                sig_words = list(set(_significant_phrases(note)))
+                if not sig_words:
+                    continue
+                hits = sum(1 for w in sig_words if w in content_lower)
+                coverage = hits / len(sig_words)
+                if coverage < 0.5:
+                    misses.append(f"'{note[:50]}...' ({hits}/{len(sig_words)} words in copy, {coverage:.0%})")
+            if misses:
+                log_warning(f"Message match weak — creative brief message_match_notes under-represented in copy ({len(misses)} note(s)): {misses[:2]}")
+            else:
+                log_info(f"Message match verified — {len(mm_notes)} message_match_notes echoed in copy")
 
     log_info(f"Report stats: {len(lines)} lines, {total_labels} source labels, frameworks: {', '.join(frameworks) or 'none detected'}")
 
@@ -211,6 +261,34 @@ def validate_image_prompts(path):
     if short_prompts > 0:
         log_warning(f"{short_prompts} image prompts under 30 words (may be too short for quality output)")
 
+    # Creative-brief cross-check: image_gen_prompt_prefix must flow through.
+    # image-prompt-patterns.md Rule #1: never deviate from the prefix. Without this
+    # check, a skill run can silently drop the brand-consistent prompt prefix and
+    # produce off-brand imagery despite the brief's instruction.
+    if CREATIVE_BRIEF:
+        prefixes = _brief_collect_strings(CREATIVE_BRIEF, {'image_gen_prompt_prefix'})
+        if prefixes:
+            # Normalize both sides — strip punctuation, collapse whitespace — then
+            # check if a 5-word distinctive window from the prefix appears in the content.
+            # Prevents false positives from comma/hyphen differences between brief and prompts.
+            content_tokens = ' '.join(_significant_phrases(content, min_word_len=3))
+            missing_prefixes = []
+            for prefix in prefixes:
+                words = _significant_phrases(prefix, min_word_len=3)
+                if not words:
+                    continue
+                window_size = min(5, len(words))
+                found = any(
+                    ' '.join(words[i:i+window_size]) in content_tokens
+                    for i in range(len(words) - window_size + 1)
+                )
+                if not found:
+                    missing_prefixes.append(prefix[:60] + ('...' if len(prefix) > 60 else ''))
+            if missing_prefixes:
+                log_critical(f"image_gen_prompt_prefix from creative brief not found in image prompts ({len(missing_prefixes)} prefix(es) missing): {missing_prefixes[:2]}")
+            else:
+                log_info(f"Image prompt prefix(es) from creative brief verified in output ({len(prefixes)} checked)")
+
     log_info(f"Image prompts stats: ~{total_prompts} prompts, {p1_count} P1, {p2_count} P2")
 
 def validate_video_storyboards(path):
@@ -245,6 +323,23 @@ def validate_video_storyboards(path):
 
     # Word count of all VO
     total_vo_words = sum(len(s.split()) for s in vo_sections)
+
+    # Per-frame VO word count vs duration budget. Spec from video-storyboard-spec.md:
+    # 6s bumper = 0 words, 15s = 35-40 words total, 30s = 70-80 words total.
+    # Frame-level: assume ~3s per frame average; flag if a single frame's VO > 25 words
+    # (unreadable at AI-voice pace) or entire storyboard exceeds 30s video budget (~90 words).
+    per_frame_word_counts = [len(s.split()) for s in vo_sections]
+    bloated_frames = [n for n in per_frame_word_counts if n > 25]
+    if bloated_frames:
+        log_warning(f"{len(bloated_frames)} frame(s) with >25 words of VO — too dense for ~3s frame pace; AI voice will feel rushed")
+    # Total VO vs implied duration. Look for explicit duration hints in content.
+    duration_match = re.search(r'(\d{1,3})\s*(?:s\b|second|sec\b)', content.lower())
+    if duration_match and total_vo_words > 0:
+        declared_sec = int(duration_match.group(1))
+        # Rough budget: ~2.5 words/second for AI voice; flag if >20% over budget.
+        budget = int(declared_sec * 2.5 * 1.2)
+        if total_vo_words > budget:
+            log_warning(f"Total VO ~{total_vo_words} words for ~{declared_sec}s video — exceeds {budget}-word budget (2.5 wps AI voice pace)")
 
     log_info(f"Video storyboard stats: ~{max(len(videos),1)} videos, {len(frames)} frames, {len(vo_sections)} VO sections, {total_vo_words} VO words")
 
@@ -292,6 +387,7 @@ def main():
         print(__doc__)
         sys.exit(1)
 
+    global CREATIVE_BRIEF
     files = {}
     for path in sys.argv[1:]:
         if not os.path.exists(path):
@@ -302,6 +398,15 @@ def main():
             files[file_type] = path
         else:
             print(f"  ⚠️  Could not classify: {os.path.basename(path)}")
+
+    # Pre-load creative brief (if supplied) so per-file validators can cross-reference.
+    if 'creative_brief' in files:
+        try:
+            with open(files['creative_brief'], 'r', encoding='utf-8') as f:
+                CREATIVE_BRIEF = json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"  ⚠️  Creative brief load failed ({e}) — cross-validation disabled")
+            CREATIVE_BRIEF = None
 
     print("🔍 Ad Copywriter — Output Validation")
     for ftype, fpath in files.items():

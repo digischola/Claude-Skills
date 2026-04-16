@@ -405,26 +405,30 @@ def validate_cross_file_consistency(report_path, csv_path):
     csv_only = set(csv_norm.keys()) - set(report_norm.keys())
     report_only = set(report_norm.keys()) - set(csv_norm.keys())
 
-    # For names that don't exactly match, check for fuzzy containment
-    # (e.g., "Meta Prospecting — Leads" in report vs "Prospecting — Leads" in CSV)
+    # For names that don't exactly match, accept ONLY structured prefix/suffix variants
+    # (e.g. "Meta Prospecting — Leads" vs "Prospecting — Leads"). Previous substring
+    # match was too loose — "Summer" would match "Summer Sale Campaign" even if those
+    # were distinct entities.
+    def _is_structured_variant(a, b):
+        if a == b:
+            return True
+        # Enforce minimum overlap ratio so "A" never matches "A Much Longer Name"
+        shorter, longer = (a, b) if len(a) <= len(b) else (b, a)
+        if len(shorter) / max(len(longer), 1) < 0.6:
+            return False
+        for sep in (' — ', ' – ', ' - ', ': ', ' | ', ' / '):
+            if longer.endswith(sep + shorter) or longer.startswith(shorter + sep):
+                return True
+        return False
+
     unmatched_csv = set()
     for cn in csv_only:
-        found = False
-        for rn in report_norm:
-            if cn in rn or rn in cn:
-                found = True
-                break
-        if not found:
+        if not any(_is_structured_variant(cn, rn) for rn in report_norm):
             unmatched_csv.add(csv_norm[cn])
 
     unmatched_report = set()
     for rn in report_only:
-        found = False
-        for cn in csv_norm:
-            if rn in cn or cn in rn:
-                found = True
-                break
-        if not found:
+        if not any(_is_structured_variant(rn, cn) for cn in csv_norm):
             unmatched_report.add(report_norm[rn])
 
     if unmatched_csv:
@@ -567,6 +571,51 @@ def print_results(name, issues):
     return has_critical
 
 
+def validate_creative_brief_presence(report_path):
+    """Step 5.5 produces {client}-creative-brief.json. Downstream skills (ad-copywriter,
+    landing-page-builder, campaign-setup) depend on it. Missing = silent pipeline break."""
+    issues = {"CRITICAL": [], "WARNING": [], "INFO": []}
+    deliverables_dir = os.path.dirname(os.path.abspath(report_path))
+    # Look for *-creative-brief.json anywhere in the same deliverables folder
+    candidates = [
+        f for f in os.listdir(deliverables_dir)
+        if f.endswith('-creative-brief.json') or f == 'creative-brief.json'
+    ]
+    if not candidates:
+        issues["CRITICAL"].append(
+            "No *-creative-brief.json found in deliverables folder — "
+            "Step 5.5 output missing; downstream ad-copywriter/landing-page-builder/campaign-setup "
+            "will run in degraded mode"
+        )
+    else:
+        # Basic structural validation
+        path = os.path.join(deliverables_dir, candidates[0])
+        try:
+            import json as _json
+            with open(path, 'r', encoding='utf-8') as f:
+                brief = _json.load(f)
+            required = ['business_name', 'campaigns']
+            missing = [k for k in required if k not in brief]
+            if missing:
+                issues["CRITICAL"].append(f"Creative brief missing required keys: {missing}")
+            campaigns = brief.get('campaigns', [])
+            if not isinstance(campaigns, list) or len(campaigns) == 0:
+                issues["CRITICAL"].append("Creative brief has no campaigns array or empty campaigns")
+            else:
+                # Require at least one campaign to have visual_direction.image_gen_prompt_prefix
+                with_prefix = [c for c in campaigns if isinstance(c, dict)
+                               and c.get('visual_direction', {}).get('image_gen_prompt_prefix')]
+                if not with_prefix:
+                    issues["WARNING"].append(
+                        "No campaign has visual_direction.image_gen_prompt_prefix — "
+                        "ad-copywriter image prompts will lack brand consistency"
+                    )
+                issues["INFO"].append(f"Creative brief: {candidates[0]} ({len(campaigns)} campaign(s))")
+        except (OSError, ValueError) as e:
+            issues["CRITICAL"].append(f"Creative brief exists but failed to parse: {e}")
+    return issues
+
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: python validate_output.py <report.md> <dashboard.html> [media-plan.csv]")
@@ -586,6 +635,7 @@ def main():
 
     has_critical |= print_results("Strategy Report", validate_report(report_path))
     has_critical |= print_results("Strategy Dashboard", validate_dashboard(dashboard_path))
+    has_critical |= print_results("Creative Brief (Step 5.5)", validate_creative_brief_presence(report_path))
 
     if csv_path:
         has_critical |= print_results("CSV Media Plan", validate_csv(csv_path))

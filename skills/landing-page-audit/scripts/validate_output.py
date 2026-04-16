@@ -158,12 +158,23 @@ def validate_dashboard(html_path: str) -> dict:
         if re.search(p, html_lower):
             results["CRITICAL"].append(f"Placeholder text found: matches pattern '{p}'")
 
-    # 12. No unreplaced {{PLACEHOLDER}} template variables
-    unreplaced = re.findall(r'\{\{[A-Z_]+(?:\|[^}]*)?\}\}', html)
+    # 12. No unreplaced template variables — cover {{X}}, {X}, [X], and ${X} syntax variants
+    # (different templates in the wild use different conventions; single-brace and square-bracket
+    # forms would slip through the original {{...}}-only check)
+    unreplaced = []
+    for pattern, label in [
+        (r'\{\{[A-Z_][A-Z0-9_]*(?:\|[^}]*)?\}\}', '{{...}}'),
+        (r'\{[A-Z_][A-Z0-9_]{2,}\}', '{...}'),       # >=3 char keys to avoid matching CSS like {color:red}
+        (r'\[[A-Z_][A-Z0-9_]{2,}\]', '[...]'),       # same guard
+        (r'\$\{[A-Z_][A-Z0-9_]*\}', '${...}'),
+    ]:
+        hits = re.findall(pattern, html)
+        if hits:
+            unreplaced.append(f"{label}: {', '.join(set(hits))}")
     if unreplaced:
-        results["CRITICAL"].append(f"Unreplaced placeholders found: {', '.join(set(unreplaced))}")
+        results["CRITICAL"].append(f"Unreplaced template placeholders: {' | '.join(unreplaced)}")
     else:
-        results["PASS"].append("All {{PLACEHOLDER}} template variables replaced")
+        results["PASS"].append("All placeholder variants replaced ({{...}}, {...}, [...], ${...})")
 
     # --- INFO ---
 
@@ -172,6 +183,22 @@ def validate_dashboard(html_path: str) -> dict:
     results["INFO"].append(f"Dashboard file size: {size_kb:.1f} KB")
     if size_kb < 10:
         results["WARNING"].append("File seems very small — may be incomplete")
+
+    # 13. Companion markdown findings report must exist (SKILL.md Step 5b)
+    # Pattern: {page-name}-landing-page-audit.html → {page-name}-audit-findings.md
+    # The HTML dashboard is great for client presentation, but the MD is what downstream
+    # skills + email + client calls need. Skipping it = findings locked in HTML only.
+    md_path = re.sub(r'-landing-page-audit\.html$', '-audit-findings.md', html_path)
+    if md_path == html_path:
+        # Filename didn't follow the expected pattern; try a looser fallback.
+        md_path = os.path.splitext(html_path)[0] + '-findings.md'
+    if os.path.exists(md_path):
+        results["PASS"].append(f"Markdown findings report present: {os.path.basename(md_path)}")
+    else:
+        results["CRITICAL"].append(
+            f"Markdown findings report missing: expected {os.path.basename(md_path)} "
+            "alongside HTML dashboard (required by SKILL.md Step 5b)"
+        )
 
     return results
 

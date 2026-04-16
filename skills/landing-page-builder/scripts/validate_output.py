@@ -17,6 +17,19 @@ critical = 0
 warning = 0
 info = 0
 
+# Set by main() when a page-spec is supplied — makes validate_html aware of the
+# declared page_type so it can enforce page-type-specific rules (form field budgets, etc.).
+SPEC_PAGE_TYPE = None
+
+# Max form-field count per page type. Sources: landing-page-research.md §7 (Form Rules)
+# — friction compounds quickly past these thresholds for paid-ad traffic.
+FORM_FIELD_BUDGET = {
+    'lead_gen': 5,
+    'workshop_event': 5,
+    'retreat_booking': 7,
+    'teacher_training': 8,
+}
+
 def log(level, msg):
     global critical, warning, info
     prefix = {"CRITICAL": "  ❌", "WARNING": "  ⚠️", "INFO": "  ℹ️"}
@@ -81,9 +94,12 @@ def validate_html(path):
         log("INFO", f"Section count: {section_count}")
 
     # ── CTA checks ──
+    # Expanded verb list covers B2B (qualify, enroll), non-profit (donate), high-ticket (claim, purchase, invest),
+    # and lead-gen (request, submit) alongside original verbs. Without this, valid CTAs were flagged as missing.
+    cta_verb_pattern = r'(?:reserve|book|register|apply|schedule|get|start|join|download|check|claim|qualify|enroll|donate|purchase|buy|invest|request|submit|contact|speak|talk)'
     cta_patterns = [
-        r'(?:reserve|book|register|apply|schedule|get|start|join|download|check)\s',
-        r'(?:my|your)\s+(?:spot|place|seat|call|guide|journey)',
+        cta_verb_pattern + r'\s',
+        r'(?:my|your)\s+(?:spot|place|seat|call|guide|journey|invite)',
     ]
     cta_found = False
     for pattern in cta_patterns:
@@ -93,7 +109,7 @@ def validate_html(path):
 
     # Also check for button/a tags with action text
     button_count = lower.count('<button') + lower.count('role="button"')
-    cta_link_count = len(re.findall(r'<a[^>]*(?:class|href)[^>]*>(?:reserve|book|register|apply|schedule|get|start|join|download|check)', lower))
+    cta_link_count = len(re.findall(r'<a[^>]*(?:class|href)[^>]*>[^<]*' + cta_verb_pattern, lower))
 
     total_ctas = button_count + cta_link_count
     if total_ctas == 0:
@@ -304,6 +320,31 @@ def validate_html(path):
         else:
             log("INFO", f"Primary .btn tap area: ~{v_total}px (≥44px required)")
 
+    # ── Page-type aware form-field budget ──
+    # Count distinct form fields (inputs/textareas/selects, excluding hidden/submit).
+    if SPEC_PAGE_TYPE:
+        field_matches = re.findall(r'<(?:input|textarea|select)\b([^>]*)>', lower)
+        real_fields = [m for m in field_matches if not re.search(r'type\s*=\s*["\']?(hidden|submit|button|reset|image)\b', m)]
+        field_count = len(real_fields)
+        budget = FORM_FIELD_BUDGET.get(SPEC_PAGE_TYPE)
+        if budget is not None and field_count > budget:
+            log("WARNING", f"{field_count} form fields on {SPEC_PAGE_TYPE} page — budget is {budget} (every extra field drops conversion ~4-7%)")
+        elif budget is not None:
+            log("INFO", f"Form fields: {field_count} (budget for {SPEC_PAGE_TYPE}: {budget})")
+
+    # ── Lovable portability linter ──
+    # Lovable imports HTML best when it's semantic + flex/grid based. Canvas, complex SVG
+    # with transforms, and float layouts cause rebuild pain. Keep prototypes clean.
+    if re.search(r'<canvas\b', lower):
+        log("WARNING", "Contains <canvas> — Lovable rebuild friction (prefer SVG/CSS animation)")
+    # Detect float-based layout (property in CSS, not in JS/inline-comment)
+    float_css_uses = len(re.findall(r'(?<![a-z-])float\s*:\s*(?:left|right)\b', lower))
+    if float_css_uses > 0:
+        log("WARNING", f"{float_css_uses} float:left/right declarations — use flex/grid for Lovable portability")
+    # Complex SVG = <svg> containing <path> with transform matrices
+    if re.search(r'<svg[^>]*>.{0,5000}?<path[^>]*transform\s*=\s*"matrix', html, re.DOTALL | re.IGNORECASE):
+        log("WARNING", "SVG contains <path transform=\"matrix(…)\"> — flatten transforms before Lovable import")
+
     log("INFO", f"HTML stats: {size_kb:.0f}KB, {section_count} sections, {total_ctas} CTAs, {found_components}/6 components")
 
 
@@ -371,6 +412,15 @@ if __name__ == '__main__':
     print(f"   html: {html_path}")
     if spec_path:
         print(f"   spec: {spec_path}")
+
+    # Pre-load page_type from spec so validate_html can apply page-type-specific rules
+    # (form-field budget etc.) before the formal spec validation runs.
+    if spec_path and os.path.exists(spec_path):
+        try:
+            with open(spec_path, 'r', encoding='utf-8') as f:
+                SPEC_PAGE_TYPE = json.load(f).get('page_type')
+        except (json.JSONDecodeError, OSError):
+            SPEC_PAGE_TYPE = None  # formal validation will flag the problem
 
     validate_html(html_path)
     if spec_path:

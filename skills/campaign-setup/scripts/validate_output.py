@@ -284,12 +284,54 @@ def validate_meta(root: Path) -> None:
 
     bulk_path = meta_dir / "meta-bulk-import.csv"
     rows = read_csv(bulk_path)
+
+    # Meta Objective → valid ad-set Optimization Goals (Marketing API 2024+ ODAX).
+    # Mismatches are silently rejected at import time with vague errors, so catching them
+    # here saves launch-day headaches.
+    OBJECTIVE_TO_VALID_GOALS = {
+        "OUTCOME_AWARENESS": {"REACH", "BRAND_AWARENESS", "IMPRESSIONS", "AD_RECALL_LIFT", "THRUPLAY"},
+        "OUTCOME_TRAFFIC": {"LINK_CLICKS", "LANDING_PAGE_VIEWS", "IMPRESSIONS", "REACH", "QUALITY_CALL"},
+        "OUTCOME_ENGAGEMENT": {"POST_ENGAGEMENT", "PAGE_LIKES", "EVENT_RESPONSES", "THRUPLAY",
+                                "VIDEO_VIEWS", "REPLIES", "CONVERSATIONS", "QUALITY_CALL"},
+        "OUTCOME_LEADS": {"LEAD_GENERATION", "QUALITY_LEAD", "OFFSITE_CONVERSIONS",
+                           "LANDING_PAGE_VIEWS", "CONVERSATIONS", "SUBSCRIBERS", "QUALITY_CALL"},
+        "OUTCOME_APP_PROMOTION": {"APP_INSTALLS", "OFFSITE_CONVERSIONS", "LINK_CLICKS", "VALUE"},
+        "OUTCOME_SALES": {"OFFSITE_CONVERSIONS", "VALUE", "LANDING_PAGE_VIEWS", "CONVERSATIONS",
+                           "LINK_CLICKS"},
+    }
+
     if not rows:
         log("WARNING", area, "meta-bulk-import.csv is empty or missing")
     else:
+        # First pass: build Campaign Name → Objective map from CAMPAIGN-level rows
+        campaign_objectives = {}
+        for row in rows:
+            level = (row.get("Level") or "").strip().upper()
+            if level == "CAMPAIGN":
+                name = (row.get("Campaign Name") or "").strip()
+                obj = (row.get("Objective") or "").strip().upper()
+                if name and obj:
+                    campaign_objectives[name] = obj
+
         # Distinguish by Level column
         for i, row in enumerate(rows, start=2):
             level = (row.get("Level") or "").strip().upper()
+            # ── AD_SET-level Optimization Goal enum check ──
+            if level == "AD_SET":
+                goal = (row.get("Optimization Goal") or "").strip().upper()
+                parent_camp = (row.get("Campaign Name") or "").strip()
+                parent_obj = campaign_objectives.get(parent_camp, "").upper()
+                if goal and parent_obj:
+                    valid_goals = OBJECTIVE_TO_VALID_GOALS.get(parent_obj)
+                    if valid_goals is not None and goal not in valid_goals:
+                        log("CRITICAL", area,
+                            f"meta-bulk-import.csv row {i}: Optimization Goal '{goal}' invalid for "
+                            f"Objective '{parent_obj}' (parent campaign '{parent_camp}'). "
+                            f"Valid goals: {sorted(valid_goals)}")
+                    elif valid_goals is None:
+                        log("WARNING", area,
+                            f"meta-bulk-import.csv row {i}: unrecognized Objective '{parent_obj}' — "
+                            f"cannot validate Optimization Goal enum")
             if level == "AD" or row.get("Ad Name"):
                 check_char_limit(row.get("Body", ""), META_LIMITS["Body"], f"Body row {i}", area, soft=True)
                 check_char_limit(row.get("Title", ""), META_LIMITS["Title"], f"Title row {i}", area)
