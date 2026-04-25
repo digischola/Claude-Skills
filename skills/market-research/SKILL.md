@@ -157,9 +157,7 @@ Update wiki/log.md, wiki/index.md, and wiki-config.json.
 - [ ] Raw sources saved to sources/ (immutable)
 
 ## Learnings & Rules
-
 <!-- Format: [DATE] [CLIENT TYPE] Finding → Action. Keep under 30 lines. Prune quarterly. See references/feedback-loop.md for protocol. -->
-
 - [2026-04] [B2B Services] Finding: Perplexity returns stronger competitor data when 2-3 known competitor names are seeded into the prompt. Action: During intake, always ask if user knows any competitor names.
 - [2026-04] [B2B Services] Finding: Google Business Profile data often missing from Perplexity output — critical for local businesses. Action: Always flag GBP status as a gap if not in Perplexity data, recommend direct verification.
 - [2026-04] [General] Finding: Brand color extraction from websites needs systematic approach, not manual eyeballing. Action: Use extract_brand.py script first, fall back to manual only if script fails.

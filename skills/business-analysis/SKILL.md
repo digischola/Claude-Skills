@@ -171,9 +171,7 @@ Read `references/feedback-loop.md`. Capture what worked/didn't. Add learnings be
 - [ ] run_evals.py passes with 0 failures
 
 ## Learnings & Rules
-
 <!-- Format: [DATE] [CLIENT TYPE] Finding → Action. Keep under 30 lines. Prune quarterly. See references/feedback-loop.md for protocol. -->
-
 <!-- CONSOLIDATED 2026-04-09 script fixes (all baked into extract_brand.py): external CSS fetching, vestigial Google Font detection, WP preset filtering, HSL grayscale, utility color filtering + prominence rescue, icon font filtering (incl carousel/Webflow), platform default filtering, prominence-weighted scoring with hue-diff secondary, VISUAL_EDITOR_SITE anomaly, anomalies array (8 detectors), validate_all.py master runner, lint_wiki.py content linter -->
 - [2026-04-09] [General] Finding: Brand style guide PDF may not match website CSS — always ask for guidelines during intake. → Action: Added to Step 5.
 - [2026-04-09] [Process] Finding: Script fixes without SKILL.md updates violate feedback loop. → Action: CLAUDE.md Skill Auto-Update Rule created — learnings are part of the fix.
