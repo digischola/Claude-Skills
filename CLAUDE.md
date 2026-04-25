@@ -62,6 +62,14 @@ Everything else — SKILL.md files, reference files, scripts, assets, evals — 
 
 If a user explicitly asks to update these files, confirm the specific change before making it. Never modify them as a side effect of another task.
 
+**Filesystem-level enforcement.** These four files are `chmod 444` (read-only) with SHA-256 checksums verified at session start by `scripts/verify_kernel.sh`. Drift fires a macOS notification. To make an authorized kernel edit:
+
+1. `scripts/verify_kernel.sh --unlock` (chmod 644)
+2. Edit the file
+3. `scripts/verify_kernel.sh --update` (regenerates baseline checksums AND re-locks to 444)
+
+Never run `--update` without confirming the change is intentional — it overwrites the integrity baseline. If a session sees the kernel locked and needs to edit it, stop and confirm with the user first.
+
 ## Skill Auto-Update Rule (Always Active)
 
 When ANY file inside a skill folder is modified (scripts/, references/, assets/, templates), the following MUST happen **immediately as part of the same fix** — not deferred to session close, not as a separate step:
