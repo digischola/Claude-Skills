@@ -162,13 +162,15 @@ def validate_dashboard(html_path: str) -> dict:
     # (different templates in the wild use different conventions; single-brace and square-bracket
     # forms would slip through the original {{...}}-only check)
     unreplaced = []
+    # Known source-label tags from accuracy-protocol.md — not placeholders
+    SOURCE_LABELS = {'[EXTRACTED]', '[INFERRED]', '[INTAKE]', '[BRIEF]', '[GENERATED]', '[ADAPTED]', '[REFRESH]'}
     for pattern, label in [
         (r'\{\{[A-Z_][A-Z0-9_]*(?:\|[^}]*)?\}\}', '{{...}}'),
         (r'\{[A-Z_][A-Z0-9_]{2,}\}', '{...}'),       # >=3 char keys to avoid matching CSS like {color:red}
         (r'\[[A-Z_][A-Z0-9_]{2,}\]', '[...]'),       # same guard
         (r'\$\{[A-Z_][A-Z0-9_]*\}', '${...}'),
     ]:
-        hits = re.findall(pattern, html)
+        hits = [h for h in re.findall(pattern, html) if h not in SOURCE_LABELS]
         if hits:
             unreplaced.append(f"{label}: {', '.join(set(hits))}")
     if unreplaced:
@@ -297,6 +299,41 @@ def validate_dashboard(html_path: str) -> dict:
         results["WARNING"].append(
             f"{len(critical_major_issues)} CRITICAL/MAJOR issues but no screenshot markers found"
         )
+
+    # 14b. False-positive guard on "missing content" CRITICAL findings.
+    # Screenshot-timing bugs (mid-animation captures, uncompleted lazy-load) have
+    # caused phantom CRITICALs like "broken images", "blank sections", "missing text".
+    # See references/screenshot-capture.md "DOM-First Rule for Content Claims".
+    # If a CRITICAL claims content is missing, require a companion DOM-verification note.
+    critical_section_match = re.search(
+        r'Critical — Fix Before Running Ads(.+?)(?:Major — Fix|Minor — Fix|</section>)',
+        html, re.DOTALL | re.IGNORECASE
+    )
+    if critical_section_match:
+        critical_text = critical_section_match.group(1).lower()
+        red_flag_patterns = [
+            r'\bbroken images?\b',
+            r'\bblank (placeholder|image|card|section)',
+            r'\bimage(s)? (are|is) (blank|missing|not rendering|not loading)',
+            r'\bimages? (not|aren.?t|isn.?t) (loading|rendering|showing)',
+            r'\bmissing (image|content|text|heading)',
+        ]
+        hit = next((p for p in red_flag_patterns if re.search(p, critical_text)), None)
+        if hit:
+            # Require an explicit DOM-verification acknowledgment somewhere in the doc
+            dom_verified = bool(re.search(
+                r'(dom[- ]verified|verified against (the )?(rendered )?dom|confirmed via (document|querySelector)|dom check|rendered-dom check)',
+                html, re.IGNORECASE
+            ))
+            if not dom_verified:
+                results["WARNING"].append(
+                    f"CRITICAL finding claims visual content is missing (pattern: /{hit}/). "
+                    "Content-missing claims can be phantom findings from screenshot timing issues "
+                    "(scroll-reveal animations, lazy-load). Verify against rendered DOM before "
+                    "delivery — see references/screenshot-capture.md 'DOM-First Rule'."
+                )
+            else:
+                results["PASS"].append("Content-missing CRITICAL includes DOM-verification acknowledgment")
 
     # 15. Companion markdown findings report must exist (SKILL.md Step 5b)
     # Pattern: {page-name}-landing-page-audit.html → {page-name}-audit-findings.md

@@ -12,6 +12,7 @@ Last updated: 2026-04-16
 - **Happy Buddha Retreat** (Australia) — Meta Ads management, ~AUD $1,400/month
 - **ISKM / Sri Krishna Mandir** (Singapore) — Meta Ads, SGD $500/month
 - **Salt Air Cinema** (Australia) — Agency subcontract, AUD $10/hr, ~8-10 hrs/month
+- **Living Flow Yoga Ashfield** (Inner West Sydney, NSW) — Onboarded 2026-04-25. Google Ads only. AUD $300/month. Two-campaign brief, split into multi-program structure: (1) **Local Studio - Inner West Sydney** ($150-200/mo; LAUNCHABLE once GA4 + Intro Pass landing page are in place), (2) **Live-stream AU-wide** ($100-150/mo; **DO-NOT-LAUNCH** until Phase 1 structural fixes — standalone digital SKU $39-49/mo, dedicated /online-yoga-australia landing page, 7-day free trial, GA4 migration). Natalie Ristoski, 7 teachers, MindBody booking. **1,235 Google reviews** = unprecedented local dominance moat. Cross-link: Winter Cocoon Retreat hosted at Thrive Retreats venue (existing client). Files at `Desktop/Yoga Ashfield/` (multi-program: _shared/, Local Studio - Inner West Sydney/, Live-stream AU-wide/). Market research reports + dashboards delivered 2026-04-25.
 - **Gargi** — Pre-sales phase, not yet active
 
 FY25-26 total revenue: ~27 lakh INR
@@ -73,3 +74,7 @@ _Note: Test and one-off project folders (Gwinganna, Magic Receipt, Retreat House
 ## 2026 Growth Targets
 
 TBD — to be defined in upcoming planning session.
+
+## Strategic Shifts Logged
+
+- **[2026-04-22] Loomer Meta-ad-shutdown rule — locked across both tracks.** Jon Loomer published 2026-03-19 "AI-Related Ad Account Shutdowns, Meta AI Chat, and More" reporting advertisers (Naman Bansal lost 17 accounts) getting Meta ad accounts shut down for connecting to AI agents through third-party connectors. Mechanism per Loomer: Meta's detection flags large API-call volume from AI tools as automated abuse. **Rule locked for client-skills track:** All Windsor.ai pulls from Claude are READ-ONLY. Never issue write operations to Meta Ads Manager via any MCP. `post-launch-optimization` was already structured this way (outputs reports, not API mutations); rule is now explicit and must not be relaxed even if "safe MCP" products (e.g., Madgicx) come to market — only relax after independent verification the product doesn't trip Meta's detection. When a client ad account receives a Business Manager warning about unusual API activity, pause Windsor pulls for that account and fall back to CSV export for the analysis cycle. Same rule mirrored in the personal-brand track for Digischola organic FB + IG via `performance-review`. **Client risk exposure:** ISKM SG + Thrive Retreats Meta ad accounts are revenue-critical (currently connected on Windsor for post-launch-optimization pulls); a Meta shutdown would cascade to those client relationships. Mitigation: we're already read-only, so the risk surface is Windsor's own relationship with Meta (out of our control but Windsor has strong incentive to comply with Meta's terms).

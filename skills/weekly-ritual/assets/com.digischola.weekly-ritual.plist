@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+TEMPLATE for the Weekly Ritual LaunchAgent. install_launchagents.py renders the
+final version with absolute paths and writes it to ~/Library/LaunchAgents/.
+
+DO NOT edit this template directly and copy to LaunchAgents/. Use the installer.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.digischola.weekly-ritual</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>{ABSOLUTE_PATH_TO_PYTHON3}</string>
+        <string>{ABSOLUTE_PATH_TO_WEEKLY_RITUAL_PY}</string>
+        <string>--day</string>
+        <string>auto</string>
+        <string>--brand-folder</string>
+        <string>/Users/digischola/Desktop/Digischola</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Weekday</key><integer>0</integer>
+            <key>Hour</key><integer>9</integer>
+            <key>Minute</key><integer>0</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>5</integer>
+            <key>Hour</key><integer>18</integer>
+            <key>Minute</key><integer>0</integer>
+        </dict>
+    </array>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>KeepAlive</key>
+    <false/>
+
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/digischola/Desktop/Digischola/weekly-ritual.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/digischola/Desktop/Digischola/weekly-ritual.stderr.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/digischola</string>
+    </dict>
+</dict>
+</plist>

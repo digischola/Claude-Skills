@@ -1,0 +1,169 @@
+{
+  "skill_name": "visual-generator",
+  "schema_version": 3,
+  "updated": "2026-04-22",
+  "notes": "v7.4 DUAL-ENGINE eval cases. Path A (Claude Design) unchanged. Path B now routes per scene_type: UI-mockup teardown → Remotion; social-platform overlays → Hyperframes catalog blocks. Cases 11-13 added for dual-engine routing + consistency layer + render log.",
+  "evals": [
+    {
+      "id": 1,
+      "path": "A",
+      "prompt": "Generate a visual brief for the Thrive LP audit Instagram carousel (source: queue/pending-approval/2026-04-19-4e4eed15-instagram-carousel-carousel-repurpose.md). Target: carousel.",
+      "expected_output": "Brief written to brand/queue/briefs/ with frontmatter (source_file, target_engine=Claude Design, target_format=carousel), brand-context block (dark mode, #3B9EFF, Orbitron/Space Grotesk/Manrope, no em dashes), slide structure derived from source (## Slide N sections preserved), caption length spec (150-300 chars), render format (PNG sequence via handoff).",
+      "assertions": [
+        {"name": "brief_file_written", "description": "File at brand/queue/briefs/YYYY-MM-DD-<entry>-carousel-brief.md exists"},
+        {"name": "engine_claude_design", "description": "Frontmatter says target_engine=Claude Design"},
+        {"name": "brand_block_present", "description": "Brief body includes dark mode + #3B9EFF + Orbitron/Space Grotesk/Manrope specs"},
+        {"name": "slides_pre_structured", "description": "Since source has ## Slide N headers, brief uses them as Input Slide 1...N"},
+        {"name": "no_em_dashes_in_brief", "description": "Brief body contains no em dash characters"},
+        {"name": "next_steps_printed", "description": "Script stdout lists next steps (open claude.ai/design, paste, iterate, hand off)"}
+      ]
+    },
+    {
+      "id": 2,
+      "path": "A",
+      "prompt": "Import a Claude Design handoff folder containing 8 PNG slides (Image-1.png through Image-8.png) with source-id=4e4eed15, kind=carousel.",
+      "expected_output": "All 8 PNGs copied to brand/queue/assets/4e4eed15/ with normalized names (slide-1.png through slide-8.png). Manifest.json lists all 8 with original_name vs stored_as. Script exits 0.",
+      "assertions": [
+        {"name": "all_8_copied", "description": "brand/queue/assets/<id>/ contains slide-1.png through slide-8.png"},
+        {"name": "normalized_naming", "description": "Files renamed from Image-N.png to slide-N.png per carousel pattern"},
+        {"name": "manifest_has_8_entries", "description": "manifest.json assets array length = 8"},
+        {"name": "kind_carousel", "description": "Manifest kind=carousel"}
+      ]
+    },
+    {
+      "id": 3,
+      "path": "B",
+      "prompt": "Parse a reel draft with 5 scenes (hook / problem / insight / data-reveal / outro) and confirm scene classifier assigns correct scene_types to each, and SCENE_COMPOSITION maps them to the 5 v7.3 Remotion components.",
+      "expected_output": "parse_scenes() returns 5 dicts with scene_type in {hook, problem_beat, insight_beat, data_reveal, outro}. Each scene_type maps to the correct Remotion composition: hook→KineticHook, problem_beat→ProblemBeat, insight_beat→InsightBeat, data_reveal→DataReveal, outro→OutroCard. Duration per scene in seconds matches SCENE_DURATION table (hook 2.9, problem 3.3, insight 5.0, data 3.8, outro 3.8).",
+      "assertions": [
+        {"name": "five_scenes_parsed", "description": "len(scenes) == 5"},
+        {"name": "scene_types_correct", "description": "scene types in order are hook, problem_beat, insight_beat, data_reveal, outro"},
+        {"name": "composition_mapping_correct", "description": "Every scene_type has a matching composition in SCENE_COMPOSITION"},
+        {"name": "durations_match_theme", "description": "SCENE_DURATION[t] matches theme/brand.ts::sceneDuration[t] for every scene_type"}
+      ]
+    },
+    {
+      "id": 4,
+      "path": "B",
+      "prompt": "Build scene props for a data_reveal scene with VO 'Form length reduction alone lifts conversion by 120 percent.' and overlay '9 → 3 fields / +120%'.",
+      "expected_output": "build_props_for_scene() returns {number:120, suffix:'%', sign:'+', eyebrow:'RESULT', sublabel:'LIFT', words:[...]}. Number extracted correctly from '120 percent'/'+120%'. Sign defaults '+'. Suffix '%'.",
+      "assertions": [
+        {"name": "number_extracted_120", "description": "props.number == 120"},
+        {"name": "suffix_percent", "description": "props.suffix == '%'"},
+        {"name": "sign_positive", "description": "props.sign == '+'"},
+        {"name": "sublabel_lift", "description": "props.sublabel == 'LIFT' (positive sign)"}
+      ]
+    },
+    {
+      "id": 5,
+      "path": "B",
+      "prompt": "Build outro props for a CTA scene with VO 'Visit digischola.in for the full audit playbook.' and overlay 'DIGISCHOLA.IN'.",
+      "expected_output": "Props include ctaText extracted from VO imperative-verb ('VISIT DIGISCHOLA.IN' truncated to 4 words), ctaUrl 'DIGISCHOLA.IN' extracted from overlay+VO, handle 'DIGISCHOLA'. Must NOT pull 'DIGISCHOLA' into ctaText from URL.",
+      "assertions": [
+        {"name": "cta_url_present", "description": "ctaUrl == 'DIGISCHOLA.IN'"},
+        {"name": "cta_text_from_vo", "description": "ctaText starts with imperative verb VISIT (first word of VO clause)"},
+        {"name": "cta_text_not_url", "description": "ctaText does NOT contain 'DIGISCHOLA.IN' (URL already handled by ctaUrl)"},
+        {"name": "handle_present", "description": "handle == 'DIGISCHOLA'"}
+      ]
+    },
+    {
+      "id": 6,
+      "path": "B",
+      "prompt": "Render KineticHook composition with 6 words from 0 to 2.4 seconds, totalCount=40. Confirm MP4 is produced at 30fps × 2.9s = 87 frames of 1080×1920 H.264.",
+      "expected_output": "scene-1-rmt.mp4 exists. ffprobe shows 1080x1920 resolution, 87 frames at 30 fps, codec h264, pix_fmt yuv420p, CRF ~18.",
+      "assertions": [
+        {"name": "mp4_exists", "description": "scene-1-rmt.mp4 file exists"},
+        {"name": "resolution_1080x1920", "description": "ffprobe reports 1080 width × 1920 height"},
+        {"name": "duration_2_9s", "description": "ffprobe duration in [2.85, 2.95] seconds"},
+        {"name": "codec_h264", "description": "ffprobe codec_name == h264"},
+        {"name": "pixel_format_yuv420p", "description": "ffprobe pix_fmt == yuv420p"}
+      ]
+    },
+    {
+      "id": 7,
+      "path": "B",
+      "prompt": "After stitching a 5-scene reel, run qa_reel.py and confirm 3-check output: visual_density ≥ 0.08, pure_black_ratio ≤ 0.92, frame_delta ≥ 0.01. On v7.3 wellness-LP smoke, 39/39 sampled frames must pass.",
+      "expected_output": "qa_reel.py exits 0. Stdout reports counts for each check and total frames sampled. On smoke reel, all 3 checks pass for every sampled frame.",
+      "assertions": [
+        {"name": "qa_exits_zero", "description": "qa_reel.py --reel <smoke.mp4> exits 0"},
+        {"name": "visual_density_pass", "description": "Every sampled frame has Yavg/255 ≥ 0.08 OR Yvar ≥ threshold"},
+        {"name": "pure_black_pass", "description": "Every sampled frame has black_ratio ≤ 0.92"},
+        {"name": "motion_pass", "description": "SSIM delta between consecutive sampled frames ≥ 0.01 (frame isn't stuck)"}
+      ]
+    },
+    {
+      "id": 8,
+      "path": "B",
+      "prompt": "Stitch 5 scenes into reel.mp4 with VO + optional BGM. Confirm flash clips interleave between scene pairs, POLISH_FILTER applied, VO duration drives final -t trim.",
+      "expected_output": "reel.mp4 exists. ffprobe shows single video stream + single AAC audio stream. Duration matches get_audio_duration_sec(voiceover) ± 0.1s. Polish filter visible via eq/vignette in frame sample.",
+      "assertions": [
+        {"name": "reel_mp4_exists", "description": "reel.mp4 file exists"},
+        {"name": "has_audio_stream", "description": "ffprobe reports exactly 1 AAC audio stream"},
+        {"name": "duration_matches_vo", "description": "Final duration within 0.1s of VO duration"},
+        {"name": "concat_count_correct", "description": "5 scenes + 4 flashes interleaved = 9 input segments concatenated"}
+      ]
+    },
+    {
+      "id": 9,
+      "path": "B",
+      "prompt": "Confirm every rendered reel renders identical pixels across 2 independent runs with the same draft + voiceover (determinism contract).",
+      "expected_output": "SHA-256 of scene-1-rmt.mp4 through scene-5-rmt.mp4 identical between run A and run B. No Math.random anywhere in compositions; all seeded via remotion's random().",
+      "assertions": [
+        {"name": "sha_stable_per_scene", "description": "SHA-256 of each scene-N-rmt.mp4 matches between 2 runs"},
+        {"name": "no_math_random_in_src", "description": "grep 'Math.random' src/components src/compositions returns zero matches"}
+      ]
+    },
+    {
+      "id": 10,
+      "path": "housekeeping",
+      "prompt": "Run scripts/audit_skill.py against the visual-generator skill folder. Confirm 0 fails + all green (v7.4: hyperframes moved to current stack, hyperframes-setup.md archived, routing tables consistent).",
+      "expected_output": "audit_skill.py exits 0. Line count <200, all referenced files exist, learnings log mentions v7.4, no undeclared deprecated stack names outside Anti-patterns, no orphaned references under references/ root (archive/ subfolder is allowed).",
+      "assertions": [
+        {"name": "audit_exits_zero", "description": "python3 audit_skill.py exits 0"},
+        {"name": "skill_md_under_200", "description": "SKILL.md < 200 lines"},
+        {"name": "v7_4_mentioned", "description": "Learnings log contains 'v7.4' tag"},
+        {"name": "no_broken_refs", "description": "Every references/* and scripts/* mentioned in SKILL.md actually exists"},
+        {"name": "zero_warnings", "description": "Audit reports 0 warnings (all warnings resolved in v7.4 close-out)"}
+      ]
+    },
+    {
+      "id": 11,
+      "path": "B-dual-engine",
+      "prompt": "Run scripts/test_routing.py. Verify dual-engine routing logic dispatches each scene_type to the right engine and render_log captures metadata.",
+      "expected_output": "test_routing.py exits 0. All 44 checks pass: HEADING_LABEL_MAP covers all 13 routed scene_types; SCENE_ROUTING + SCENE_DURATION + SCENE_COMPOSITION/HYPERFRAMES_CATALOG_MAP are in parity; scene_spec.py routing tables match generate_reel.py; Scene.engine dispatches correctly (data_reveal → remotion, x_post_overlay → hyperframes); Scene.validate() catches invalid inputs; render_scene() logs {scene_n, scene_type, engine, render_time_sec, success} per call; parse_scenes() on a dual-engine smoke draft returns [hook, x_post_overlay, data_reveal, outro] with engines [remotion, hyperframes, remotion, remotion].",
+      "assertions": [
+        {"name": "test_exits_zero", "description": "test_routing.py exits 0"},
+        {"name": "all_44_checks_pass", "description": "Stdout shows 'ALL CHECKS PASSED' with no ✗ lines"},
+        {"name": "scene_spec_gr_parity", "description": "scene_spec.py SCENE_ROUTING == generate_reel.py SCENE_ROUTING"},
+        {"name": "render_log_shape", "description": "render_log rows include engine + scene_type + render_time_sec keys"},
+        {"name": "parse_dual_engine_draft", "description": "parse_scenes() on a dual-engine draft returns correct scene_types in order"}
+      ]
+    },
+    {
+      "id": 12,
+      "path": "B-consistency",
+      "prompt": "Regenerate brand/hyperframes-scenes/shared/tokens.css from design-tokens.json via scripts/build_shared_tokens.py. Verify palette / fonts / easing / sceneDuration tokens are identical between the Remotion brand.ts and the generated tokens.css.",
+      "expected_output": "build_shared_tokens.py exits 0 with zero brand.ts drift warnings. Generated tokens.css contains (a) --color-* custom properties for every palette entry, (b) --font-* for every fonts entry, (c) --ease-* for every easingCSS entry, (d) --dur-* for every sceneDuration entry, (e) .atmo-mesh-neutral / -positive / -warning classes matching the Remotion MeshGradient TONE_LAYERS recipes by construction.",
+      "assertions": [
+        {"name": "build_exits_zero", "description": "scripts/build_shared_tokens.py exits 0"},
+        {"name": "no_brand_ts_drift", "description": "stdout shows '✓ brand.ts values align with design-tokens.json'"},
+        {"name": "all_palette_tokens_emitted", "description": "tokens.css contains --color-accent: #3B9EFF and --color-success: #4ADE80"},
+        {"name": "all_scene_durations_emitted", "description": "tokens.css contains --dur-hook / --dur-data-reveal / --dur-x-post-overlay"},
+        {"name": "mesh_classes_present", "description": "tokens.css defines .atmo-mesh-neutral and @keyframes atmo-shift"}
+      ]
+    },
+    {
+      "id": 13,
+      "path": "B-render-log",
+      "prompt": "Generate a dual-engine reel (draft with hook + x_post_overlay + data_reveal + outro) and inspect the render_log.jsonl output.",
+      "expected_output": "brand/queue/assets/<entry>/render_log.jsonl contains 4 lines of JSON, one per scene. Each row has keys {entry_id, scene_n, scene_type, engine, render_time_sec, out_file, success}. Engines: scene 1 = remotion, scene 2 = hyperframes, scene 3 = remotion, scene 4 = remotion. MP4 filenames suffix with -rmt or -hf matching the engine.",
+      "assertions": [
+        {"name": "render_log_exists", "description": "render_log.jsonl exists in assets dir"},
+        {"name": "four_rows", "description": "render_log has 4 rows (one per scene)"},
+        {"name": "engine_mix_correct", "description": "engines in order = [remotion, hyperframes, remotion, remotion]"},
+        {"name": "filename_suffix_matches", "description": "scene-2-hf.mp4 exists (Hyperframes scene) and scene-1/3/4-rmt.mp4 exist (Remotion scenes)"},
+        {"name": "all_success", "description": "every row has success=true"}
+      ]
+    }
+  ]
+}

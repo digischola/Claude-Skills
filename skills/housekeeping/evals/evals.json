@@ -1,0 +1,57 @@
+{
+  "skill_name": "housekeeping",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "run housekeeping",
+      "expected_output": "Scan completes, presents totals per tier, uses AskUserQuestion for each non-empty category (AUTO-BLOAT / LIKELY-BLOAT / AMBIGUOUS), moves approved items to Desktop/.housekeeping-quarantine/{today}/ with manifest.json, runs purge_quarantine for entries >7d old, runs validate_output, reports MB recovered.",
+      "assertions": [
+        { "name": "scan_runs", "description": "scan.py executes and writes scan-report.json without touching filesystem" },
+        { "name": "no_protected_in_report", "description": "scan-report.json contains zero items with path matching PROTECTED_NAMES (SKILL.md, pillars.md, idea-bank.json, etc.)" },
+        { "name": "user_prompted_per_tier", "description": "AskUserQuestion invoked once per non-empty tier; user decisions recorded in approved-plan.json" },
+        { "name": "cleanup_moves_not_deletes", "description": "cleanup.py only moves to quarantine; original paths exist in .housekeeping-quarantine/{date}/items/" },
+        { "name": "manifest_written", "description": "manifest.json written with one entry per moved item (original_path, quarantine_path, size_bytes, sha256, timestamp)" }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "rollback yesterday's cleanup of the mining folder",
+      "expected_output": "rollback.py --date YYYY-MM-DD --pattern 'voice-samples*' restores the specific files to original paths. Log entry written. Manifest pruned of restored entries. Destination conflicts reported but not overwritten.",
+      "assertions": [
+        { "name": "rollback_restores_to_original", "description": "Files move from quarantine back to their original paths listed in manifest" },
+        { "name": "conflict_fails_loudly", "description": "If destination already exists, rollback reports CONFLICT and does NOT overwrite" },
+        { "name": "manifest_updated", "description": "After restore, manifest.json no longer lists the restored entries" }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "install housekeeping cron",
+      "expected_output": "install_launchagent.py writes ~/Library/LaunchAgents/com.mayank.housekeeping.plist with StartCalendarInterval Saturday 10:00, loads via launchctl, verifies with launchctl list.",
+      "assertions": [
+        { "name": "plist_written", "description": "plist file exists with Weekday=6, Hour=10, Minute=0" },
+        { "name": "launchctl_load_succeeds", "description": "launchctl load returns 0 and label appears in launchctl list" },
+        { "name": "fires_weekly_nudge", "description": "plist invokes weekly_nudge.py (not cleanup.py directly — cron must not silently delete)" }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "cleanup protected file leak test",
+      "expected_output": "If approved-plan.json accidentally contains a PROTECTED path (e.g., pillars.md), cleanup.py REFUSES the move and logs 'REFUSED (PROTECTED: ...)'. No touch to protected file.",
+      "assertions": [
+        { "name": "cleanup_defense_in_depth", "description": "cleanup.py.is_protected() double-checks each approved path; protected ones logged REFUSED" },
+        { "name": "protected_file_untouched", "description": "Protected path still exists at original location after cleanup run" }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "purge quarantine older than 7 days",
+      "expected_output": "purge_quarantine.py identifies date-folders older than 7 days, permanently deletes them via shutil.rmtree, logs size + path. Defense: only operates inside QUARANTINE_ROOT. Refuses paths outside.",
+      "assertions": [
+        { "name": "only_old_folders_purged", "description": "Date-folders <=7d old are kept; >7d are purged" },
+        { "name": "never_purges_non_date_folders", "description": "Non-YYYY-MM-DD folder names inside quarantine are skipped (e.g., stray config)" },
+        { "name": "logs_permanent_deletion", "description": "Every purge logged with byte total to housekeeping.log" },
+        { "name": "refuses_path_outside_quarantine_root", "description": "If somehow path escapes QUARANTINE_ROOT, purge refuses with REFUSED log" }
+      ]
+    }
+  ]
+}

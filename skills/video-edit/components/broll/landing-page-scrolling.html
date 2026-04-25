@@ -1,0 +1,160 @@
+<!--
+  Component: broll/landing-page-scrolling
+  Fake landing page B-roll with cursor arrow scrolling from top to bottom.
+  Use when the speaker says "landing page", "visitor scrolls", "above the fold", "homepage".
+
+  Inputs (replace at injection time):
+    {{ID}}               - unique DOM id suffix (e.g. "lp1")
+    {{START}}            - data-start in composition seconds (float)
+    {{DURATION}}         - data-duration seconds (recommend 2.5-4.5)
+    {{TRACK}}            - data-track-index (recommend 2 for B-roll above video)
+    {{BRAND_PRIMARY}}    - brand primary color hex (e.g. #3B9EFF)
+    {{BRAND_BG}}         - page background hex (e.g. #FFFFFF for light LP)
+    {{PAGE_TITLE}}       - hero headline shown on fake LP (keep short, ALL CAPS ok)
+    {{HERO_COPY}}        - sub-headline (1 sentence)
+    {{CTA_TEXT}}         - button label (UPPERCASE recommended)
+    {{MUTE_OVERLAY}}     - true/false — if true, adds a blue vignette over LP to keep brand continuity
+
+  Usage: inject into index.html body, inside root composition div. Pair with tailwind via CDN in <head>.
+-->
+
+<div
+  id="broll-lp-{{ID}}"
+  class="clip broll-lp"
+  data-start="{{START}}"
+  data-duration="{{DURATION}}"
+  data-track-index="{{TRACK}}"
+  style="position: absolute; inset: 0; overflow: hidden; z-index: 14; background: #000;"
+>
+  <!-- Scrollable LP content wrapper -->
+  <div class="lp-viewport-{{ID}}" style="position: absolute; inset: 0; overflow: hidden;">
+    <div
+      class="lp-page-{{ID}}"
+      style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: {{BRAND_BG}};
+        color: #0B1220;
+        font-family: 'Inter', 'Manrope', system-ui, sans-serif;
+        padding: 60px 80px 120px;
+        display: flex;
+        flex-direction: column;
+        gap: 64px;
+        min-height: 240%;
+      "
+    >
+      <!-- Fake nav -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 24px; border-bottom: 1px solid #E5E7EB;">
+        <div style="font-family: Orbitron, sans-serif; font-weight: 700; font-size: 32px; letter-spacing: 0.02em;">
+          ACME<span style="color: {{BRAND_PRIMARY}};">.CO</span>
+        </div>
+        <div style="display: flex; gap: 32px; font-size: 20px; color: #6B7280;">
+          <span>Product</span><span>Pricing</span><span>Login</span>
+        </div>
+      </div>
+
+      <!-- Hero section -->
+      <div style="display: flex; flex-direction: column; gap: 28px; padding-top: 40px;">
+        <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 88px; line-height: 1.08; letter-spacing: -0.02em; color: #0B1220;">
+          {{PAGE_TITLE}}
+        </div>
+        <div style="font-size: 28px; line-height: 1.45; color: #4B5563; max-width: 90%;">
+          {{HERO_COPY}}
+        </div>
+        <div style="margin-top: 16px;">
+          <span style="
+            display: inline-block;
+            background: {{BRAND_PRIMARY}};
+            color: #fff;
+            padding: 18px 36px;
+            border-radius: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 22px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+          ">
+            {{CTA_TEXT}}
+          </span>
+        </div>
+      </div>
+
+      <!-- Fake feature grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 60px;">
+        <div style="background: #F3F4F6; border-radius: 16px; padding: 32px; height: 280px;"></div>
+        <div style="background: #F3F4F6; border-radius: 16px; padding: 32px; height: 280px;"></div>
+        <div style="background: #F3F4F6; border-radius: 16px; padding: 32px; height: 280px;"></div>
+        <div style="background: #F3F4F6; border-radius: 16px; padding: 32px; height: 280px;"></div>
+      </div>
+
+      <!-- Fake long form (conversion killer — what we're about to critique) -->
+      <div style="background: #F9FAFB; border-radius: 16px; padding: 48px; margin-top: 40px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="font-size: 32px; font-weight: 600; color: #0B1220;">Tell us about you</div>
+        <div style="height: 72px; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;"></div>
+        <div style="height: 72px; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;"></div>
+        <div style="height: 72px; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;"></div>
+        <div style="height: 72px; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;"></div>
+        <div style="height: 72px; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;"></div>
+        <div style="height: 72px; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cursor arrow scrolling down -->
+  <div
+    class="lp-cursor-{{ID}}"
+    style="
+      position: absolute;
+      left: 58%;
+      top: 18%;
+      width: 32px;
+      height: 44px;
+      z-index: 5;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    "
+  >
+    <svg viewBox="0 0 32 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 2L2 34L10 26L14.5 38L19 36L14.5 24L26 24L2 2Z" fill="#FFFFFF" stroke="#0B1220" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</div>
+
+<script>
+(function() {
+  /* Scroll the LP content upward + cursor moves downward, giving illusion of a visitor scrolling. */
+  var tl = (window.__timelines && window.__timelines["main"]) || null;
+  if (!tl) return;
+
+  var START = {{START}};
+  var DURATION = {{DURATION}};
+
+  /* LP page slides from top (0) to bottom (approx -140% of viewport) over the duration */
+  tl.fromTo(
+    ".lp-page-{{ID}}",
+    { y: 0 },
+    { y: -1400, duration: DURATION - 0.3, ease: "power1.inOut" },
+    START + 0.15
+  );
+
+  /* Cursor drifts from upper area to lower area, giving active-scroll feeling */
+  tl.fromTo(
+    ".lp-cursor-{{ID}}",
+    { top: "18%" },
+    { top: "72%", duration: DURATION - 0.3, ease: "power1.inOut" },
+    START + 0.15
+  );
+
+  /* Component entrance: fade in */
+  tl.from(
+    "#broll-lp-{{ID}}",
+    { opacity: 0, duration: 0.28, ease: "power2.out" },
+    START + 0.02
+  );
+  /* Component exit: hard kill at end for determinism */
+  tl.set("#broll-lp-{{ID}}", { opacity: 0, visibility: "hidden" }, START + DURATION);
+})();
+</script>

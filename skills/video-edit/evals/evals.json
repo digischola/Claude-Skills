@@ -1,0 +1,39 @@
+{
+  "skill_name": "video-edit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Edit this testimonial, make it feel premium like Apple. Source is at /tmp/testimonial-raw.mp4, client is Thrive Retreats for Ibiza 2026 retreat.",
+      "expected_output": "MP4 delivered at Desktop/Thrive Retreats/Ibiza 2026 retreat/videos/edits/{date}-testimonial-edit.mp4 with apple-premium preset applied, silent segments trimmed, kinetic centered captions, name/title lower-third, slow confident motion, filmic LUT, -16 LUFS audio, thumbnail sidecar.",
+      "assertions": [
+        {"name": "preset_chosen", "description": "apple-premium preset used because user said 'premium like Apple'"},
+        {"name": "aspect_auto", "description": "Aspect ratio auto-detected from source and target-render-dims set accordingly"},
+        {"name": "silence_trimmed", "description": "cuts.json written with silent segments >0.6s removed"},
+        {"name": "validate_pass", "description": "validate_output.py exits 0 with no CRITICAL failures"},
+        {"name": "output_location", "description": "File lands in Desktop/Thrive Retreats/Ibiza 2026 retreat/videos/edits/ per client-work structure"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Turn this raw footage into a scroll-stopping Reel — Gen-Z punchy, kinetic captions, beat sync if there's music. File is /tmp/raw-hook.mp4, for client 'Thrive Retreats / Nrsimha Caturdasi 2026'.",
+      "expected_output": "9:16 1080x1920 MP4 with gen-z-punchy preset, hook-framer arc, kinetic word-by-word captions with color pops, zoom punches, hard cuts, -14 LUFS audio, snappier fade in/out.",
+      "assertions": [
+        {"name": "preset_gen_z", "description": "gen-z-punchy preset chosen based on 'scroll-stopping' and 'Gen-Z' language"},
+        {"name": "arc_hook_framer", "description": "hook-framer narrative arc applied (HOOK card → source → payoff)"},
+        {"name": "lufs_14", "description": "Audio normalized to -14 LUFS (gen-z-punchy preset target)"},
+        {"name": "delegates_to_hyperframes", "description": "Skill invokes /hyperframes with structured brief; does NOT try to author HTML itself"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Edit this client testimonial. Source is at /tmp/iskm-testimonial.mp4 for ISKM Singapore. Their brand colors are saffron and gold.",
+      "expected_output": "testimonial-trust preset applied, but DESIGN.md overrides primary/accent with saffron/gold from client brand colors, lower-third with speaker name+title, pull-quote emphasis, validate_output.py passes.",
+      "assertions": [
+        {"name": "preset_testimonial", "description": "testimonial-trust preset chosen because source is a client testimonial (content type wins over any surface aesthetic)"},
+        {"name": "brand_override", "description": "DESIGN.md colors use saffron + gold from user-supplied brand colors, not preset defaults"},
+        {"name": "lower_third", "description": "Name/title lower-third rendered for speaker segment"},
+        {"name": "iskm_folder", "description": "Output lands in Desktop/ISKM Singapore/{project}/videos/edits/ — do NOT route to Digischola brand folder"}
+      ]
+    }
+  ]
+}

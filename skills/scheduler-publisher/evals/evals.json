@@ -1,0 +1,106 @@
+{
+  "skill": "scheduler-publisher",
+  "version": "1.0.0",
+  "test_cases": [
+    {
+      "id": "tick_no_drafts",
+      "description": "Tick on empty pending-approval folder logs zero work, returns 0",
+      "fixture": "fixtures/empty_brand/",
+      "command": "tick.py --dry-run",
+      "expected_exit": 0,
+      "expected_log_contains": ["scanned: 0 due drafts", "tick end"]
+    },
+    {
+      "id": "tick_due_linkedin_text",
+      "description": "Tick picks up a LinkedIn text-post draft with scheduled_at in the past and dispatches",
+      "fixture": "fixtures/single_li_text_due/",
+      "command": "tick.py --dry-run",
+      "expected_exit": 0,
+      "expected_log_contains": ["[DRY-RUN] would publish 4e4eed15", "linkedin"]
+    },
+    {
+      "id": "tick_skip_already_posted",
+      "description": "Drafts with posting_status=posted are NOT re-fired",
+      "fixture": "fixtures/already_posted/",
+      "command": "tick.py --dry-run",
+      "expected_exit": 0,
+      "expected_log_contains": ["scanned: 0 due drafts"]
+    },
+    {
+      "id": "tick_retry_due_after_backoff",
+      "description": "Failed drafts whose posting_next_retry_at is in the past ARE retried",
+      "fixture": "fixtures/retry_due/",
+      "command": "tick.py --dry-run",
+      "expected_exit": 0,
+      "expected_log_contains": ["scanned: 1 due drafts"]
+    },
+    {
+      "id": "tick_lock_contention",
+      "description": "If lock is held by another process, tick exits with code 1",
+      "fixture": "fixtures/empty_brand/",
+      "command": "(flock /tmp/digischola-scheduler.lock sleep 30 &) ; sleep 1 ; tick.py",
+      "expected_exit": 1,
+      "expected_log_contains": ["another tick is in flight"]
+    },
+    {
+      "id": "manual_channel_notification",
+      "description": "Instagram draft fires a notification and sets posting_status=notified",
+      "fixture": "fixtures/single_ig_carousel_due/",
+      "command": "tick.py --dry-run",
+      "expected_exit": 0,
+      "expected_frontmatter_after": {
+        "posting_status": "notified"
+      }
+    },
+    {
+      "id": "manual_publish_overdue_marker",
+      "description": "Notified draft >48h becomes manual_publish_overdue",
+      "fixture": "fixtures/notified_50h_ago/",
+      "command": "tick.py",
+      "expected_exit": 0,
+      "expected_log_contains": ["manual_publish_overdue"]
+    },
+    {
+      "id": "apply_calendar_writes_scheduled_at",
+      "description": "apply_calendar parses W17 markdown and writes scheduled_at to matching drafts",
+      "fixture": "fixtures/calendar_w17/",
+      "command": "apply_calendar.py --week 2026-W17",
+      "expected_exit": 0,
+      "expected_frontmatter_after": {
+        "scheduled_at": "2026-04-22T09:00:00+05:30",
+        "posting_status": "scheduled"
+      }
+    },
+    {
+      "id": "ship_now_overrides_schedule",
+      "description": "ship_now.py forces immediate dispatch even if scheduled_at is in the future",
+      "fixture": "fixtures/scheduled_for_tomorrow/",
+      "command": "ship_now.py path/to/draft.md --dry-run",
+      "expected_exit": 0,
+      "expected_log_contains": ["[DRY-RUN] would publish"]
+    },
+    {
+      "id": "confirm_published_moves_to_published_dir",
+      "description": "confirm_published.py marks posted and moves the file",
+      "fixture": "fixtures/notified_ig/",
+      "command": "confirm_published.py path/to/draft.md --url https://instagram.com/p/ABC123",
+      "expected_exit": 0,
+      "expected_file_at": "brand/queue/published/draft.md",
+      "expected_frontmatter_after": {
+        "posting_status": "posted",
+        "platform_url": "https://instagram.com/p/ABC123",
+        "published_via": "manual"
+      }
+    },
+    {
+      "id": "x_thread_split_long_text",
+      "description": "X publisher splits text > 280 chars into a thread with chained replies",
+      "fixture": "fixtures/long_x_text/",
+      "command": "ship_now.py path/to/draft.md --dry-run",
+      "expected_exit": 0,
+      "notes": "Verify by inspecting publish_thread is invoked, not publish_single"
+    }
+  ],
+  "fixtures_dir": "fixtures/",
+  "notes": "Fixtures directory contains a brand/queue/pending-approval/ subtree per test case. Run with: python3 -m evals.run_evals (future runner)."
+}

@@ -1,0 +1,74 @@
+{
+  "skill_name": "post-writer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use post-writer to draft a LinkedIn post from the idea-bank entry about the Thrive Retreats LP audit (21% CTR, 1.2% conversion, fixed hero and added phone number).",
+      "expected_output": "LinkedIn text post, 1,200-1,800 chars. Hook in first 2 lines (<210 chars) using Category 3 (data/metric-before-context) or Category 4 (story/moment-in-time) from hook-library.md. Body applies Dickie Bush 3x3 structure or Hormozi Value Equation. Ends with a calibrated question. No em dashes, no hype words. Saved to Desktop/Digischola/brand/queue/pending-approval/.",
+      "assertions": [
+        {"name": "format_match", "description": "File saved in queue/pending-approval/ with YAML frontmatter specifying channel=linkedin, format=text-post, entry_id"},
+        {"name": "validator_pass", "description": "validate_post.py returns exit 0 or 1 (never 2)"},
+        {"name": "hook_under_fold", "description": "First 2 lines under 210 chars"},
+        {"name": "three_candidate_hooks", "description": "Output contains 3 alternative hooks labeled Option A/B/C for user pick"},
+        {"name": "specific_numbers_preserved", "description": "188%, 21%, 1.2%, $10/day preserved where relevant"},
+        {"name": "credential_decision_logged", "description": "Skill output explicitly notes whether Ex-Google/$1B was anchored this time and why"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use post-writer to turn the same Thrive LP audit entry into an X thread (5-7 tweets) AND an Instagram carousel caption.",
+      "expected_output": "Two separate drafts saved. X thread: tweet 1 = data hook, tweets 2-5 = one insight each, tweet 6-7 = close with soft CTA. IG carousel caption: 150-300 chars, hook-first, matches Register 2 (Operator). Both drafts reference the same entry_id but have separate filenames.",
+      "assertions": [
+        {"name": "multi_channel", "description": "Skill produces >1 draft from 1 entry in a single run"},
+        {"name": "thread_tweet_lengths", "description": "Each tweet in thread under 280 chars"},
+        {"name": "thread_first_tweet_hook", "description": "Thread tweet 1 reads as a standalone hook that invites the thread"},
+        {"name": "ig_caption_length", "description": "IG caption between 60-400 chars"},
+        {"name": "voice_register_match", "description": "X thread uses Register 1 or 2; IG caption uses Register 2 (Operator)"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Draft a LinkedIn post with the Ex-Google credential anchored as a Lesson Anchor. Content: 'Managing big-agency budgets at Google taught me that cash covers bad conversion rates. Now with SMBs spending $300/month, the LP has to be perfect.'",
+      "expected_output": "LinkedIn post with one credential anchored via Lesson Anchor framework (per credential-anchoring.md). The post explicitly names 'Ex-Google' OR '$1B managed' exactly once, paired with a concrete small-scale lesson. Pattern matches the Lesson Anchor template in credential-anchoring.md. Credential log updated.",
+      "assertions": [
+        {"name": "one_credential_only", "description": "Only one credential mentioned in post body (not a stack)"},
+        {"name": "lesson_anchor_pattern", "description": "Post structure follows: credential context → specific lesson → current application"},
+        {"name": "no_arrogance", "description": "Opener does not lead with the credential dismissively (e.g., no 'As an Ex-Google marketer, I can tell you...')"},
+        {"name": "credential_log_updated", "description": "credential-usage-log.json gains an entry for today's use"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Draft a WhatsApp Status update from the build-log idea-bank entry 'Plugin migration complete. Skills now at Claude Skills/skills/.'",
+      "expected_output": "WA Status draft: 1 screenshot placeholder + caption under 50 words. Register 3 (BTS / Behind-the-scenes) tone. Casual, 'Today...' framing. No hype, no credential, no CTA.",
+      "assertions": [
+        {"name": "length_correct", "description": "Caption between 30-150 chars"},
+        {"name": "register_3_tone", "description": "Casual BTS tone, no formal strategy vocabulary"},
+        {"name": "no_credential", "description": "No Ex-Google or $1B reference"},
+        {"name": "screenshot_placeholder_present", "description": "Draft includes [screenshot: ...] placeholder indicating what visual to attach"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Validator test: draft a LinkedIn post that includes an em dash, a hype word, and 'Comment YES if you agree'.",
+      "expected_output": "validate_post.py exits 2 with 3 CRITICAL errors listed. Skill does NOT save the draft to queue/pending-approval/. Skill responds with the specific lines that failed + one regenerated clean version.",
+      "assertions": [
+        {"name": "validator_blocks", "description": "validate_post.py returns exit code 2"},
+        {"name": "all_three_violations_caught", "description": "Output lists em dash + hype word + engagement bait as 3 separate critical errors"},
+        {"name": "draft_not_saved", "description": "No file written to queue/pending-approval/"},
+        {"name": "regeneration_attempt", "description": "Skill produces one auto-corrected version for user review"}
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Draft 3 candidate hooks for an insight-type idea-bank entry: 'Most wellness retreat LPs use autoplay hero videos. None convert as well as a static image with a phone number.'",
+      "expected_output": "3 hook candidates labeled A/B/C, each from a DIFFERENT category in hook-library.md (e.g., A=Counterintuitive, B=Data, C=Question). Each hook under 210 chars. Each hook preserves the specific detail (autoplay hero videos, static image, phone number). Skill does NOT commit to one hook, waits for user pick.",
+      "assertions": [
+        {"name": "three_distinct_hooks", "description": "Exactly 3 candidates, 3 different hook categories"},
+        {"name": "user_picks", "description": "Skill response asks user to pick A/B/C before generating full post"},
+        {"name": "all_under_fold", "description": "Each candidate under 210 chars"},
+        {"name": "specificity_preserved", "description": "Each candidate retains concrete details from raw_note"}
+      ]
+    }
+  ]
+}

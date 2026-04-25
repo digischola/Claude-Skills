@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fixture: Plain static HTML</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 680px; margin: 40px auto; padding: 20px; }
+  h1 { font-size: 32px; color: #071442; }
+  .cta { display: inline-block; background: #f1c66e; color: #071442; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; }
+  form { margin-top: 24px; }
+  input, textarea { width: 100%; padding: 10px; margin: 8px 0; font-size: 16px; }
+  button { background: #f1c66e; color: #071442; padding: 12px 24px; border: 0; border-radius: 6px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Book a Free Consultation</h1>
+<p>Real data, real experts, real results. Speak with our team about your business.</p>
+<a class="cta" href="#contact">Get Started</a>
+
+<section id="features">
+  <h2>Why Choose Us</h2>
+  <ul>
+    <li>20 years of industry experience</li>
+    <li>ISO 9001 certified</li>
+    <li>4.9/5 average client rating</li>
+  </ul>
+</section>
+
+<section id="testimonials">
+  <h2>What Clients Say</h2>
+  <blockquote>"They delivered exactly what they promised." — Alex R.</blockquote>
+  <blockquote>"Professional, responsive, reliable." — Priya S.</blockquote>
+</section>
+
+<form id="contact" action="/submit" method="post">
+  <h2>Contact Us</h2>
+  <input name="name" type="text" placeholder="Your name" required>
+  <input name="email" type="email" placeholder="Your email" required>
+  <textarea name="message" placeholder="How can we help?" rows="4"></textarea>
+  <button type="submit">Send Message</button>
+</form>
+
+<footer>
+  <p>&copy; 2026 Example Co. · <a href="/privacy">Privacy</a></p>
+</footer>
+</body>
+</html>

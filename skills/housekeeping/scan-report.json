@@ -1,0 +1,188 @@
+{
+  "generated_at": "2026-04-24T16:20:29.963401+05:30",
+  "roots_scanned": [
+    "/Users/digischola/Desktop",
+    "/Users/digischola/.claude/projects"
+  ],
+  "totals": {
+    "AUTO-BLOAT": {
+      "count": 11,
+      "bytes": 102444
+    },
+    "LIKELY-BLOAT": {
+      "count": 4,
+      "bytes": 139451019
+    },
+    "AMBIGUOUS": {
+      "count": 0,
+      "bytes": 0
+    }
+  },
+  "findings": [
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 16388,
+      "size_human": "16.0KB",
+      "mtime_iso": "2026-04-24T16:10:52.023602+05:30",
+      "age_days": 0.0
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Digischola/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 10244,
+      "size_human": "10.0KB",
+      "mtime_iso": "2026-04-23T04:00:35.441143+05:30",
+      "age_days": 1.5
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Digischola/tools/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 6148,
+      "size_human": "6.0KB",
+      "mtime_iso": "2026-04-23T01:53:00.176112+05:30",
+      "age_days": 1.6
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Digischola/tools/lp-audit-v1/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 6148,
+      "size_human": "6.0KB",
+      "mtime_iso": "2026-04-23T23:18:40.649457+05:30",
+      "age_days": 0.7
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Digischola/brand/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 14340,
+      "size_human": "14.0KB",
+      "mtime_iso": "2026-04-23T23:15:14.328904+05:30",
+      "age_days": 0.7
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Digischola/brand/queue/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 10244,
+      "size_human": "10.0KB",
+      "mtime_iso": "2026-04-23T04:24:46.249492+05:30",
+      "age_days": 1.5
+    },
+    {
+      "tier": "LIKELY-BLOAT",
+      "rule_id": "cleared-archive",
+      "reason": "explicitly-cleared archive (2d old, name signals intent)",
+      "path": "/Users/digischola/Desktop/Digischola/brand/queue/archive/2026-04-22-cleared",
+      "is_dir": true,
+      "size_bytes": 139178304,
+      "size_human": "132.7MB",
+      "mtime_iso": "2026-04-23T01:53:23.786065+05:30",
+      "age_days": 1.6
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Digischola/brand/queue/archive/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 6148,
+      "size_human": "6.0KB",
+      "mtime_iso": "2026-04-23T01:53:16.727485+05:30",
+      "age_days": 1.6
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Digischola/brand/remotion-studio/src/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 6148,
+      "size_human": "6.0KB",
+      "mtime_iso": "2026-04-24T14:45:32.879325+05:30",
+      "age_days": 0.1
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Sri Krishna Mandir/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 6148,
+      "size_human": "6.0KB",
+      "mtime_iso": "2026-04-24T00:10:53.371601+05:30",
+      "age_days": 0.7
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Sri Krishna Mandir/Nrsimha Caturdasi 2026/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 10244,
+      "size_human": "10.0KB",
+      "mtime_iso": "2026-04-23T12:06:49.815706+05:30",
+      "age_days": 1.2
+    },
+    {
+      "tier": "AUTO-BLOAT",
+      "rule_id": "ds-store",
+      "reason": ".DS_Store",
+      "path": "/Users/digischola/Desktop/Sri Krishna Mandir/_shared/.DS_Store",
+      "is_dir": false,
+      "size_bytes": 10244,
+      "size_human": "10.0KB",
+      "mtime_iso": "2026-04-23T12:10:28.338574+05:30",
+      "age_days": 1.2
+    },
+    {
+      "tier": "LIKELY-BLOAT",
+      "rule_id": "tool-results-stale",
+      "reason": "tool-result overflow 8d old",
+      "path": "/Users/digischola/.claude/projects/-Users-digischola-Desktop/d3ef9c16-da07-4338-b6da-e41ff013c275/tool-results/mcp-7b028e43-64c0-4263-b64f-4db3b49c7420-get_options-1776340357692.txt",
+      "is_dir": false,
+      "size_bytes": 95059,
+      "size_human": "92.8KB",
+      "mtime_iso": "2026-04-16T17:22:37.697258+05:30",
+      "age_days": 8.0
+    },
+    {
+      "tier": "LIKELY-BLOAT",
+      "rule_id": "tool-results-stale",
+      "reason": "tool-result overflow 9d old",
+      "path": "/Users/digischola/.claude/projects/-Users-digischola-Desktop/ab544497-0bf7-4bca-8eb6-6a9044c443a0/tool-results/biphct7zu.txt",
+      "is_dir": false,
+      "size_bytes": 82597,
+      "size_human": "80.7KB",
+      "mtime_iso": "2026-04-16T03:39:44.655764+05:30",
+      "age_days": 8.5
+    },
+    {
+      "tier": "LIKELY-BLOAT",
+      "rule_id": "tool-results-stale",
+      "reason": "tool-result overflow 9d old",
+      "path": "/Users/digischola/.claude/projects/-Users-digischola-Desktop/ab544497-0bf7-4bca-8eb6-6a9044c443a0/tool-results/mcp-7b028e43-64c0-4263-b64f-4db3b49c7420-get_options-1776290963567.txt",
+      "is_dir": false,
+      "size_bytes": 95059,
+      "size_human": "92.8KB",
+      "mtime_iso": "2026-04-16T03:39:23.568838+05:30",
+      "age_days": 8.5
+    }
+  ]
+}

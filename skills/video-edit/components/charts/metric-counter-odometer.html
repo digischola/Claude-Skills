@@ -1,0 +1,136 @@
+<!--
+  Component: charts/metric-counter-odometer
+  Big hero metric counting up from 0 (or a low value) to the target.
+  Use for: "+130%", "$41k MRR", "1,200 signups", "47 clients" — the hero moment.
+
+  Inputs (replace at injection time):
+    {{ID}}                - unique DOM id suffix (e.g. "m1")
+    {{START}}             - data-start seconds (float)
+    {{DURATION}}          - data-duration seconds (recommend 2.0-3.0)
+    {{TRACK}}             - data-track-index (recommend 10 for above-captions overlay)
+    {{PREFIX}}            - prefix symbol/char (e.g. "+", "$", "") — shown before number
+    {{TARGET_VALUE}}      - final number as integer (e.g. 130, 41000, 1200)
+    {{SUFFIX}}            - suffix (e.g. "%", "k", "x", "")
+    {{LABEL}}             - one-line label below number, UPPERCASE (e.g. "CONVERSION LIFT")
+    {{COLOR_PRIMARY}}     - hero number color (e.g. #4ADE80 success green, or brand primary)
+    {{COLOR_LABEL}}       - label text color (default #F8FAFC foreground)
+    {{FONT_DISPLAY}}      - display font family (e.g. "Orbitron", "Space Grotesk")
+    {{FONT_LABEL}}        - label font (e.g. "Space Grotesk")
+    {{FORMAT_COMMAS}}     - "true" or "false" — thousands separator during count-up (recommended true for large numbers)
+
+  Behavior:
+  - Number counts up from 0 to target over first 0.8s of duration with power3.out ease
+  - Label fades in at 0.3s offset
+  - On the hero beat (50% of duration), a subtle scale-bump accent
+  - Component exits cleanly at data-duration (hidden by framework clip visibility)
+-->
+
+<div
+  id="metric-{{ID}}"
+  class="clip metric-counter"
+  data-start="{{START}}"
+  data-duration="{{DURATION}}"
+  data-track-index="{{TRACK}}"
+  style="
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    z-index: 20;
+    will-change: opacity, transform;
+  "
+>
+  <div
+    class="metric-num-{{ID}}"
+    style="
+      font-family: {{FONT_DISPLAY}}, sans-serif;
+      font-weight: 700;
+      font-size: 360px;
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+      color: {{COLOR_PRIMARY}};
+      filter: drop-shadow(0 0 28px rgba(0,0,0,0.45));
+      display: inline-block;
+    "
+  >
+    <span class="metric-prefix-{{ID}}">{{PREFIX}}</span><span class="metric-value-{{ID}}" data-target="{{TARGET_VALUE}}" data-commas="{{FORMAT_COMMAS}}">0</span><span class="metric-suffix-{{ID}}">{{SUFFIX}}</span>
+  </div>
+  <div
+    class="metric-label-{{ID}}"
+    style="
+      margin-top: 36px;
+      font-family: {{FONT_LABEL}}, sans-serif;
+      font-weight: 600;
+      font-size: 48px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: {{COLOR_LABEL}};
+      text-shadow: 0 2px 18px rgba(0,0,0,0.85);
+    "
+  >
+    {{LABEL}}
+  </div>
+</div>
+
+<script>
+(function() {
+  var tl = (window.__timelines && window.__timelines["main"]) || null;
+  if (!tl) return;
+
+  var START = {{START}};
+  var DURATION = {{DURATION}};
+  var TARGET = {{TARGET_VALUE}};
+  var COMMAS = "{{FORMAT_COMMAS}}" === "true";
+
+  /* Entrance: scale-pop with the ONE sanctioned back.out for hero moments */
+  tl.from(
+    "#metric-{{ID}} .metric-num-{{ID}}",
+    { scale: 0.5, opacity: 0, duration: 0.55, ease: "back.out(1.6)" },
+    START + 0.05
+  );
+  tl.from(
+    "#metric-{{ID}} .metric-label-{{ID}}",
+    { y: 28, opacity: 0, duration: 0.45, ease: "power2.out" },
+    START + 0.30
+  );
+
+  /* Count-up using GSAP's tween on a proxy object */
+  var proxy = { val: 0 };
+  tl.to(
+    proxy,
+    {
+      val: TARGET,
+      duration: 0.85,
+      ease: "power3.out",
+      onUpdate: function() {
+        var v = Math.round(proxy.val);
+        var formatted = COMMAS ? v.toLocaleString("en-US") : String(v);
+        var el = document.querySelector("#metric-{{ID}} .metric-value-{{ID}}");
+        if (el) el.textContent = formatted;
+      }
+    },
+    START + 0.10
+  );
+
+  /* Subtle scale bump at 60% of duration — keeps the beat alive */
+  tl.to(
+    "#metric-{{ID}} .metric-num-{{ID}}",
+    { scale: 1.04, duration: 0.25, ease: "power2.out" },
+    START + DURATION * 0.55
+  );
+  tl.to(
+    "#metric-{{ID}} .metric-num-{{ID}}",
+    { scale: 1.0, duration: 0.35, ease: "power2.inOut" },
+    START + DURATION * 0.55 + 0.25
+  );
+
+  /* Exit: fade before clip ends */
+  tl.to(
+    "#metric-{{ID}}",
+    { opacity: 0, duration: 0.35, ease: "power2.in", overwrite: "auto" },
+    START + DURATION - 0.38
+  );
+})();
+</script>

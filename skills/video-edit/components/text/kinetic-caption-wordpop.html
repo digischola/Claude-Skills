@@ -1,0 +1,165 @@
+<!--
+  Component: text/kinetic-caption-wordpop
+  Word-by-word pop captions synced to transcript timestamps. Pro short-form caption style.
+  Each word enters with a scale-pop at its exact word.start time. Active word gets accent color;
+  prior words stay foreground white until the caption group exits.
+
+  This is the caption style every top creator uses (Hormozi, Dickie Bush, MrBeast editors, etc).
+
+  Inputs:
+    {{ID}}             - unique suffix (e.g. "p1" for phrase 1)
+    {{TRACK}}          - data-track-index (recommend 5)
+    {{COLOR_DEFAULT}}  - inactive word color (e.g. #F8FAFC)
+    {{COLOR_ACTIVE}}   - current word accent color (e.g. #3B9EFF)
+    {{COLOR_METRIC}}   - numeric/metric word color (e.g. #4ADE80)
+    {{FONT_BODY}}      - body word font (e.g. "Manrope")
+    {{FONT_EMPHASIS}}  - emphasis word font (e.g. "Space Grotesk")
+    {{FONT_METRIC}}    - metric/number font (e.g. "Orbitron")
+    {{FONT_SIZE}}      - body font-size in px (e.g. 62)
+    {{BOTTOM_Y}}       - px from bottom for caption vertical position (e.g. 420 for Reel)
+    {{WORDS_JSON}}     - JSON array of word objects, see schema below
+
+  WORDS_JSON schema (each word):
+    {
+      "text": "audited",             // word text (keep punctuation attached)
+      "start": 1.32,                  // composition-time start seconds (transcript_time + video_offset)
+      "end": 1.72,                    // composition-time end
+      "class": "word"                 // "word" | "accent" | "metric" — styling tier
+    }
+
+  The phrase clip auto-computes its own data-start/data-duration from the first word's start
+  and last word's end + a trailing pad.
+
+  Behavior:
+    - Phrase container fades in 0.1s before first word
+    - Each word starts at opacity 0, scale 0.85, positioned at its final spot (flex layout)
+    - At word.start: scale 0.85 → 1.0 in 0.12s (back.out), opacity 0 → 1 in 0.15s
+    - Active word additionally scales 1.0 → 1.08 and color → COLOR_ACTIVE for the duration word.start → word.end
+    - After word.end: returns to scale 1.0, color → COLOR_DEFAULT (or COLOR_METRIC if class=metric)
+    - Phrase container fades out 0.25s after last word end
+-->
+
+<div
+  id="wordpop-{{ID}}"
+  class="clip wordpop"
+  data-start="{{CLIP_START}}"
+  data-duration="{{CLIP_DURATION}}"
+  data-track-index="{{TRACK}}"
+  style="
+    position: absolute; left: 0; right: 0;
+    bottom: {{BOTTOM_Y}}px;
+    padding: 0 64px;
+    text-align: center;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 22px;
+    z-index: 12;
+    will-change: opacity;
+    overflow: visible;
+  "
+>
+  <!-- WORDS_SPANS placeholder — the injector generates one <span> per word like:
+       <span id="wp-{{ID}}-w-0" class="wp-word wp-cls-word" style="...">I</span>
+       <span id="wp-{{ID}}-w-1" class="wp-word wp-cls-accent" style="...">audited</span>
+       <span id="wp-{{ID}}-w-2" class="wp-word wp-cls-metric" style="...">40</span>
+  -->
+  {{WORDS_SPANS}}
+</div>
+
+<style>
+  #wordpop-{{ID}} .wp-word {
+    font-family: {{FONT_BODY}}, sans-serif;
+    font-weight: 500;
+    font-size: {{FONT_SIZE}}px;
+    line-height: 1.12;
+    color: {{COLOR_DEFAULT}};
+    text-shadow: 0 3px 22px rgba(0,0,0,0.85);
+    display: inline-block;
+    transform-origin: center center;
+    will-change: transform, opacity, color;
+  }
+  #wordpop-{{ID}} .wp-cls-accent {
+    font-family: {{FONT_EMPHASIS}}, sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  #wordpop-{{ID}} .wp-cls-metric {
+    font-family: {{FONT_METRIC}}, sans-serif;
+    font-weight: 700;
+    color: {{COLOR_METRIC}};
+  }
+</style>
+
+<script>
+(function() {
+  var tl = (window.__timelines && window.__timelines["main"]) || null;
+  if (!tl) return;
+
+  /* WORDS array — injected at render time from transcript slice */
+  var WORDS = {{WORDS_JSON}};
+  var CLIP_START = {{CLIP_START}};
+  var CLIP_DURATION = {{CLIP_DURATION}};
+  var COLOR_DEFAULT = "{{COLOR_DEFAULT}}";
+  var COLOR_ACTIVE = "{{COLOR_ACTIVE}}";
+  var COLOR_METRIC = "{{COLOR_METRIC}}";
+
+  /* Phrase container fades in 0.05s before clip-start (framework handles clip visibility boundary) */
+  tl.from(
+    "#wordpop-{{ID}}",
+    { opacity: 0, duration: 0.18, ease: "power2.out" },
+    CLIP_START + 0.02
+  );
+
+  /* Per-word entrance: each word pops at its exact word.start timestamp */
+  WORDS.forEach(function(w, i) {
+    var sel = "#wp-{{ID}}-w-" + i;
+    var enterAt = Math.max(w.start, CLIP_START + 0.05);
+
+    /* Entry: fade + scale-pop */
+    tl.fromTo(
+      sel,
+      { opacity: 0, scale: 0.80 },
+      { opacity: 1, scale: 1.0, duration: 0.22, ease: "back.out(1.6)" },
+      enterAt
+    );
+
+    /* Active emphasis while speaker is saying this word: brief additional scale + color tint */
+    var activeDur = Math.max(0.08, (w.end - w.start));
+    tl.to(
+      sel,
+      { scale: 1.08, color: COLOR_ACTIVE, duration: 0.12, ease: "power2.out", overwrite: "auto" },
+      w.start
+    );
+    /* Return to resting state after word ends */
+    var restingColor = (w.cls === "metric") ? COLOR_METRIC : COLOR_DEFAULT;
+    tl.to(
+      sel,
+      { scale: 1.0, color: restingColor, duration: 0.18, ease: "power2.inOut", overwrite: "auto" },
+      w.end
+    );
+  });
+
+  /* Phrase container fades out at clip end (0.25s before clip-end for smoother handoff) */
+  tl.to(
+    "#wordpop-{{ID}}",
+    { opacity: 0, duration: 0.22, ease: "power2.in", overwrite: "auto" },
+    CLIP_START + CLIP_DURATION - 0.24
+  );
+})();
+</script>
+
+<!--
+  Render-time helper (pseudo-code for the assembler):
+
+    function renderWordPopSpans(words, id) {
+      return words.map((w, i) => {
+        const cls = w.class || "word";   // "word" | "accent" | "metric"
+        return `<span id="wp-${id}-w-${i}" class="wp-word wp-cls-${cls}" style="opacity:0; transform: scale(0.80);">${w.text}</span>`;
+      }).join("");
+    }
+
+    function computeClipTiming(words, pad = 0.15) {
+      const start = Math.max(0, words[0].start - 0.1);
+      const end   = words[words.length - 1].end + pad;
+      return { CLIP_START: start, CLIP_DURATION: end - start };
+    }
+-->

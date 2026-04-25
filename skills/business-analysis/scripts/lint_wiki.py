@@ -60,61 +60,79 @@ def lint_metadata_header(page_name, content):
 
 
 def lint_source_labels(page_name, content):
-    """Check that data points have [EXTRACTED] or [INFERRED] labels."""
+    """Check that data points have [EXTRACTED] or [INFERRED] labels.
+
+    Paragraph-aware: a paragraph "has a label" if any line in it contains
+    [EXTRACTED], [INFERRED], or [INTAKE]. Substantive prose lines inside a
+    labeled paragraph all count as labeled. This avoids penalising writing
+    that puts the source tag on one line and the data details on the next.
+    Table rows and bullets are counted. Change-history tail is excluded.
+    """
     issues = []
     if is_template(content):
         return issues
 
-    lines = content.split('\n')
-    labeled_lines = 0
-    data_lines = 0
+    # Strip Change History tail — meta, not data
+    if '## Change History' in content:
+        body = content.split('## Change History', 1)[0]
+    else:
+        body = content
 
-    for line in lines:
-        stripped = line.strip()
-        # Skip headers, empty lines, metadata, change history entries
-        if not stripped or stripped.startswith('#') or stripped.startswith('>'):
+    paragraphs = re.split(r'\n\s*\n', body)
+    labeled = 0
+    data = 0
+    for para in paragraphs:
+        plain = para.strip()
+        if not plain or plain.startswith('>'):
             continue
-        if stripped.startswith('- 20') and ':' in stripped:  # Change history entry
+        has_label = bool(re.search(r'\[EXTRACTED\]|\[INFERRED\]|\[INTAKE\]', para))
+        subst_lines = 0
+        for ln in plain.split('\n'):
+            s = ln.strip()
+            if not s or s.startswith('#') or s.startswith('|---') or s.startswith('<!--'):
+                continue
+            if len(s) < 20:
+                continue
+            subst_lines += 1
+        if subst_lines == 0:
             continue
-        if stripped.startswith('<!--') or stripped.startswith('-->'):
-            continue
+        data += subst_lines
+        if has_label:
+            labeled += subst_lines
 
-        # Data lines: bullet points and bold-prefixed lines with actual content
-        if stripped.startswith('- ') and len(stripped) > 10:
-            data_lines += 1
-            if '[EXTRACTED]' in stripped or '[INFERRED]' in stripped:
-                labeled_lines += 1
-        elif stripped.startswith('**') and len(stripped) > 15:
-            data_lines += 1
-            if '[EXTRACTED]' in stripped or '[INFERRED]' in stripped:
-                labeled_lines += 1
-
-    if data_lines > 0:
-        ratio = labeled_lines / data_lines
+    if data > 0:
+        ratio = labeled / data
         if ratio < 0.3:
             issues.append(("ERROR", page_name,
-                           f"Only {labeled_lines}/{data_lines} data points have source labels ({ratio:.0%})"))
+                           f"Only {labeled}/{data} substantive lines in labeled paragraphs ({ratio:.0%})"))
         elif ratio < 0.6:
             issues.append(("WARN", page_name,
-                           f"{labeled_lines}/{data_lines} data points labeled ({ratio:.0%}) — aim for >60%"))
+                           f"{labeled}/{data} substantive lines in labeled paragraphs ({ratio:.0%}) — aim for >60%"))
 
     return issues
 
 
 def lint_blank_fields(page_name, content):
-    """Check BLANK fields have explanations."""
+    """Check BLANK fields have explanations.
+
+    Accepts:
+      - "BLANK — reason" (em-dash/dash)
+      - "BLANK: reason"
+      - "BLANK (reason)"
+      - "BLANK | explanation in next cell" (inside markdown table)
+    """
     issues = []
     if is_template(content):
         return issues
 
-    # BLANK should be followed by — or - or : or ( with explanation
-    blanks_total = len(re.findall(r'BLANK', content))
-    blanks_explained = len(re.findall(r'BLANK\s*[—\-–:(]\s*\S', content))
+    blanks_total = len(re.findall(r'\bBLANK\b', content))
+    # Accept em-dash, dash, colon, paren, OR pipe (table-cell explanation in next cell)
+    blanks_explained = len(re.findall(r'\bBLANK\s*[—\-–:(\|]\s*\S', content))
     blanks_unexplained = blanks_total - blanks_explained
 
     if blanks_unexplained > 0:
         issues.append(("ERROR", page_name,
-                       f"{blanks_unexplained} BLANK field(s) without explanation (must have reason after — or :)"))
+                       f"{blanks_unexplained} BLANK field(s) without explanation (must have reason after —, :, (, or | for table cells)"))
 
     return issues
 
@@ -223,7 +241,14 @@ def lint_wiki_config(client_dir):
         issues.append(("ERROR", "wiki-config.json", "Invalid JSON"))
         return issues
 
-    registered_pages = set(config.get("pages", {}).keys())
+    # Accept both dict (legacy {slug: title}) and list (multi-program mode) formats
+    pages_field = config.get("pages", {})
+    if isinstance(pages_field, dict):
+        registered_pages = set(pages_field.keys())
+    elif isinstance(pages_field, list):
+        registered_pages = set(pages_field)
+    else:
+        registered_pages = set()
     actual_pages = {f.stem for f in wiki_dir.glob("*.md") if f.name not in ("index.md", "log.md")}
 
     # Pages on disk but not registered
@@ -279,10 +304,33 @@ def main():
 
     show_fix = "--fix" in sys.argv
 
+    # Detect multi-program wiki type — program folders only hold per-program
+    # research (strategy.md etc.), not the 4 shared brand-DNA pages.
+    config_path = client_dir / "wiki-config.json"
+    wiki_type = "standard"
+    program_pages = []
+    if config_path.exists():
+        try:
+            cfg = json.loads(config_path.read_text())
+            wiki_type = cfg.get("type", "standard")
+            pages_field = cfg.get("pages", [])
+            if isinstance(pages_field, list):
+                program_pages = pages_field
+            elif isinstance(pages_field, dict):
+                program_pages = list(pages_field.keys())
+        except json.JSONDecodeError:
+            pass
+
+    if wiki_type == "program":
+        # Program wiki: only check the pages registered in wiki-config.json
+        active_labeled = [f"{p}.md" for p in program_pages]
+    else:
+        active_labeled = LABELED_PAGES
+
     all_issues = []
 
     # Lint each content page
-    for page_name in LABELED_PAGES:
+    for page_name in active_labeled:
         path = wiki_dir / page_name
         if not path.exists():
             all_issues.append(("ERROR", page_name, "File does not exist"))

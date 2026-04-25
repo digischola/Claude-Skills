@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+This is the TEMPLATE for the LaunchAgent. install_launchagent.py renders the
+final version with absolute paths and writes it to ~/Library/LaunchAgents/.
+
+DO NOT edit this template directly and copy to LaunchAgents/. Use the installer.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.digischola.scheduler</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>{ABSOLUTE_PATH_TO_PYTHON3}</string>
+        <string>{ABSOLUTE_PATH_TO_TICK_PY}</string>
+        <string>--brand-folder</string>
+        <string>/Users/digischola/Desktop/Digischola</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <false/>
+
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/digischola/Desktop/Digischola/scheduler.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/digischola/Desktop/Digischola/scheduler.stderr.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/digischola</string>
+    </dict>
+</dict>
+</plist>

@@ -1,0 +1,44 @@
+{
+  "skill_name": "work-capture",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Capture this: Today I audited a Thrive Retreats campaign. 21% CTR, 1.2% conversion rate. The ad is fine. The LP hero has a 15-word headline and no phone number. Going to test a rewrite.",
+      "expected_output": "Single entry created with type=experiment (it's a test-in-progress), suggested_pillar=Landing-Page Conversion Craft, channel_fit=[LinkedIn, X, IG-carousel], tags=[Thrive, LP-audit, CTR, conversion], status=raw.",
+      "assertions": [
+        {"name": "correct_type", "description": "type is 'experiment' (not client-win, since test hasn't run yet)"},
+        {"name": "specific_numbers_preserved", "description": "raw_note keeps 21%, 1.2%, 15-word details intact"},
+        {"name": "pillar_match", "description": "suggested_pillar is Landing-Page Conversion Craft or equivalent approved pillar ID"},
+        {"name": "appended_to_bank", "description": "idea-bank.json entries array grew by 1"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "User pastes a full WhatsApp conversation between themselves and Athil covering 4 topics: workshop sales data, LP diagnosis, $10/day test proposal, and an offer to send an annotated example.",
+      "expected_output": "Skill splits into multiple entries. At minimum: (a) a client-comm entry on the test-proposal framing (high-value content), (b) a client-win or insight entry on the diagnosis framework. Discards the procedural messages (file paths, scheduling).",
+      "assertions": [
+        {"name": "multiple_entries", "description": "At least 2 entries created from one paste"},
+        {"name": "client_comm_captured", "description": "The test-proposal-framing moment is captured as type=client-comm"},
+        {"name": "no_pii_leaked", "description": "Client phone numbers, personal details are stripped or anonymized in raw_note"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Capture: just some thoughts on AI and marketing in general.",
+      "expected_output": "Skill rejects or asks for specifics. Generic observations without concrete hooks do NOT pass anti-patterns check. Skill responds: 'This is too generic. Can you share a specific moment: a number, a client, a tool, a specific test result?'",
+      "assertions": [
+        {"name": "rejects_generic", "description": "No entry appended to idea-bank.json"},
+        {"name": "requests_specifics", "description": "Skill response asks for concrete hook before capturing"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Capture this before pillars are approved.",
+      "expected_output": "Skill aborts with: 'Pillars not approved yet. Run personal-brand-dna and approve 3-5 pillars first.' No entry added to idea-bank.json.",
+      "assertions": [
+        {"name": "pillar_gate_enforced", "description": "Skill reads brand-wiki.md or wiki-config.json approval_gates; aborts if pillars status is DRAFT"},
+        {"name": "no_entry_appended", "description": "idea-bank.json unchanged"}
+      ]
+    }
+  ]
+}

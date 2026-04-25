@@ -1,0 +1,80 @@
+<!--
+  Component: motion/zoom-punch
+  Quick zoom-in + subtle shake on the source video at an emphasis moment. Pro editor's camera punch-in.
+  Use on face close-ups at claim words, hook moments, or emotional peaks.
+
+  IMPORTANT: this component does NOT render new visual content — it operates on an EXISTING element
+  (typically the video-stage wrapper) by tweening its transform at the specified time.
+
+  Inputs:
+    {{TARGET_SELECTOR}}  - CSS selector of the element to zoom (e.g. "#video-stage" or ".broll-lp")
+    {{START}}            - when to trigger the punch (composition seconds)
+    {{INTENSITY}}        - "subtle" | "medium" | "hard" — controls zoom + shake amount
+    {{HOLD}}             - seconds to hold at peak zoom (recommend 0.2-0.5)
+    {{RECOVERY}}         - seconds to zoom back to normal (recommend 0.4-0.8)
+
+  Intensity presets:
+    subtle  — scale 1.0 → 1.04, no shake (confident premium)
+    medium  — scale 1.0 → 1.08, 2px shake (standard emphasis)
+    hard    — scale 1.0 → 1.14, 5px shake (high-energy, Gen-Z)
+
+  Does NOT emit HTML — it's a SCRIPT-ONLY component that modifies an existing element's timeline.
+-->
+
+<script>
+(function() {
+  var tl = (window.__timelines && window.__timelines["main"]) || null;
+  if (!tl) return;
+
+  var TARGET = "{{TARGET_SELECTOR}}";
+  var START = {{START}};
+  var INTENSITY = "{{INTENSITY}}";
+  var HOLD = {{HOLD}};
+  var RECOVERY = {{RECOVERY}};
+
+  /* Intensity presets */
+  var PRESETS = {
+    subtle: { scale: 1.04, shake: 0, inDur: 0.18, ease: "power2.out" },
+    medium: { scale: 1.08, shake: 2, inDur: 0.14, ease: "power3.out" },
+    hard:   { scale: 1.14, shake: 5, inDur: 0.10, ease: "expo.out" }
+  };
+  var P = PRESETS[INTENSITY] || PRESETS.medium;
+
+  /* Zoom in — the "punch" */
+  tl.to(
+    TARGET,
+    { scale: P.scale, duration: P.inDur, ease: P.ease, overwrite: "auto" },
+    START
+  );
+
+  /* Optional shake during hold — 2 small x/y jitters if shake > 0 */
+  if (P.shake > 0 && HOLD > 0.15) {
+    var halfHold = HOLD * 0.5;
+    tl.to(
+      TARGET,
+      { x: P.shake, y: -P.shake * 0.6, duration: halfHold * 0.5, ease: "power1.inOut" },
+      START + P.inDur
+    );
+    tl.to(
+      TARGET,
+      { x: -P.shake * 0.8, y: P.shake * 0.4, duration: halfHold * 0.5, ease: "power1.inOut" },
+      START + P.inDur + halfHold * 0.5
+    );
+    tl.to(
+      TARGET,
+      { x: 0, y: 0, duration: halfHold * 0.5, ease: "power1.out" },
+      START + P.inDur + halfHold
+    );
+  }
+
+  /* Hold at peak */
+  /* (no tween needed — GSAP holds last value between keyframes) */
+
+  /* Recover to scale 1.0 */
+  tl.to(
+    TARGET,
+    { scale: 1.0, x: 0, y: 0, duration: RECOVERY, ease: "power2.inOut", overwrite: "auto" },
+    START + P.inDur + HOLD
+  );
+})();
+</script>

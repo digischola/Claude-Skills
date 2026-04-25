@@ -1,0 +1,38 @@
+{
+  "skill_name": "personal-brand-dna",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to build my own personal brand on social media. I have a website digischola.in. Can you analyze it and build the brand wiki?",
+      "expected_output": "Skill activates. Creates Desktop/{Brand}/brand/ folder with 9 wiki files. Runs mine_transcripts.py. Falls back to Chrome MCP for SPA rendering when WebFetch returns thin content. Produces 5-7 pillar candidates in pillars.md with AWAITING APPROVAL status. Asks user to approve 3-5 pillars before any downstream skill can run.",
+      "assertions": [
+        {"name": "folder_structure", "description": "Desktop/{Brand}/brand/ exists with 9 files: brand-wiki.md, brand-identity.md, credentials.md, voice-guide.md, pillars.md, icp.md, channel-playbook.md, idea-bank.json, wiki-config.json"},
+        {"name": "chrome_fallback_triggered", "description": "When WebFetch returns <500 chars, skill escalates to Chrome MCP per fallback-chain.md"},
+        {"name": "pillars_awaiting_approval", "description": "pillars.md contains AWAITING APPROVAL banner, 5-7 candidates, and recommended final set"},
+        {"name": "universal_rules_captured", "description": "voice-guide.md Universal Rules section lists explicit user corrections with transcript sample numbers as sources"},
+        {"name": "credentials_locked", "description": "credentials.md marked LOCKED with source inventory from public website"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Rebuild my brand wiki with new pillars — I want to pivot from [1] MarketingOS to a focus on AI for solo freelancers specifically.",
+      "expected_output": "Skill detects existing wiki at Desktop/{Brand}/brand/, reads current pillars.md, treats this as a REFRESH not a fresh build. Regenerates pillar candidates weighted toward the new focus. Preserves brand-identity.md and credentials.md (LOCKED — still from public site). Updates pillars.md + channel-playbook.md (cadence may shift). Requires user re-approval before lock.",
+      "assertions": [
+        {"name": "refresh_detected", "description": "Skill identifies existing wiki and runs in refresh mode, not fresh build"},
+        {"name": "locked_files_preserved", "description": "brand-identity.md and credentials.md are NOT overwritten"},
+        {"name": "pillars_regenerated", "description": "New pillar candidates proposed with new focus reflected in thesis statements"},
+        {"name": "re_approval_gate", "description": "Skill surfaces the new candidates and pauses for user approval before locking"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have no website yet, but I want to start building my personal brand as an AI consultant. Can you extract what you can from our conversation history?",
+      "expected_output": "Skill runs with only 3 of 5 inputs (analyst profile + CLI transcripts + memory; no website, no brand guide). Marks brand-identity.md as LIMITED with BLANK explanations for missing visual design tokens. Still produces full voice-guide.md, pillars.md, icp.md from available data. Flags in wiki-config.json that brand-identity needs a brand-guide input when user has one.",
+      "assertions": [
+        {"name": "graceful_partial_inputs", "description": "Skill produces all 9 files; missing-input files have BLANK fields with reasons instead of being omitted"},
+        {"name": "brand_identity_flagged", "description": "brand-identity.md status shows LIMITED / needs-brand-guide-input rather than LOCKED"},
+        {"name": "pillars_still_derived", "description": "pillars.md still produces 5-7 candidates from CLI + analyst profile even without website evidence"}
+      ]
+    }
+  ]
+}

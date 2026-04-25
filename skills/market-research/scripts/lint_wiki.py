@@ -24,7 +24,35 @@ WIKI_PAGES = [
     "benchmarks.md", "digital-presence.md", "strategy.md"
 ]
 
+# Pages expected when lint runs on a multi-program `type: program` folder.
+# Shared brand DNA pages (business.md, digital-presence.md etc.) live in
+# `../_shared/`, not in the program folder itself.
+PROGRAM_WIKI_PAGES_DEFAULT = ["strategy.md"]
+
 STALENESS_THRESHOLD_DAYS = 90
+
+
+def detect_wiki_pages(client_path):
+    """Return the list of wiki pages this folder is expected to contain.
+
+    For standard (single-program) wikis: full WIKI_PAGES list.
+    For multi-program program folders (wiki-config.json `type: program`):
+    only the pages registered in wiki-config.json (or strategy.md default).
+    """
+    config_path = client_path / "wiki-config.json"
+    if config_path.exists():
+        try:
+            cfg = json.loads(config_path.read_text(encoding="utf-8"))
+            if cfg.get("type") == "program":
+                pages_field = cfg.get("pages", [])
+                if isinstance(pages_field, list) and pages_field:
+                    return [f"{p}.md" for p in pages_field]
+                if isinstance(pages_field, dict) and pages_field:
+                    return [f"{slug}.md" for slug in pages_field.keys()]
+                return PROGRAM_WIKI_PAGES_DEFAULT
+        except json.JSONDecodeError:
+            pass
+    return WIKI_PAGES
 
 
 def check_wiki_exists(client_path):
@@ -40,7 +68,8 @@ def check_wiki_exists(client_path):
     if not sources_path.exists():
         issues.append(("WARNING", "sources/ folder missing — no raw sources stored"))
 
-    for page in WIKI_PAGES:
+    expected_pages = detect_wiki_pages(client_path)
+    for page in expected_pages:
         if not (wiki_path / page).exists():
             issues.append(("WARNING", f"wiki/{page} missing"))
 
@@ -58,7 +87,7 @@ def check_empty_pages(client_path):
     wiki_path = client_path / "wiki"
     issues = []
 
-    for page in WIKI_PAGES:
+    for page in detect_wiki_pages(client_path):
         filepath = wiki_path / page
         if not filepath.exists():
             continue
@@ -77,7 +106,7 @@ def check_stale_pages(client_path):
     issues = []
     now = datetime.now()
 
-    for page in WIKI_PAGES:
+    for page in detect_wiki_pages(client_path):
         filepath = wiki_path / page
         if not filepath.exists():
             continue

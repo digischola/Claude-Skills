@@ -104,6 +104,64 @@
         }
       ],
       "files": []
+    },
+    {
+      "id": 7,
+      "type": "prompt-check",
+      "prompt": "Audit landing page for ISKM Singapore Nṛsiṁha Caturdaśī event. React SPA built on Lovable/GPT-Engineer. Page uses scroll-triggered fade-in reveal animations (IntersectionObserver + CSS opacity transitions) and CountUp-style stat counter animations. First screenshot pass captured sections mid-animation — text rendered at low opacity, stat counters captured at transient frames, card images inside faded sections appeared blank. Page is actually fully rendered and correct when animations finish.",
+      "expected_output": "Audit must inject animation-kill CSS before capturing screenshots (per references/screenshot-capture.md 'Kill Page Animations' pre-step). Must NOT report phantom 'broken images' or 'number contradiction' or 'missing content' CRITICAL findings when the page DOM actually contains correct rendered content. Content-missing claims must be verified against rendered DOM, not screenshot alone. Validator should WARN if CRITICAL findings include broken-image-class language without a DOM-verification acknowledgment.",
+      "assertions": [
+        {
+          "name": "animation_kill_css_injected",
+          "description": "Screenshot capture step injects animation-kill CSS (0ms animations/transitions, forced opacity:1) before mobile/desktop capture — not after"
+        },
+        {
+          "name": "no_phantom_content_missing_critical",
+          "description": "No CRITICAL finding claims images are broken / blank / stats contradict / content missing when the page DOM actually contains correct rendered content"
+        },
+        {
+          "name": "dom_verification_for_content_claims",
+          "description": "Any 'content missing' finding (images, text, diacritics, form fields, number values) is explicitly verified against rendered DOM before being labeled CRITICAL — screenshot-only content claims are blocked"
+        },
+        {
+          "name": "validator_warns_false_positive",
+          "description": "scripts/validate_output.py WARNING fires if CRITICAL section contains broken-image-class language without a DOM-verified acknowledgment in the dashboard"
+        },
+        {
+          "name": "real_structural_findings_preserved",
+          "description": "Real structural issues (distraction ratio, message-match gap, CTA contrast, missing trust signals) are still identified and ranked correctly — the fix removes false positives without suppressing true positives"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "type": "prompt-check",
+      "prompt": "Audit a landing page. URL: https://events.example.com/signup. Before capturing any screenshots, per SKILL.md Step 0, run the pre-flight sequence: health_check.py → detect_target_profile.py → load the matching recipe playbook.",
+      "expected_output": "Step 0 must execute before any Chrome MCP screenshot or DOM probe. health_check.py exit code must be 0. Target profile must be detected. The corresponding recipe in references/capture-recipes/ must be read before Step 1 capture begins. If profile has no recipe, skill must stop and surface the gap per Skill Protocol Supremacy, not invent an ad-hoc capture approach.",
+      "assertions": [
+        {
+          "name": "health_check_gates_session",
+          "description": "Before any client-URL work, scripts/health_check.py is run. Non-zero exit blocks the session with a skill-broken message."
+        },
+        {
+          "name": "profile_detected_before_capture",
+          "description": "scripts/detect_target_profile.py is run against the client URL and returns a profile ID before any screenshot or DOM probe happens."
+        },
+        {
+          "name": "recipe_loaded_and_followed",
+          "description": "references/capture-recipes/{profile}.md is read, and its capture protocol is followed literally in Step 1 — not a generic one-size-fits-all sequence."
+        },
+        {
+          "name": "missing_recipe_surfaces_gap",
+          "description": "If detection returns a profile whose recipe file doesn't exist yet, skill stops and flags it as a Skill Protocol Supremacy gap — does NOT improvise an ad-hoc recipe on the client page."
+        },
+        {
+          "name": "fixtures_remain_green",
+          "description": "All 3 fixtures (react-spa-countup, elementor-wordpress, static-html) still classify correctly at health-check time."
+        }
+      ],
+      "files": []
     }
   ]
 }

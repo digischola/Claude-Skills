@@ -1,0 +1,116 @@
+{
+  "skill": "case-study-generator",
+  "version": "1.0.0",
+  "test_cases": [
+    {
+      "id": "prepare_recognizes_thrive_as_public",
+      "description": "prepare on a Thrive Retreats entry returns named identifier",
+      "command": "case_study.py prepare --client 'Thrive Retreats'",
+      "fixture": "fixtures/idea_bank_with_thrive_win/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["Named: True", "Thrive Retreats (Colo Heights NSW)", "Source: digischola.in/case-studies"]
+    },
+    {
+      "id": "prepare_anonymizes_unknown_client",
+      "description": "prepare on an unknown client returns anonymized identifier",
+      "command": "case_study.py prepare --entry-id abc123",
+      "fixture": "fixtures/idea_bank_with_unknown_wellness/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["Named: False", "a wellness retreat client"]
+    },
+    {
+      "id": "prepare_rejects_non_client_win",
+      "description": "Entry without client-win indicators → exit 1",
+      "command": "case_study.py prepare --entry-id xyz789",
+      "fixture": "fixtures/idea_bank_with_non_win/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["NOT a client-win", "use post-writer"]
+    },
+    {
+      "id": "validate_passes_clean_bundle",
+      "description": "All 4 deliverables consistent + no rule violations → exit 0",
+      "command": "validate_case_study.py --bundle-dir fixtures/clean_bundle/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["ALL CHECKS PASS"]
+    },
+    {
+      "id": "validate_catches_metric_drift",
+      "description": "LI Slide 1 says 188% but Blog H1 says 190% → exit 1",
+      "command": "validate_case_study.py --bundle-dir fixtures/bundle_with_drift/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["hook consistency", "varies across"]
+    },
+    {
+      "id": "validate_catches_em_dash",
+      "description": "Any deliverable contains em dash → exit 1",
+      "command": "validate_case_study.py --bundle-dir fixtures/bundle_with_emdash/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["em dash"]
+    },
+    {
+      "id": "validate_catches_hype_word",
+      "description": "Blog post contains 'unlock' → exit 1",
+      "command": "validate_case_study.py --bundle-dir fixtures/bundle_with_hype/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["hype word"]
+    },
+    {
+      "id": "validate_catches_engagement_bait",
+      "description": "IG carousel contains 'tag a friend' → exit 1",
+      "command": "validate_case_study.py --bundle-dir fixtures/bundle_with_bait/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["engagement bait"]
+    },
+    {
+      "id": "validate_catches_too_few_slides",
+      "description": "LI carousel has 6 slides instead of 8-10 → exit 1",
+      "command": "validate_case_study.py --bundle-dir fixtures/bundle_with_6_slides/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["LI carousel has 6 slides"]
+    },
+    {
+      "id": "validate_catches_overlong_tweet",
+      "description": "X thread Tweet 5 is 312 chars → exit 1",
+      "command": "validate_case_study.py --bundle-dir fixtures/bundle_with_overlong_tweet/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["Tweet 5", "chars"]
+    },
+    {
+      "id": "validate_catches_blog_too_short",
+      "description": "Blog post is 800 words (under 1500) → exit 1",
+      "command": "validate_case_study.py --bundle-dir fixtures/bundle_with_short_blog/",
+      "expected_exit": 1,
+      "expected_stdout_contains": ["blog post is 800 words"]
+    },
+    {
+      "id": "bundle_writes_4_files_plus_manifest",
+      "description": "bundle copies all 4 files to pending-approval/case-study-<id>/ + writes manifest.json",
+      "command": "case_study.py bundle --entry-id 4e4eed15 --bundle-dir fixtures/clean_bundle/",
+      "expected_exit": 0,
+      "expected_files_at": [
+        "brand/queue/pending-approval/case-study-4e4eed15/linkedin-carousel.md",
+        "brand/queue/pending-approval/case-study-4e4eed15/x-thread.md",
+        "brand/queue/pending-approval/case-study-4e4eed15/blog-post.md",
+        "brand/queue/pending-approval/case-study-4e4eed15/instagram-carousel.md",
+        "brand/queue/pending-approval/case-study-4e4eed15/manifest.json"
+      ]
+    },
+    {
+      "id": "list_public_clients_shows_all_6",
+      "description": "list-public-clients shows the 6 named-allowed clients",
+      "command": "case_study.py list-public-clients",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["Thrive Retreats", "ISKM Singapore", "Samir's Indian Kitchen", "Chart & Chime", "CrownTECH", "Happy Buddha Retreats"]
+    },
+    {
+      "id": "catalog_lists_existing_bundles",
+      "description": "catalog shows all case-study-* directories in pending-approval",
+      "command": "case_study.py catalog",
+      "fixture": "fixtures/pending_with_2_bundles/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["case-study-4e4eed15", "case-study-iskm-ry25"]
+    }
+  ],
+  "fixtures_dir": "fixtures/",
+  "notes": "Fixtures include realistic idea-bank.json + bundle directories with various deliverable combinations (clean, drift, em-dash, hype, bait, slide-count violations, etc.). Validator tests are pure-logic — no external API calls. case_study.py prepare uses the live PUBLIC_CLIENTS dict from the script."
+}

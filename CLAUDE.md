@@ -6,6 +6,20 @@ These rules apply to EVERY session, every skill, every output. Non-negotiable.
 
 AI-based digital marketing freelancer. Pre-marketing research and campaign development for Meta + Google Ads. Based in Gurugram, Haryana. See `.claude/shared-context/analyst-profile.md` for full context.
 
+## Skill Tracks (Always Active)
+
+Two separate skill groups, two separate contexts. Never mix them.
+
+1. **Client-skills track** — skills for doing marketing work FOR clients (market-research, business-analysis, landing-page-audit, ad-copywriter, campaign-setup, landing-page-builder, paid-media-strategy, post-launch-optimization, and future client-delivery skills).
+   - Strategic context: `.claude/shared-context/strategic-context.md`
+   - Client deliverables: `Desktop/{Client Name}/{Project or Business}/`
+
+2. **Personal-brand track** — skills for growing Digischola as Mayank's own brand (personal-brand-dna, work-capture, and the ~13 planned personal-brand suite skills).
+   - Strategic context: `Desktop/Digischola/strategic-context.md`
+   - Brand wiki: `Desktop/Digischola/brand/`
+
+Session-close updates and cross-session learnings go to the track-specific strategic-context file. The two tracks never share data except for `.claude/shared-context/analyst-profile.md`, `accuracy-protocol.md`, and `skill-architecture-standards.md` (universal).
+
 ## Accuracy Protocol (Always Active)
 
 Three rules apply to ALL research, analysis, and data extraction — regardless of which skill is running. See `.claude/shared-context/accuracy-protocol.md` for the full protocol.
@@ -58,6 +72,31 @@ When ANY file inside a skill folder is modified (scripts/, references/, assets/,
 
 These three actions are part of the fix. A fix without them is incomplete. Do not wait for the user to ask "did the skill get updated?" — that means the rule was violated.
 
+## Skill Protocol Supremacy (Always Active)
+
+When a skill is invoked, its steps are executed literally — not adapted, abbreviated, or short-circuited by judgment. Analyst judgment interprets data *within* the skill's framework, never substitutes for a missing step or overrides the skill's procedure.
+
+If a skill step fails, produces ambiguous data, or hits a scenario the skill doesn't cover:
+
+1. **Stop the skill run.** Do not improvise a workaround to push through.
+2. **Log the gap** as a skill-improvement candidate in the Learnings & Rules section.
+3. **Patch the skill** per the 7+3 rule (SKILL.md, references/, scripts/, evals/, feedback loop).
+4. **Re-run the skill** with the patched protocol.
+
+Never silently paper over a protocol gap with judgment and ship — that's how skills stop learning. The goal is to make skills more capable, and that only happens when their gaps become visible.
+
+**What counts as "judgment substitution" (not allowed):**
+- Skipping a mandatory step because it felt harder than expected
+- Interpreting ambiguous output as definitive findings without the skill's cross-check procedure
+- Inventing missing protocols ad-hoc instead of adding them to the skill
+- Trusting one data source over another when the skill doesn't specify priority
+
+**What counts as "judgment within framework" (allowed and required):**
+- Choosing which severity tier fits a finding per the scoring rubric
+- Adapting ad copy to the specific brand voice per the creative brief
+- Picking competitor names to seed into a research prompt
+- Weighing which fix to recommend first when multiple are valid
+
 ## Session Start Audit (Always Active)
 
 When activating any skill at the start of a session:
@@ -72,7 +111,11 @@ Every skill session MUST end with these steps — no exceptions, even if the use
 1. **Validate outputs.** If the skill has a `scripts/validate_output.py`, run it against all deliverables. Fix any CRITICAL failures before delivery.
 2. **Run feedback loop.** Review what worked, what didn't, and capture learnings in the skill's Learnings & Rules section. See the skill's `references/feedback-loop.md` for format.
 3. **Flag downstream connections.** Note which other skills can consume this output (e.g., "research ready for meta-ad-copywriter").
-4. **Update shared-context/strategic-context.md** if any business decisions, client changes, revenue updates, or roadmap shifts happened during the session.
+4. **Update the strategic-context file for the active skill's track** if any business decisions, client changes, revenue updates, or roadmap shifts happened during the session:
+   - Client-skills track: `.claude/shared-context/strategic-context.md`
+   - Personal-brand track: `Desktop/Digischola/strategic-context.md`
+   
+   See the "Skill Tracks" section at the top of this file.
 
 If a session is interrupted or cut short, the next session that activates the same skill must run the feedback loop retroactively.
 

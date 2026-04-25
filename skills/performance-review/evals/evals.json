@@ -1,0 +1,48 @@
+{
+  "skill_name": "performance-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Record LinkedIn performance for the Thrive LP audit Draft A: 1200 impressions, 45 reactions, 8 comments, 3 reshares, 22 saves.",
+      "expected_output": "record_performance.py computes weighted_score = (8*15 + 22*10 + 3*8 + 45*1) = 120+220+24+45 = 409. Log entry appended. Post frontmatter stamped with performance summary. Exit 0.",
+      "assertions": [
+        {"name": "scorer_key_correct", "description": "scorer_key = 'linkedin' (channel + text-post format)"},
+        {"name": "weighted_score_correct", "description": "weighted_score = 409"},
+        {"name": "log_entry_appended", "description": "brand/performance/log.json entries array grew by 1"},
+        {"name": "post_frontmatter_stamped", "description": "Post file frontmatter now has 'performance: {...}' field"},
+        {"name": "required_fields_present", "description": "impressions, reactions, comments, reshares, saves all present in metrics; validator passed"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Record Instagram Reel performance missing the required 'reach' field.",
+      "expected_output": "record_performance.py exits 1 with clear error: 'Missing required metric reach for instagram-reel'. No log entry appended. No post frontmatter change.",
+      "assertions": [
+        {"name": "validation_error", "description": "Script exits 1"},
+        {"name": "no_log_entry_added", "description": "log.json unchanged"},
+        {"name": "clear_error_message", "description": "Error names the missing field 'reach' explicitly"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Run weekly review with only 2 days of data across 3 posts.",
+      "expected_output": "weekly_review.py generates report in 'Collecting baseline' mode. Buckets NOT assigned (all show COLLECTING). No suggestions. Report shows raw metrics only.",
+      "assertions": [
+        {"name": "collecting_mode_active", "description": "Report header or per-channel section indicates 'collecting (N of 21 days)' mode"},
+        {"name": "no_buckets_assigned", "description": "All weekly posts show bucket='COLLECTING' not HIT/ABOVE/BELOW/FLOP"},
+        {"name": "no_suggestions", "description": "Suggestions section shows 'No suggestions yet. Channels need 56+ days'"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Run weekly review with 60+ days of data, where Data hook category has 4 HITs + 1 ABOVE (net +9) across 5 posts.",
+      "expected_output": "weekly_review.py emits P1 PROMOTE suggestion for Hook Category Data with target hook-library.md, specific edit instruction, evidence (net +9, 5 posts, 4 HITs). Suggestion included in report; not auto-applied.",
+      "assertions": [
+        {"name": "p1_suggestion_emitted", "description": "Suggestions section contains a P1 promotion for 'Hook Category: Data'"},
+        {"name": "target_file_correct", "description": "Suggestion targets post-writer/references/hook-library.md"},
+        {"name": "evidence_present", "description": "Evidence text includes 'Net +9', '5 posts', '4 HITs'"},
+        {"name": "no_auto_apply", "description": "hook-library.md is NOT modified by this script (v1 advisory only)"}
+      ]
+    }
+  ]
+}

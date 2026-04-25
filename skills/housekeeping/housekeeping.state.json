@@ -1,0 +1,20 @@
+{
+  "last_run_at": "2026-04-24T16:25:50+05:30",
+  "last_run_action": "scanned + presented + user_skipped_all",
+  "last_run_items_quarantined": 0,
+  "last_run_bytes_recovered": 0,
+  "last_scan_totals": {
+    "AUTO_BLOAT": {
+      "count": 11,
+      "bytes": 102444
+    },
+    "LIKELY_BLOAT": {
+      "count": 4,
+      "bytes": 139451019
+    },
+    "AMBIGUOUS": {
+      "count": 0,
+      "bytes": 0
+    }
+  }
+}

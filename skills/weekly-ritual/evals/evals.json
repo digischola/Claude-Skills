@@ -1,0 +1,88 @@
+{
+  "skill": "weekly-ritual",
+  "version": "1.0.0",
+  "test_cases": [
+    {
+      "id": "auto_detect_sunday",
+      "description": "On Sunday, --day auto returns 'sunday'",
+      "command": "weekly_ritual.py --day auto --dry-run",
+      "fixture": "fixtures/sunday/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["Auto-detected day: sunday", "[DRY-RUN] would fire sunday ritual"]
+    },
+    {
+      "id": "auto_detect_friday",
+      "description": "On Friday, --day auto returns 'friday'",
+      "command": "weekly_ritual.py --day auto --dry-run",
+      "fixture": "fixtures/friday/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["Auto-detected day: friday", "[DRY-RUN] would fire friday ritual"]
+    },
+    {
+      "id": "auto_detect_non_ritual_day",
+      "description": "On Tue/Wed/Thu/Sat, --day auto exits 0 with 'Today is not a ritual day'",
+      "command": "weekly_ritual.py --day auto",
+      "fixture": "fixtures/tuesday/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["not a ritual day"]
+    },
+    {
+      "id": "idempotency_skip",
+      "description": "Re-firing within 12h is a no-op (skipped with explanation)",
+      "command": "weekly_ritual.py --day sunday",
+      "fixture": "fixtures/just_fired_sunday/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["Skipped sunday ritual", "within 12h window"]
+    },
+    {
+      "id": "force_bypasses_idempotency",
+      "description": "--once / --force bypasses the 12h cooldown",
+      "command": "weekly_ritual.py --day sunday --once --dry-run",
+      "fixture": "fixtures/just_fired_sunday/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["[DRY-RUN] would fire sunday ritual"]
+    },
+    {
+      "id": "fire_writes_state_file",
+      "description": "Successful fire writes last_fired_<day> to brand/weekly-ritual.state.json",
+      "command": "weekly_ritual.py --day friday --once",
+      "fixture": "fixtures/empty_brand/",
+      "expected_exit": 0,
+      "expected_state_file": {
+        "last_fired_friday": "<ISO 8601 timestamp>"
+      }
+    },
+    {
+      "id": "status_shows_state",
+      "description": "--status prints state file contents and today's ritual day",
+      "command": "weekly_ritual.py --status",
+      "fixture": "fixtures/has_state/",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["State file:", "Today (IST):"]
+    },
+    {
+      "id": "install_launchagent_writes_plist",
+      "description": "install_launchagents.py creates the plist with both Sun + Fri triggers",
+      "command": "install_launchagents.py --force",
+      "expected_exit": 0,
+      "expected_file_at": "~/Library/LaunchAgents/com.digischola.weekly-ritual.plist",
+      "expected_plist_contains": ["StartCalendarInterval", "Weekday>0<", "Weekday>5<", "Hour>9<", "Hour>18<"]
+    },
+    {
+      "id": "install_status_after_load",
+      "description": "After install, --status reports loaded=true",
+      "command": "install_launchagents.py --status",
+      "expected_exit": 0,
+      "expected_stdout_contains": ["Loaded in launchctl: True"]
+    },
+    {
+      "id": "uninstall_removes_plist",
+      "description": "--uninstall unloads + removes the plist",
+      "command": "install_launchagents.py --uninstall",
+      "expected_exit": 0,
+      "expected_file_absent": "~/Library/LaunchAgents/com.digischola.weekly-ritual.plist"
+    }
+  ],
+  "fixtures_dir": "fixtures/",
+  "notes": "Fixtures simulate different brand-folder + state combos. Many tests freeze the system clock (IST) to a specific weekday by mocking datetime — e.g., fixtures/sunday/ uses freezegun-equivalent to lock the date to a Sunday. Run via: python3 -m evals.run_evals (future runner)."
+}

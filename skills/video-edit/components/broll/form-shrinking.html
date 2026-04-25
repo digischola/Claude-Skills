@@ -1,0 +1,151 @@
+<!--
+  Component: broll/form-shrinking
+  Fake form with N fields that visibly collapse down to K short fields at an emphasis moment.
+  Ideal for "form length reduction" or "less is more" beats.
+
+  Inputs:
+    {{ID}}              - unique suffix
+    {{START}}           - data-start seconds
+    {{DURATION}}        - data-duration seconds (recommend 1.5-3.0)
+    {{TRACK}}           - data-track-index (recommend 8)
+    {{LABELS_LONG}}     - array of field labels (e.g. ["First name", "Last name", "Company", "Phone", "Website", "Annual revenue"])
+    {{LABELS_SHORT}}    - array of labels kept AFTER shrink (e.g. ["Email", "Company"])
+    {{CALLOUT_TEXT}}    - big text shown at peak moment (e.g. "-66% FIELDS", "6 → 2")
+    {{CALLOUT_COLOR}}   - callout color (e.g. #4ADE80 success green)
+    {{BRAND_PRIMARY}}   - CTA button color (e.g. #3B9EFF)
+    {{FORM_TITLE}}      - form header text (e.g. "Request a demo")
+
+  Behavior:
+    - At START: all long fields visible
+    - At START + 0.5s: the fields NOT in LABELS_SHORT fade + shrink away (staggered)
+    - At START + 1.0s: CALLOUT slams in (scale-pop)
+    - Hold until DURATION - 0.3s
+    - Fade out
+-->
+
+<div
+  id="form-shrink-{{ID}}"
+  class="clip form-shrink"
+  data-start="{{START}}"
+  data-duration="{{DURATION}}"
+  data-track-index="{{TRACK}}"
+  style="position: absolute; inset: 80px 60px 140px; overflow: hidden; z-index: 14;
+         border-radius: 22px;
+         background: #FFFFFF;
+         box-shadow: 0 50px 140px rgba(0,0,0,0.65), 0 16px 50px rgba(0,0,0,0.4);
+         border: 1px solid #D1D5DB;
+         padding: 60px 72px; display: flex; flex-direction: column; gap: 36px;
+         font-family: 'Inter', -apple-system, system-ui, sans-serif;
+         will-change: opacity;"
+>
+  <!-- Form header -->
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div
+      class="fs-title-{{ID}}"
+      style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 48px;
+             color: #0B1220; line-height: 1.1;"
+    >
+      {{FORM_TITLE}}
+    </div>
+    <div style="font-size: 22px; color: #6B7280;">
+      Fill out the form to get started.
+    </div>
+  </div>
+
+  <!-- Fields list — injector generates these from LABELS_LONG -->
+  <div id="fs-fields-{{ID}}" class="fs-fields-{{ID}}" style="display: flex; flex-direction: column; gap: 22px;">
+    <!-- FIELD SPANS placeholder:
+         <div class="fs-field-{{ID}}" data-keep="true|false">
+           <label>Field Name</label>
+           <div class="input"></div>
+         </div>
+    -->
+    {{FIELDS_HTML}}
+  </div>
+
+  <!-- CTA -->
+  <div style="margin-top: 12px;">
+    <span
+      class="fs-cta-{{ID}}"
+      style="display: inline-block; background: {{BRAND_PRIMARY}}; color: #fff;
+             padding: 20px 42px; border-radius: 12px;
+             font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 26px;
+             letter-spacing: 0.08em; text-transform: uppercase;"
+    >
+      SUBMIT
+    </span>
+  </div>
+
+  <!-- Callout overlay (fires on shrink) -->
+  <div
+    id="fs-callout-{{ID}}"
+    style="position: absolute; right: 10%; top: 38%;
+           font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 180px;
+           line-height: 0.95; color: {{CALLOUT_COLOR}};
+           filter: drop-shadow(0 0 24px rgba(74,222,128,0.45));
+           opacity: 0;
+           transform: scale(0.6) rotate(-6deg);
+           letter-spacing: -0.02em;"
+  >
+    {{CALLOUT_TEXT}}
+  </div>
+</div>
+
+<style>
+  #form-shrink-{{ID}} .fs-field-{{ID}} {
+    display: flex; flex-direction: column; gap: 8px;
+    will-change: opacity, transform, height;
+    overflow: hidden;
+  }
+  #form-shrink-{{ID}} .fs-field-{{ID}} label {
+    font-size: 20px; font-weight: 500; color: #374151;
+    letter-spacing: 0.02em;
+  }
+  #form-shrink-{{ID}} .fs-field-{{ID}} .input {
+    height: 72px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px;
+  }
+</style>
+
+<script>
+(function() {
+  var tl = (window.__timelines && window.__timelines["main"]) || null;
+  if (!tl) return;
+  var START = {{START}};
+  var DURATION = {{DURATION}};
+
+  /* Entrance */
+  tl.from("#form-shrink-{{ID}}", { opacity: 0, scale: 0.96, y: 20, duration: 0.4, ease: "power3.out" }, START + 0.02);
+
+  /* At START + 0.6s, fields marked data-keep="false" collapse away */
+  tl.to(
+    "#form-shrink-{{ID}} .fs-field-{{ID}}[data-keep='false']",
+    {
+      opacity: 0,
+      scaleY: 0,
+      height: 0,
+      marginTop: 0,
+      marginBottom: 0,
+      duration: 0.55,
+      stagger: 0.08,
+      ease: "power2.inOut",
+      transformOrigin: "top center",
+      overwrite: "auto"
+    },
+    START + 0.55
+  );
+
+  /* Callout slam at START + 1.0s */
+  tl.to(
+    "#fs-callout-{{ID}}",
+    { opacity: 1, scale: 1.0, rotate: 0, duration: 0.45, ease: "back.out(1.8)", overwrite: "auto" },
+    START + 1.0
+  );
+
+  /* Fade out */
+  tl.to(
+    "#form-shrink-{{ID}}",
+    { opacity: 0, duration: 0.3, ease: "power2.in", overwrite: "auto" },
+    START + DURATION - 0.32
+  );
+})();
+</script>

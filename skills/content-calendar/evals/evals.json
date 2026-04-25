@@ -1,0 +1,54 @@
+{
+  "skill_name": "content-calendar",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build next week's content calendar for Digischola. Idea-bank has 8 raw entries distributed across 3 pillars (3 LP Craft, 2 Solo Ops, 3 Small-Budget Paid Media).",
+      "expected_output": "Calendar markdown file written to Desktop/Digischola/brand/calendars/{ISO-week}.md with 12 slots. All 3 pillar-locked LI slots (Mon/Wed/Fri) filled. Thu carousel + Sat IG repurposes from strongest LI slot. X threads repurposed from Mon + Fri LI. Gap alerts section has 0 CRITICAL, 0 WARNING. 5-8 entries flipped raw → shaped with scheduled_week field.",
+      "assertions": [
+        {"name": "calendar_file_written", "description": "File at brand/calendars/YYYY-WXX.md exists with correct ISO week naming"},
+        {"name": "pillar_locked_slots_filled", "description": "Mon LI = LP Craft entry; Wed LI = Solo Ops entry; Fri LI = Small-Budget Paid Media entry"},
+        {"name": "repurpose_chain_applied", "description": "Tue X thread inherits mon-li entry_id; Fri X thread inherits fri-li entry_id"},
+        {"name": "sat_ig_repurpose", "description": "Sat IG has is_repurpose=true and entry_id matches a Mon/Wed/Fri/Thu LI slot"},
+        {"name": "statuses_flipped", "description": "Matched entries in idea-bank.json have status=shaped and scheduled_week set"},
+        {"name": "zero_critical_gaps", "description": "Gap alerts CRITICAL list is empty"},
+        {"name": "exit_code_0", "description": "Script exits 0 for fully clean week"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Build next week's content calendar. Idea-bank has only 2 raw entries: 1 LP Craft (client-win, Thrive), 1 Solo Ops (build-log, wiki-lock). No Small-Budget Paid Media entries.",
+      "expected_output": "Partial calendar generated. Mon LI filled with Thrive entry + auto-repurpose to Tue X thread + Sat IG Reel. Wed LI filled with wiki-lock entry + repurpose to Wed X. Fri LI pillar-locked to Small-Budget Paid Media but 0 matching entries → CRITICAL gap. Thursday carousel + fresh X slots attempt flex matching; may flag INFO if pool is depleted. Distribution summary shows 3-4 of 11 slots filled. Exit 1 (warnings + critical present).",
+      "assertions": [
+        {"name": "partial_calendar_written", "description": "Calendar file still written even with gaps"},
+        {"name": "critical_gap_for_fri", "description": "Gap alerts CRITICAL includes fri-li for Small-Budget Paid Media"},
+        {"name": "pillar_bank_gap", "description": "Gap alerts CRITICAL includes pillar-bank entry for Small-Budget Paid Media (0 raw entries)"},
+        {"name": "volume_warning", "description": "Distribution alerts include CRITICAL for total volume (2 entries, well under 6-10 target)"},
+        {"name": "mon_and_wed_filled", "description": "Mon LI + Wed LI both have entry_id assigned"},
+        {"name": "exit_code_1", "description": "Script exits 1 (warnings + criticals, calendar still written)"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Build next week's calendar with --theme 'Landing-Page Conversion Craft' (themed week). Idea-bank has 5 LP Craft entries.",
+      "expected_output": "Themed calendar: all Mon/Wed/Fri LI slots assigned LP Craft entries (not the balanced Mon=LP / Wed=Solo / Fri=PaidMedia split). Thu carousel also favors LP Craft if format fits. Calendar markdown header shows 'Theme override: Landing-Page Conversion Craft'. Gap alerts may warn that other pillars are 'dark' this week (INFO level, not CRITICAL).",
+      "assertions": [
+        {"name": "theme_applied_to_locks", "description": "Mon LI, Wed LI, Fri LI all have pillar_lock=Landing-Page Conversion Craft in the output"},
+        {"name": "theme_header_present", "description": "Calendar markdown has 'Theme override: Landing-Page Conversion Craft' in header"},
+        {"name": "all_three_li_slots_filled", "description": "3 LP Craft entries assigned across Mon/Wed/Fri LI (no cross-pillar fallback)"},
+        {"name": "no_critical_pillar_gaps_on_locked_days", "description": "Mon/Wed/Fri all filled; no pillar-locked CRITICAL gaps"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Build calendar when idea-bank is completely empty (0 raw entries).",
+      "expected_output": "Script BLOCKS with exit 2. Error message: 'BLOCKED: idea-bank has 0 raw entries. Run work-capture first.' No calendar file written. No entries flipped.",
+      "assertions": [
+        {"name": "blocks_with_exit_2", "description": "Script exits 2"},
+        {"name": "no_calendar_file_written", "description": "brand/calendars/ has no new file"},
+        {"name": "no_entries_flipped", "description": "idea-bank.json entries[*].status remains unchanged"},
+        {"name": "clear_fix_instruction", "description": "Error message explicitly names work-capture as the next step"}
+      ]
+    }
+  ]
+}

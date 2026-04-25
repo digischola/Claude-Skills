@@ -1,0 +1,123 @@
+<!--
+  Component: emphasis/arrow-callout
+  Curved arrow that draws itself in, pointing at something. Great for pointing at UI elements, numbers, buttons, text.
+  Uses FREE CSS stroke-dashoffset animation (no GSAP Club DrawSVG plugin needed).
+
+  Inputs:
+    {{ID}}           - unique suffix
+    {{START}}        - data-start seconds
+    {{DURATION}}     - data-duration seconds (recommend 1.0-2.5)
+    {{TRACK}}        - data-track-index (recommend 11, above overlays)
+    {{FROM_X}}       - arrow TAIL x in px (from 0-1080 or 0-1920 depending on composition)
+    {{FROM_Y}}       - arrow TAIL y in px
+    {{TO_X}}         - arrow HEAD x (where it points)
+    {{TO_Y}}         - arrow HEAD y
+    {{CURVE}}        - "left" | "right" — which side the arc bends
+    {{COLOR}}        - stroke color hex (e.g. brand primary #3B9EFF)
+    {{LABEL}}        - optional short text label near the tail (keep under 4 words); pass empty string to skip
+    {{LABEL_FONT}}   - font family for label (e.g. "Space Grotesk")
+
+  Behavior: arrow draws in over 0.6s, label fades in during the last 0.2s of the draw.
+-->
+
+<div
+  id="arrow-{{ID}}"
+  class="clip arrow-callout"
+  data-start="{{START}}"
+  data-duration="{{DURATION}}"
+  data-track-index="{{TRACK}}"
+  style="position: absolute; inset: 0; z-index: 21; pointer-events: none; will-change: opacity;"
+>
+  <svg
+    class="arrow-svg-{{ID}}"
+    viewBox="0 0 1080 1920"
+    preserveAspectRatio="none"
+    style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;"
+  >
+    <defs>
+      <marker
+        id="arrow-head-{{ID}}"
+        viewBox="0 0 12 12"
+        refX="6"
+        refY="6"
+        markerWidth="8"
+        markerHeight="8"
+        orient="auto-start-reverse"
+      >
+        <path d="M0,0 L12,6 L0,12 Z" fill="{{COLOR}}"/>
+      </marker>
+    </defs>
+    <!-- Curved arrow path using quadratic Bezier. Control point auto-offset by CURVE param. -->
+    <path
+      class="arrow-path-{{ID}}"
+      d="M {{FROM_X}} {{FROM_Y}} Q {{CONTROL_X}} {{CONTROL_Y}} {{TO_X}} {{TO_Y}}"
+      stroke="{{COLOR}}"
+      stroke-width="6"
+      stroke-linecap="round"
+      fill="none"
+      marker-end="url(#arrow-head-{{ID}})"
+      style="stroke-dasharray: 2000; stroke-dashoffset: 2000; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));"
+    />
+  </svg>
+
+  <!-- Optional label near the tail -->
+  <div
+    class="arrow-label-{{ID}}"
+    style="
+      position: absolute;
+      left: {{LABEL_X}}px;
+      top: {{LABEL_Y}}px;
+      max-width: 320px;
+      font-family: {{LABEL_FONT}}, sans-serif;
+      font-weight: 600;
+      font-size: 34px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: {{COLOR}};
+      opacity: 0;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      {{LABEL_HIDE_CSS}}
+    "
+  >
+    {{LABEL}}
+  </div>
+</div>
+
+<script>
+(function() {
+  var tl = (window.__timelines && window.__timelines["main"]) || null;
+  if (!tl) return;
+
+  var START = {{START}};
+  var DURATION = {{DURATION}};
+
+  /* Arrow draws in via stroke-dashoffset 2000 → 0 (free alternative to GSAP Club DrawSVG) */
+  tl.fromTo(
+    ".arrow-path-{{ID}}",
+    { attr: { "stroke-dashoffset": 2000 } },
+    { attr: { "stroke-dashoffset": 0 }, duration: 0.65, ease: "power2.out" },
+    START + 0.05
+  );
+
+  /* Component entrance (fade so the draw looks clean) */
+  tl.from(
+    "#arrow-{{ID}}",
+    { opacity: 0, duration: 0.18, ease: "power2.out" },
+    START + 0.02
+  );
+
+  /* Label fades in during last 0.3s of the draw */
+  tl.to(
+    ".arrow-label-{{ID}}",
+    { opacity: 1, duration: 0.35, ease: "power2.out" },
+    START + 0.45
+  );
+
+  /* Exit before clip end */
+  tl.to(
+    "#arrow-{{ID}}",
+    { opacity: 0, duration: 0.3, ease: "power2.in", overwrite: "auto" },
+    START + DURATION - 0.32
+  );
+})();
+</script>
