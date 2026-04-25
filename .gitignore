@@ -29,3 +29,6 @@ venv/
 
 # Local smoke-test scratch (not part of the skills themselves)
 /tmp_*
+
+# Auto-generated reports (audit, wiki-drift) — not meant for git
+scripts/logs/
