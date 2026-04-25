@@ -1,5 +1,13 @@
 # Data Queries Reference — Windsor.ai MCP
 
+## Table of Contents
+
+- [Query Execution Rules](#query-execution-rules)
+- [Meta Ads Queries](#meta-ads-queries)
+- [Google Ads Queries](#google-ads-queries)
+- [Query Execution Order](#query-execution-order)
+- [Conversion Event Mapping](#conversion-event-mapping)
+
 Load this file in Step 2. Contains exact field names and query configurations for both platforms.
 
 ## Query Execution Rules

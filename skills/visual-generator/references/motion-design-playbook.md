@@ -1,5 +1,23 @@
 # Motion Design Playbook — Digischola Reels (v2)
 
+## Table of Contents
+
+- [0. Index](#0-index)
+- [1. Philosophy — the 3 hard rules](#1-philosophy--the-3-hard-rules)
+- [2. The Three-School Subtitle Framework](#2-the-three-school-subtitle-framework)
+- [3. Motion System — Roles, Curves, Timings](#3-motion-system--roles-curves-timings)
+- [4. Typography System](#4-typography-system)
+- [5. Color System](#5-color-system)
+- [6. Subtitle System — Word-Sync Pipeline](#6-subtitle-system--word-sync-pipeline)
+- [7. Background System — One Mechanic, Not Five](#7-background-system--one-mechanic-not-five)
+- [8. Composition System — Vertical Grid + Safe Zones](#8-composition-system--vertical-grid--safe-zones)
+- [9. Transition System — 15 Options, 70/30 Rule](#9-transition-system--15-options-7030-rule)
+- [10. Audio-Visual Sync Rules](#10-audio-visual-sync-rules)
+- [11. The Never-Do List (hard rules)](#11-the-never-do-list-hard-rules)
+- [12. Per-Scene Recipes](#12-per-scene-recipes)
+- [13. Benchmark Exemplars](#13-benchmark-exemplars)
+- [14. Tool Stack](#14-tool-stack)
+
 **Locked 2026-04-21. Replaces v1 (vibes-based).** Every value here is research-grounded.
 Built from three parallel briefs: word-sync subtitles (School A vs B vs C framework),
 dynamic geometric backgrounds (one dominant mechanic, Paper Design shader era), and

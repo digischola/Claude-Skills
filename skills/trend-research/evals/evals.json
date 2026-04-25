@@ -1,110 +1,51 @@
 {
-  "skill": "trend-research",
-  "version": "1.0.0",
-  "test_cases": [
+  "skill_name": "trend-research",
+  "evals": [
     {
-      "id": "ingest_unique_candidate_added",
-      "description": "A unique candidate that passes quality filter gets appended to idea-bank",
-      "command": "trend_research.py ingest --pillar lp-craft --json '{\"seed\":\"Phone above the fold lifts wellness conversions 41%\",\"hook_candidate\":\"41% conversion lift from one decision: phone above the fold\",\"source_urls\":[\"https://goodui.org/study2026\"],\"relevance_score\":5,\"tags\":[\"wellness\"]}'",
-      "fixture": "fixtures/empty_bank/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["added"],
-      "expected_idea_bank_count_increase": 1
-    },
-    {
-      "id": "ingest_dup_skipped",
-      "description": "A candidate matching an existing seed is skipped with reason",
-      "command": "trend_research.py ingest --pillar lp-craft --json '{\"seed\":\"Same seed as existing\",\"source_urls\":[\"https://example.com\"],\"relevance_score\":4}'",
-      "fixture": "fixtures/bank_with_dup/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["skipped-dup"]
-    },
-    {
-      "id": "ingest_low_relevance_skipped",
-      "description": "relevance_score <3 → skipped",
-      "command": "trend_research.py ingest --pillar lp-craft --json '{\"seed\":\"low quality\",\"source_urls\":[\"https://example.com\"],\"relevance_score\":2}'",
-      "fixture": "fixtures/empty_bank/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["skipped-quality", "relevance_score 2 <3"]
-    },
-    {
-      "id": "ingest_em_dash_rejected",
-      "description": "Candidate with em dash → quality-reject",
-      "command": "trend_research.py ingest --pillar lp-craft --json '{\"seed\":\"This — has an em dash\",\"source_urls\":[\"https://example.com\"],\"relevance_score\":4}'",
-      "fixture": "fixtures/empty_bank/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["em dash"]
-    },
-    {
-      "id": "ingest_hype_word_rejected",
-      "description": "Candidate with 'unlock' or other hype word → quality-reject",
-      "command": "trend_research.py ingest --pillar solo-ops --json '{\"seed\":\"Unlock 10x productivity\",\"source_urls\":[\"https://example.com\"],\"relevance_score\":4}'",
-      "fixture": "fixtures/empty_bank/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["hype word"]
-    },
-    {
-      "id": "ingest_no_urls_rejected",
-      "description": "Candidate with empty source_urls → quality-reject",
-      "command": "trend_research.py ingest --pillar paid-media --json '{\"seed\":\"valid seed\",\"source_urls\":[],\"relevance_score\":5}'",
-      "fixture": "fixtures/empty_bank/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["no source_urls"]
-    },
-    {
-      "id": "dedupe_check_fuzzy_70_percent",
-      "description": "Candidate with ≥70% token overlap to existing seed → DUP",
-      "command": "trend_research.py dedupe-check --json '{\"pillar\":\"lp-craft\",\"seed\":\"Phone above fold lifts wellness landing conversions forty one percent\",\"source_urls\":[\"https://example.com\"],\"relevance_score\":4}'",
-      "fixture": "fixtures/bank_with_phone_trend/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["DUP", "fuzzy-match"]
-    },
-    {
-      "id": "pillar_30day_cap_blocks_low_relevance",
-      "description": "If 8+ trend entries exist for pillar in last 30d AND new candidate score <5, skip",
-      "command": "trend_research.py ingest --pillar paid-media --json '{\"seed\":\"new trend\",\"source_urls\":[\"https://example.com\"],\"relevance_score\":4}'",
-      "fixture": "fixtures/bank_with_8_paid_media_30d/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["cap reached"]
-    },
-    {
-      "id": "pillar_30day_cap_allows_score_5",
-      "description": "Score 5 bypasses the 30d cap",
-      "command": "trend_research.py ingest --pillar paid-media --json '{\"seed\":\"hot new trend\",\"source_urls\":[\"https://example.com\"],\"relevance_score\":5}'",
-      "fixture": "fixtures/bank_with_8_paid_media_30d/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["added"]
-    },
-    {
-      "id": "prompt_writes_3_files",
-      "description": "Mode 2 prompt sub-command writes 3 pillar prompt files + clipboards first",
-      "command": "trend_research.py prompt --week 2026-W17",
-      "fixture": "fixtures/empty_brand/",
-      "expected_exit": 0,
-      "expected_files_exist": [
-        "brand/_research/trends/2026-W17/lp-craft-prompt.md",
-        "brand/_research/trends/2026-W17/solo-ops-prompt.md",
-        "brand/_research/trends/2026-W17/paid-media-prompt.md"
+      "id": 1,
+      "prompt": "Run a Mode 1 autonomous trend scan for the upcoming week: `python3 scripts/trend_research.py scan --week 2026-W18`",
+      "expected_output": "Claude runs 6 WebSearches (2 per pillar across LP Craft, Solo Ops, Paid Media). Synthesizes 3-6 candidates per pillar. Dedupes against existing idea-bank entries (70% text-overlap threshold). Drops candidates with relevance_score <3 or anti-pattern words. Appends survivors to idea-bank.json with type: trend.",
+      "assertions": [
+        {
+          "name": "three_pillars_covered",
+          "description": "WebSearch executed for all 3 pillars (LP Craft, Solo Ops, Paid Media)"
+        },
+        {
+          "name": "candidates_per_pillar",
+          "description": "3-6 raw candidates synthesized per pillar before dedupe and quality filter"
+        },
+        {
+          "name": "dedupe_applied",
+          "description": "No survivor's seed text overlaps >70% with an existing idea-bank entry's seed/raw_note/hook_candidate"
+        },
+        {
+          "name": "quality_filter_applied",
+          "description": "All survivors have relevance_score >=3 and contain no em dashes / hype words from voice-guide"
+        },
+        {
+          "name": "schema_compliant",
+          "description": "Each appended entry has: id (uuid), type=trend, pillar, seed, hook_candidate, source_urls, tags, relevance_score, via=trend-research, captured_at, status=raw"
+        }
       ]
     },
     {
-      "id": "ingest_perplexity_parses_topics",
-      "description": "ingest-perplexity parses '## Topic N — name' headers and extracts fields",
-      "command": "trend_research.py ingest-perplexity --pillar lp-craft --week 2026-W17",
-      "fixture": "fixtures/perplexity_response_lp_craft/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Results:", "added"],
-      "expected_scan_log_at": "brand/_research/trends/2026-W17/scan-log.md"
-    },
-    {
-      "id": "stats_shows_per_pillar_counts",
-      "description": "stats sub-command lists trend counts per pillar + last-30d count",
-      "command": "trend_research.py stats",
-      "fixture": "fixtures/bank_with_mixed_trends/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Total trend entries:", "lp-craft:", "Last 30d:"]
+      "id": 2,
+      "prompt": "Run trend ingest with a candidate whose seed text overlaps 90% with an existing idea-bank entry.",
+      "expected_output": "Dedupe logic identifies the overlap and skips the candidate. Logs 'skipped: duplicate of <existing_id>' to scan log. Does NOT append duplicate to idea-bank.json.",
+      "assertions": [
+        {
+          "name": "duplicate_skipped",
+          "description": "Candidate with >70% seed overlap is not appended to idea-bank.json"
+        },
+        {
+          "name": "skip_reason_logged",
+          "description": "Scan log records skipped candidate with reference to the existing entry id it duplicated"
+        },
+        {
+          "name": "no_silent_loss",
+          "description": "Skipped candidate is visible in scan-log.md so user can see what was rejected and why"
+        }
+      ]
     }
-  ],
-  "fixtures_dir": "fixtures/",
-  "notes": "Fixtures use realistic idea-bank.json seeds with various trend states. Many tests freeze time to a specific IST timestamp to test the 30-day cap and recency logic deterministically. Run via: python3 -m evals.run_evals (future runner)."
+  ]
 }

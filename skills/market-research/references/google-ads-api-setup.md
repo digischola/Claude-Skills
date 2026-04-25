@@ -1,5 +1,19 @@
 # Google Ads API Setup Guide (One-Time)
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Step 1: Create Google Ads MCC Account](#step-1-create-google-ads-mcc-account-if-you-dont-have-one)
+- [Step 2: Apply for API Developer Token](#step-2-apply-for-api-developer-token)
+- [Step 3: Create Google Cloud Project](#step-3-create-google-cloud-project)
+- [Step 4: Create OAuth2 Credentials](#step-4-create-oauth2-credentials)
+- [Step 5: Generate Refresh Token](#step-5-generate-refresh-token)
+- [Step 6: Create ~/.google-ads.yaml](#step-6-create-google-adsyaml)
+- [Step 7: Install Dependencies](#step-7-install-dependencies)
+- [Step 8: Test](#step-8-test)
+- [Troubleshooting](#troubleshooting)
+- [Using Client Accounts](#using-client-accounts)
+
 This is a one-time setup. Once done, the `google_keyword_volume.py` script works for all clients. Total time: ~30 minutes (plus developer token approval wait).
 
 ## Prerequisites

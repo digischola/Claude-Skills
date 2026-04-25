@@ -1,5 +1,18 @@
 \# Google Ads Expert Reference Guide 2025–2026
 
+## Table of Contents
+
+- [1. Campaign Types and Objectives](#1-campaign-types-and-objectives)
+- [2. Bidding Strategies and Decision Logic](#2-bidding-strategies-and-decision-logic)
+- [3. Keyword Strategy and Match Types](#3-keyword-strategy-and-match-types)
+- [4. Audience Targeting](#4-audience-targeting)
+- [5. Performance Max Deep Dive](#5-performance-max-deep-dive)
+- [6. Conversion Tracking and Measurement](#6-conversion-tracking-and-measurement)
+- [7. Ad Formats and Creative Best Practices](#7-ad-formats-and-creative-best-practices)
+- [8. Campaign Structure and Account Architecture](#8-campaign-structure-and-account-architecture)
+- [9. Google Merchant Center and Shopping](#9-google-merchant-center-and-shopping)
+- [10. Reporting, Optimization & Scaling](#10-reporting-optimization--scaling)
+
 \#\# 1\. Campaign Types and Objectives
 
 \#\#\# Core campaign types as of 2025–2026

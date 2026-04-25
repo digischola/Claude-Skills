@@ -5,18 +5,84 @@
       "id": 1,
       "prompt": "I need you to audit this landing page for my client Samir's Indian Kitchen in Sydney. They're running Meta ads to this page for online reservations but the conversion rate is terrible. Here's the URL: https://samirskitchen.com.au/book-a-table and I've uploaded a mobile screenshot. The page has a big hero image of the restaurant interior, then a paragraph about the history of the restaurant, then a reservation form way at the bottom with 8 fields. No reviews or testimonials visible. CTA button says 'Submit'. They want more bookings from their Meta campaigns.",
       "expected_output": "HTML dashboard with: overall score likely 3-5/10 range given the described issues. CRITICAL findings should include: CTA buried below fold, generic 'Submit' button text, 8-field form friction, no social proof/trust signals visible. Fix recommendations should include exact rewritten CTA copy, specific fields to remove from form, where to place Google/TripAdvisor review scores, and layout restructure putting booking form above fold on mobile.",
-      "files": []
+      "files": [],
+      "assertions": [
+        {
+          "name": "score_assigned",
+          "description": "Overall Conversion Readiness Score is in expected range"
+        },
+        {
+          "name": "critical_findings_present",
+          "description": "CRITICAL findings match the expected_output description"
+        },
+        {
+          "name": "fix_recommendations_specific",
+          "description": "Fix recommendations include exact rewritten copy and element-level layout guidance, not vague advice"
+        },
+        {
+          "name": "mobile_first_audit",
+          "description": "Mobile experience audited before desktop per skill rule"
+        },
+        {
+          "name": "dashboard_uses_brand_colors",
+          "description": "HTML dashboard uses client brand colors when brand-config.json exists"
+        }
+      ]
     },
     {
       "id": 2,
       "prompt": "Can you review this landing page for Thrive Retreats in Kingscliff? They run wellness retreats and yoga teacher trainings. Page is at https://thriveretreats.com.au/200hr-ytt and I have both mobile and desktop screenshots. The page has a nice hero with a yoga class photo, headline says 'Welcome to Thrive Retreats', subhead mentions the 200-hour YTT. Below that are 6 feature cards listing what's included, a section with 3 testimonials (just first names, no photos), pricing table, and a 'Register Now' button at the very bottom. They're about to start running Google Ads to this page. Brand colors are teal and warm sand.",
-      "expected_output": "HTML dashboard with: overall score likely 5-7/10 — has good elements but needs optimization. CRITICAL: headline wastes space on 'Welcome to' instead of value prop, CTA only at bottom. MAJOR: testimonials weak (no photos, no last names, no specifics), feature cards are features not benefits, no urgency for limited spots. Fixes should include rewritten headline (e.g., 'Become a Certified Yoga Teacher in 8 Weeks — Beachside in Kingscliff'), benefit-reframed feature cards, enhanced testimonials, CTA above fold, and urgency element for cohort dates.",
-      "files": []
+      "expected_output": "HTML dashboard with: overall score likely 5-7/10 \u2014 has good elements but needs optimization. CRITICAL: headline wastes space on 'Welcome to' instead of value prop, CTA only at bottom. MAJOR: testimonials weak (no photos, no last names, no specifics), feature cards are features not benefits, no urgency for limited spots. Fixes should include rewritten headline (e.g., 'Become a Certified Yoga Teacher in 8 Weeks \u2014 Beachside in Kingscliff'), benefit-reframed feature cards, enhanced testimonials, CTA above fold, and urgency element for cohort dates.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "score_assigned",
+          "description": "Overall Conversion Readiness Score is in expected range"
+        },
+        {
+          "name": "critical_findings_present",
+          "description": "CRITICAL findings match the expected_output description"
+        },
+        {
+          "name": "fix_recommendations_specific",
+          "description": "Fix recommendations include exact rewritten copy and element-level layout guidance, not vague advice"
+        },
+        {
+          "name": "mobile_first_audit",
+          "description": "Mobile experience audited before desktop per skill rule"
+        },
+        {
+          "name": "dashboard_uses_brand_colors",
+          "description": "HTML dashboard uses client brand colors when brand-config.json exists"
+        }
+      ]
     },
     {
       "id": 3,
-      "prompt": "hey can you look at this LP for a new client CrownTECH IT Relocation in Toronto? they help businesses relocate their IT infrastructure when moving offices. page is https://crowntechit.com/relocate — i took a mobile screenshot. the page is pretty text-heavy, has their logo big at the top, then a headline 'IT Relocation Services', three paragraphs about their process, a contact form asking for name email phone company size project timeline budget range and message, and a blue 'Get Quote' button. no testimonials, no trust signals, no case studies. they want to run google search ads targeting 'office IT relocation toronto'",
-      "expected_output": "HTML dashboard with: overall score likely 3-4/10 — B2B lead gen page with major conversion barriers. CRITICAL: headline is generic (just restates the service name), no value proposition, form has 7+ fields for a first touch, no trust signals at all for a service that involves touching a company's critical infrastructure. MAJOR: text-heavy with no visual breaks, logo oversized eating above-fold space, no social proof, no objection handling (companies worry about downtime, data loss, timeline). Fixes should include rewritten headline with outcome focus, reduced form (name, email, company name only), trust signal additions (certifications, client logos, case study snippet), and copy restructure from process-dump to benefit-led."
+      "prompt": "hey can you look at this LP for a new client CrownTECH IT Relocation in Toronto? they help businesses relocate their IT infrastructure when moving offices. page is https://crowntechit.com/relocate \u2014 i took a mobile screenshot. the page is pretty text-heavy, has their logo big at the top, then a headline 'IT Relocation Services', three paragraphs about their process, a contact form asking for name email phone company size project timeline budget range and message, and a blue 'Get Quote' button. no testimonials, no trust signals, no case studies. they want to run google search ads targeting 'office IT relocation toronto'",
+      "expected_output": "HTML dashboard with: overall score likely 3-4/10 \u2014 B2B lead gen page with major conversion barriers. CRITICAL: headline is generic (just restates the service name), no value proposition, form has 7+ fields for a first touch, no trust signals at all for a service that involves touching a company's critical infrastructure. MAJOR: text-heavy with no visual breaks, logo oversized eating above-fold space, no social proof, no objection handling (companies worry about downtime, data loss, timeline). Fixes should include rewritten headline with outcome focus, reduced form (name, email, company name only), trust signal additions (certifications, client logos, case study snippet), and copy restructure from process-dump to benefit-led.",
+      "assertions": [
+        {
+          "name": "score_assigned",
+          "description": "Overall Conversion Readiness Score is in expected range"
+        },
+        {
+          "name": "critical_findings_present",
+          "description": "CRITICAL findings match the expected_output description"
+        },
+        {
+          "name": "fix_recommendations_specific",
+          "description": "Fix recommendations include exact rewritten copy and element-level layout guidance, not vague advice"
+        },
+        {
+          "name": "mobile_first_audit",
+          "description": "Mobile experience audited before desktop per skill rule"
+        },
+        {
+          "name": "dashboard_uses_brand_colors",
+          "description": "HTML dashboard uses client brand colors when brand-config.json exists"
+        }
+      ]
     },
     {
       "id": 4,
@@ -26,23 +92,23 @@
       "assertions": [
         {
           "name": "score_above_7",
-          "description": "Overall Conversion Readiness Score is 8 or above — reflects a well-built page"
+          "description": "Overall Conversion Readiness Score is 8 or above \u2014 reflects a well-built page"
         },
         {
           "name": "only_minor_issues",
-          "description": "No CRITICAL or MAJOR issues flagged — all findings are MINOR polish items"
+          "description": "No CRITICAL or MAJOR issues flagged \u2014 all findings are MINOR polish items"
         },
         {
           "name": "positive_acknowledgments_present",
-          "description": "Audit explicitly calls out what the page does well (CTA placement, form simplicity, social proof) — not just a list of problems"
+          "description": "Audit explicitly calls out what the page does well (CTA placement, form simplicity, social proof) \u2014 not just a list of problems"
         },
         {
           "name": "optimization_recommendations",
-          "description": "Recommendations are optimization-level (A/B test headline variants, micro-copy tweaks) — not overhaul suggestions"
+          "description": "Recommendations are optimization-level (A/B test headline variants, micro-copy tweaks) \u2014 not overhaul suggestions"
         },
         {
           "name": "no_critical_issues",
-          "description": "Zero CRITICAL issues in the priority-ranked list — page is not actively killing conversions"
+          "description": "Zero CRITICAL issues in the priority-ranked list \u2014 page is not actively killing conversions"
         }
       ],
       "files": []
@@ -63,7 +129,7 @@
         },
         {
           "name": "visual_audit_limited_flag",
-          "description": "Visual UI/UX pillar flagged as limited — confidence reduced due to incomplete visual data"
+          "description": "Visual UI/UX pillar flagged as limited \u2014 confidence reduced due to incomplete visual data"
         },
         {
           "name": "screenshot_caveat_in_dashboard",
@@ -71,7 +137,7 @@
         },
         {
           "name": "full_cro_and_copy_audit_still_done",
-          "description": "CRO and Persuasion/Copy pillars still fully audited using HTML source — audit does not abort due to screenshot failure"
+          "description": "CRO and Persuasion/Copy pillars still fully audited using HTML source \u2014 audit does not abort due to screenshot failure"
         }
       ],
       "files": []
@@ -79,12 +145,12 @@
     {
       "id": 6,
       "type": "prompt-check",
-      "prompt": "Audit landing page for CloudSync Pro — file backup SaaS. URL: cloudsyncpro.com/pricing. Page has 3 pricing tiers, feature comparison table, FAQ accordion, no testimonials, generic stock hero image, 'Start Free Trial' CTA only visible after scrolling past pricing grid.",
-      "expected_output": "Score should be 4-6/10. CTA visibility flagged as CRITICAL (buried below pricing grid). Missing social proof flagged as MAJOR. Pricing page used as landing page — recommend building a dedicated ad landing page. SaaS-specific criteria applied (free trial friction, tier clarity, feature comparison usability).",
+      "prompt": "Audit landing page for CloudSync Pro \u2014 file backup SaaS. URL: cloudsyncpro.com/pricing. Page has 3 pricing tiers, feature comparison table, FAQ accordion, no testimonials, generic stock hero image, 'Start Free Trial' CTA only visible after scrolling past pricing grid.",
+      "expected_output": "Score should be 4-6/10. CTA visibility flagged as CRITICAL (buried below pricing grid). Missing social proof flagged as MAJOR. Pricing page used as landing page \u2014 recommend building a dedicated ad landing page. SaaS-specific criteria applied (free trial friction, tier clarity, feature comparison usability).",
       "assertions": [
         {
           "name": "cta_visibility_critical",
-          "description": "CTA buried below pricing grid flagged as CRITICAL — must be visible above fold or repeated"
+          "description": "CTA buried below pricing grid flagged as CRITICAL \u2014 must be visible above fold or repeated"
         },
         {
           "name": "missing_social_proof_flagged",
@@ -92,7 +158,7 @@
         },
         {
           "name": "pricing_page_limitation_noted",
-          "description": "Audit notes that a pricing page is not ideal as an ad landing page — different intent than a dedicated conversion page"
+          "description": "Audit notes that a pricing page is not ideal as an ad landing page \u2014 different intent than a dedicated conversion page"
         },
         {
           "name": "dedicated_landing_page_recommended",
@@ -108,12 +174,12 @@
     {
       "id": 7,
       "type": "prompt-check",
-      "prompt": "Audit landing page for ISKM Singapore Nṛsiṁha Caturdaśī event. React SPA built on Lovable/GPT-Engineer. Page uses scroll-triggered fade-in reveal animations (IntersectionObserver + CSS opacity transitions) and CountUp-style stat counter animations. First screenshot pass captured sections mid-animation — text rendered at low opacity, stat counters captured at transient frames, card images inside faded sections appeared blank. Page is actually fully rendered and correct when animations finish.",
+      "prompt": "Audit landing page for ISKM Singapore N\u1e5bsi\u1e41ha Caturda\u015b\u012b event. React SPA built on Lovable/GPT-Engineer. Page uses scroll-triggered fade-in reveal animations (IntersectionObserver + CSS opacity transitions) and CountUp-style stat counter animations. First screenshot pass captured sections mid-animation \u2014 text rendered at low opacity, stat counters captured at transient frames, card images inside faded sections appeared blank. Page is actually fully rendered and correct when animations finish.",
       "expected_output": "Audit must inject animation-kill CSS before capturing screenshots (per references/screenshot-capture.md 'Kill Page Animations' pre-step). Must NOT report phantom 'broken images' or 'number contradiction' or 'missing content' CRITICAL findings when the page DOM actually contains correct rendered content. Content-missing claims must be verified against rendered DOM, not screenshot alone. Validator should WARN if CRITICAL findings include broken-image-class language without a DOM-verification acknowledgment.",
       "assertions": [
         {
           "name": "animation_kill_css_injected",
-          "description": "Screenshot capture step injects animation-kill CSS (0ms animations/transitions, forced opacity:1) before mobile/desktop capture — not after"
+          "description": "Screenshot capture step injects animation-kill CSS (0ms animations/transitions, forced opacity:1) before mobile/desktop capture \u2014 not after"
         },
         {
           "name": "no_phantom_content_missing_critical",
@@ -121,7 +187,7 @@
         },
         {
           "name": "dom_verification_for_content_claims",
-          "description": "Any 'content missing' finding (images, text, diacritics, form fields, number values) is explicitly verified against rendered DOM before being labeled CRITICAL — screenshot-only content claims are blocked"
+          "description": "Any 'content missing' finding (images, text, diacritics, form fields, number values) is explicitly verified against rendered DOM before being labeled CRITICAL \u2014 screenshot-only content claims are blocked"
         },
         {
           "name": "validator_warns_false_positive",
@@ -129,7 +195,7 @@
         },
         {
           "name": "real_structural_findings_preserved",
-          "description": "Real structural issues (distraction ratio, message-match gap, CTA contrast, missing trust signals) are still identified and ranked correctly — the fix removes false positives without suppressing true positives"
+          "description": "Real structural issues (distraction ratio, message-match gap, CTA contrast, missing trust signals) are still identified and ranked correctly \u2014 the fix removes false positives without suppressing true positives"
         }
       ],
       "files": []
@@ -137,7 +203,7 @@
     {
       "id": 8,
       "type": "prompt-check",
-      "prompt": "Audit a landing page. URL: https://events.example.com/signup. Before capturing any screenshots, per SKILL.md Step 0, run the pre-flight sequence: health_check.py → detect_target_profile.py → load the matching recipe playbook.",
+      "prompt": "Audit a landing page. URL: https://events.example.com/signup. Before capturing any screenshots, per SKILL.md Step 0, run the pre-flight sequence: health_check.py \u2192 detect_target_profile.py \u2192 load the matching recipe playbook.",
       "expected_output": "Step 0 must execute before any Chrome MCP screenshot or DOM probe. health_check.py exit code must be 0. Target profile must be detected. The corresponding recipe in references/capture-recipes/ must be read before Step 1 capture begins. If profile has no recipe, skill must stop and surface the gap per Skill Protocol Supremacy, not invent an ad-hoc capture approach.",
       "assertions": [
         {
@@ -150,11 +216,11 @@
         },
         {
           "name": "recipe_loaded_and_followed",
-          "description": "references/capture-recipes/{profile}.md is read, and its capture protocol is followed literally in Step 1 — not a generic one-size-fits-all sequence."
+          "description": "references/capture-recipes/{profile}.md is read, and its capture protocol is followed literally in Step 1 \u2014 not a generic one-size-fits-all sequence."
         },
         {
           "name": "missing_recipe_surfaces_gap",
-          "description": "If detection returns a profile whose recipe file doesn't exist yet, skill stops and flags it as a Skill Protocol Supremacy gap — does NOT improvise an ad-hoc recipe on the client page."
+          "description": "If detection returns a profile whose recipe file doesn't exist yet, skill stops and flags it as a Skill Protocol Supremacy gap \u2014 does NOT improvise an ad-hoc recipe on the client page."
         },
         {
           "name": "fixtures_remain_green",

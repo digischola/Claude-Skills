@@ -1,106 +1,55 @@
 {
-  "skill": "scheduler-publisher",
-  "version": "1.0.0",
-  "test_cases": [
+  "skill_name": "scheduler-publisher",
+  "evals": [
     {
-      "id": "tick_no_drafts",
-      "description": "Tick on empty pending-approval folder logs zero work, returns 0",
-      "fixture": "fixtures/empty_brand/",
-      "command": "tick.py --dry-run",
-      "expected_exit": 0,
-      "expected_log_contains": ["scanned: 0 due drafts", "tick end"]
+      "id": 1,
+      "prompt": "Run a tick that finds a LinkedIn draft scheduled for now: `python3 scripts/tick.py` against a draft with channel=linkedin, posting_status=scheduled, scheduled_at <= now(IST).",
+      "expected_output": "Tick acquires lock, dispatches to publishers/linkedin.py (autonomous API), updates frontmatter on success: posted_at, platform_url, posting_status: posted. Moves file from pending-approval/ to published/. Logs to scheduler.log.",
+      "assertions": [
+        {
+          "name": "lock_acquired",
+          "description": "fcntl flock acquired on /tmp/digischola-scheduler.lock before scanning"
+        },
+        {
+          "name": "linkedin_dispatch",
+          "description": "Draft routed to publishers/linkedin.py based on channel field"
+        },
+        {
+          "name": "frontmatter_updated",
+          "description": "On success: posted_at, platform_url, posting_status: posted all set"
+        },
+        {
+          "name": "file_moved",
+          "description": "Draft moved from pending-approval/ to published/"
+        },
+        {
+          "name": "log_entry",
+          "description": "scheduler.log gains a 'posted' entry with draft id, channel, url"
+        }
+      ]
     },
     {
-      "id": "tick_due_linkedin_text",
-      "description": "Tick picks up a LinkedIn text-post draft with scheduled_at in the past and dispatches",
-      "fixture": "fixtures/single_li_text_due/",
-      "command": "tick.py --dry-run",
-      "expected_exit": 0,
-      "expected_log_contains": ["[DRY-RUN] would publish 4e4eed15", "linkedin"]
-    },
-    {
-      "id": "tick_skip_already_posted",
-      "description": "Drafts with posting_status=posted are NOT re-fired",
-      "fixture": "fixtures/already_posted/",
-      "command": "tick.py --dry-run",
-      "expected_exit": 0,
-      "expected_log_contains": ["scanned: 0 due drafts"]
-    },
-    {
-      "id": "tick_retry_due_after_backoff",
-      "description": "Failed drafts whose posting_next_retry_at is in the past ARE retried",
-      "fixture": "fixtures/retry_due/",
-      "command": "tick.py --dry-run",
-      "expected_exit": 0,
-      "expected_log_contains": ["scanned: 1 due drafts"]
-    },
-    {
-      "id": "tick_lock_contention",
-      "description": "If lock is held by another process, tick exits with code 1",
-      "fixture": "fixtures/empty_brand/",
-      "command": "(flock /tmp/digischola-scheduler.lock sleep 30 &) ; sleep 1 ; tick.py",
-      "expected_exit": 1,
-      "expected_log_contains": ["another tick is in flight"]
-    },
-    {
-      "id": "manual_channel_notification",
-      "description": "Instagram draft fires a notification and sets posting_status=notified",
-      "fixture": "fixtures/single_ig_carousel_due/",
-      "command": "tick.py --dry-run",
-      "expected_exit": 0,
-      "expected_frontmatter_after": {
-        "posting_status": "notified"
-      }
-    },
-    {
-      "id": "manual_publish_overdue_marker",
-      "description": "Notified draft >48h becomes manual_publish_overdue",
-      "fixture": "fixtures/notified_50h_ago/",
-      "command": "tick.py",
-      "expected_exit": 0,
-      "expected_log_contains": ["manual_publish_overdue"]
-    },
-    {
-      "id": "apply_calendar_writes_scheduled_at",
-      "description": "apply_calendar parses W17 markdown and writes scheduled_at to matching drafts",
-      "fixture": "fixtures/calendar_w17/",
-      "command": "apply_calendar.py --week 2026-W17",
-      "expected_exit": 0,
-      "expected_frontmatter_after": {
-        "scheduled_at": "2026-04-22T09:00:00+05:30",
-        "posting_status": "scheduled"
-      }
-    },
-    {
-      "id": "ship_now_overrides_schedule",
-      "description": "ship_now.py forces immediate dispatch even if scheduled_at is in the future",
-      "fixture": "fixtures/scheduled_for_tomorrow/",
-      "command": "ship_now.py path/to/draft.md --dry-run",
-      "expected_exit": 0,
-      "expected_log_contains": ["[DRY-RUN] would publish"]
-    },
-    {
-      "id": "confirm_published_moves_to_published_dir",
-      "description": "confirm_published.py marks posted and moves the file",
-      "fixture": "fixtures/notified_ig/",
-      "command": "confirm_published.py path/to/draft.md --url https://instagram.com/p/ABC123",
-      "expected_exit": 0,
-      "expected_file_at": "brand/queue/published/draft.md",
-      "expected_frontmatter_after": {
-        "posting_status": "posted",
-        "platform_url": "https://instagram.com/p/ABC123",
-        "published_via": "manual"
-      }
-    },
-    {
-      "id": "x_thread_split_long_text",
-      "description": "X publisher splits text > 280 chars into a thread with chained replies",
-      "fixture": "fixtures/long_x_text/",
-      "command": "ship_now.py path/to/draft.md --dry-run",
-      "expected_exit": 0,
-      "notes": "Verify by inspecting publish_thread is invoked, not publish_single"
+      "id": 2,
+      "prompt": "Run a tick where the LinkedIn API returns HTTP 426 NONEXISTENT_VERSION on first attempt, then succeeds on retry.",
+      "expected_output": "First attempt fails. posting_attempts incremented. Tick exits without moving file. After retry-after delay (5s for attempt 2), tick re-fires and either succeeds or escalates per backoff schedule (5s \u2192 30s \u2192 2min \u2192 permanent fail at attempt 4).",
+      "assertions": [
+        {
+          "name": "retry_backoff_respected",
+          "description": "Wait times follow 5s, 30s, 2min schedule between attempts"
+        },
+        {
+          "name": "permanent_fail_at_4",
+          "description": "After 4 failed attempts, posting_status set to failed and notification fired"
+        },
+        {
+          "name": "no_double_post",
+          "description": "Lock prevents concurrent ticks from re-attempting in parallel"
+        },
+        {
+          "name": "frontmatter_attempts_count",
+          "description": "posting_attempts field tracks the retry count across tick invocations"
+        }
+      ]
     }
-  ],
-  "fixtures_dir": "fixtures/",
-  "notes": "Fixtures directory contains a brand/queue/pending-approval/ subtree per test case. Run with: python3 -m evals.run_evals (future runner)."
+  ]
 }

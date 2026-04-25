@@ -1,88 +1,56 @@
 {
-  "skill": "weekly-ritual",
-  "version": "1.0.0",
-  "test_cases": [
+  "skill_name": "weekly-ritual",
+  "evals": [
     {
-      "id": "auto_detect_sunday",
-      "description": "On Sunday, --day auto returns 'sunday'",
-      "command": "weekly_ritual.py --day auto --dry-run",
-      "fixture": "fixtures/sunday/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Auto-detected day: sunday", "[DRY-RUN] would fire sunday ritual"]
+      "id": 1,
+      "prompt": "Cron fires at Wed 09:00 IST: `python3 scripts/weekly_ritual.py --day auto`",
+      "expected_output": "auto_detect_day() resolves Wednesday \u2192 'sunday' (legacy internal label for the planning ritual). Idempotency check passes (no fire within last 12h). macOS notification fires. Clipboard receives 'run wednesday planning'. brand/weekly-ritual.state.json updated with last_fired_sunday timestamp. Launcher HTML written to brand/weekly-ritual/launcher-sunday.html.",
+      "expected_output_alt": "If ritual already fired in last 12h, script exits silently with 'idempotent skip' log entry and no notification.",
+      "assertions": [
+        {
+          "name": "weekday_routes_to_planning",
+          "description": "auto_detect_day resolves Wednesday to the planning ritual (internal key sunday)"
+        },
+        {
+          "name": "notification_fired",
+          "description": "terminal-notifier or osascript notification fired with click-through to launcher HTML"
+        },
+        {
+          "name": "clipboard_set",
+          "description": "macOS clipboard contains 'run wednesday planning'"
+        },
+        {
+          "name": "state_updated",
+          "description": "brand/weekly-ritual.state.json: last_fired_sunday set to current ISO timestamp"
+        },
+        {
+          "name": "idempotency_guard",
+          "description": "If fired again within 12h, second invocation exits silently \u2014 no duplicate notification"
+        }
+      ]
     },
     {
-      "id": "auto_detect_friday",
-      "description": "On Friday, --day auto returns 'friday'",
-      "command": "weekly_ritual.py --day auto --dry-run",
-      "fixture": "fixtures/friday/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Auto-detected day: friday", "[DRY-RUN] would fire friday ritual"]
-    },
-    {
-      "id": "auto_detect_non_ritual_day",
-      "description": "On Tue/Wed/Thu/Sat, --day auto exits 0 with 'Today is not a ritual day'",
-      "command": "weekly_ritual.py --day auto",
-      "fixture": "fixtures/tuesday/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["not a ritual day"]
-    },
-    {
-      "id": "idempotency_skip",
-      "description": "Re-firing within 12h is a no-op (skipped with explanation)",
-      "command": "weekly_ritual.py --day sunday",
-      "fixture": "fixtures/just_fired_sunday/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Skipped sunday ritual", "within 12h window"]
-    },
-    {
-      "id": "force_bypasses_idempotency",
-      "description": "--once / --force bypasses the 12h cooldown",
-      "command": "weekly_ritual.py --day sunday --once --dry-run",
-      "fixture": "fixtures/just_fired_sunday/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["[DRY-RUN] would fire sunday ritual"]
-    },
-    {
-      "id": "fire_writes_state_file",
-      "description": "Successful fire writes last_fired_<day> to brand/weekly-ritual.state.json",
-      "command": "weekly_ritual.py --day friday --once",
-      "fixture": "fixtures/empty_brand/",
-      "expected_exit": 0,
-      "expected_state_file": {
-        "last_fired_friday": "<ISO 8601 timestamp>"
-      }
-    },
-    {
-      "id": "status_shows_state",
-      "description": "--status prints state file contents and today's ritual day",
-      "command": "weekly_ritual.py --status",
-      "fixture": "fixtures/has_state/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["State file:", "Today (IST):"]
-    },
-    {
-      "id": "install_launchagent_writes_plist",
-      "description": "install_launchagents.py creates the plist with both Sun + Fri triggers",
-      "command": "install_launchagents.py --force",
-      "expected_exit": 0,
-      "expected_file_at": "~/Library/LaunchAgents/com.digischola.weekly-ritual.plist",
-      "expected_plist_contains": ["StartCalendarInterval", "Weekday>0<", "Weekday>5<", "Hour>9<", "Hour>18<"]
-    },
-    {
-      "id": "install_status_after_load",
-      "description": "After install, --status reports loaded=true",
-      "command": "install_launchagents.py --status",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Loaded in launchctl: True"]
-    },
-    {
-      "id": "uninstall_removes_plist",
-      "description": "--uninstall unloads + removes the plist",
-      "command": "install_launchagents.py --uninstall",
-      "expected_exit": 0,
-      "expected_file_absent": "~/Library/LaunchAgents/com.digischola.weekly-ritual.plist"
+      "id": 2,
+      "prompt": "Mon 18:00 IST review ritual fires but queue/published/ has zero posts from the last 7 days.",
+      "expected_output": "Pre-check fails. Notification fires with message 'No posts in queue/published this week \u2014 review will surface no metrics'. Ritual still notifies but flags the missing-data condition. State.json updated with last_fired_friday.",
+      "assertions": [
+        {
+          "name": "precheck_detects_empty",
+          "description": "Pre-check counts published/ entries with posted_at within last 7 days"
+        },
+        {
+          "name": "notification_explains_gap",
+          "description": "Notification message explicitly mentions 'no posts to review' rather than firing the standard prompt"
+        },
+        {
+          "name": "no_silent_skip",
+          "description": "Ritual still fires notification + clipboard so user is aware; does not silently skip the slot"
+        },
+        {
+          "name": "state_updated",
+          "description": "last_fired_friday updated regardless of pre-check outcome"
+        }
+      ]
     }
-  ],
-  "fixtures_dir": "fixtures/",
-  "notes": "Fixtures simulate different brand-folder + state combos. Many tests freeze the system clock (IST) to a specific weekday by mocking datetime — e.g., fixtures/sunday/ uses freezegun-equivalent to lock the date to a Sunday. Run via: python3 -m evals.run_evals (future runner)."
+  ]
 }

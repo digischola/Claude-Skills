@@ -25,6 +25,9 @@ A pure-cron version would skip the creative half. A pure-Claude version would re
 - `Desktop/Digischola/brand/queue/pending-approval/` — Wednesday-Planning writes drafts here, Monday-Review reads from `published/`
 - `Desktop/Digischola/brand/performance/YYYY-WXX.md` — Monday-Review writes
 
+**Shared context:**
+- `.claude/shared-context/analyst-profile.md` — workflow, voice/quality standards used to gate ritual outputs
+
 **Skill references:**
 - `references/wednesday-planning-flow.md` — full Wednesday step-by-step
 - `references/monday-review-flow.md` — full Monday step-by-step

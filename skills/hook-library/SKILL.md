@@ -31,6 +31,9 @@ A standalone skill enables:
 - `data/promotion-log.json` — history of all tier changes (auditable)
 - (Optional) `post-writer/references/hook-library.md` — regenerated mirror via `export --target post-writer`
 
+**Shared context:**
+- `.claude/shared-context/analyst-profile.md` — workflow, voice standards (no em dashes, no hype, conservative client naming)
+
 **Skill references:**
 - `references/hook-pattern-anatomy.md` — what makes a pattern, how to add one
 - `references/tier-system.md` — Tier 1/2/3 definitions, promotion + demotion rules

@@ -1,5 +1,17 @@
 \# Meta Ads Expert Reference Guide (2025–2026)
 
+## Table of Contents
+
+- [Executive Summary](#executive-summary)
+- [1. Campaign Objectives & Optimization Events](#1-campaign-objectives--optimization-events)
+- [2. Advantage+ & Automation Features](#2-advantage--automation-features)
+- [3. Audience Architecture](#3-audience-architecture)
+- [4. Bidding & Budget Strategies](#4-bidding--budget-strategies)
+- [5. Campaign Structure Best Practices](#5-campaign-structure-best-practices)
+- [6. Placements & Formats](#6-placements--formats)
+- [7. Conversion Tracking & Attribution](#7-conversion-tracking--attribution)
+- [8. Reporting & Optimization Signals](#8-reporting--optimization-signals)
+
 \#\# Executive Summary
 
 Meta Ads has fully migrated to the ODAX objective framework (Awareness, Traffic, Engagement, Leads, App Promotion, Sales) and layered it on top of a fundamentally new AI-driven delivery stack built around Meta Lattice, Andromeda, GEM and the Advantage+ suite. Performance in 2025–2026 is less about micromanaging knobs in Ads Manager and more about feeding the system strong conversion signals, broad audiences, and diverse creatives while selectively overriding automation where it clearly underperforms. This guide summarizes current-best practices and platform rules at a level suitable for senior media buyers and strategy tooling.\[1\]\[2\]\[3\]\[4\]\[5\]

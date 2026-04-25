@@ -1,5 +1,21 @@
 # Analysis Framework — 11 Layers
 
+## Table of Contents
+
+- [Universal Rules](#universal-rules)
+- [Layer 1: Health Check](#layer-1-health-check)
+- [Layer 2: Diagnosis](#layer-2-diagnosis)
+- [Layer 3: Prescription](#layer-3-prescription)
+- [Layer 4: Creative Intelligence](#layer-4-creative-intelligence)
+- [Layer 5: Testing Framework](#layer-5-testing-framework)
+- [Layer 6: Competitive Context](#layer-6-competitive-context)
+- [Layer 7: Benchmarking](#layer-7-benchmarking)
+- [Layer 8: Cross-Platform](#layer-8-cross-platform)
+- [Layer 9: Trend Analysis](#layer-9-trend-analysis)
+- [Layer 10: Action Prioritization](#layer-10-action-prioritization)
+- [Layer 11: Session Memory](#layer-11-session-memory)
+- [Layer Execution Order](#layer-execution-order)
+
 Load this file in Step 3. Contains decision thresholds, analysis logic, and output structure for each layer.
 
 ## Universal Rules

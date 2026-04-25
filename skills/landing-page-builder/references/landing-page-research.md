@@ -1,5 +1,25 @@
 # Landing Page Research — Builder Rules
 
+## Table of Contents
+
+- [1. Page Architecture by Type](#1-page-architecture-by-type)
+- [2. Above-the-Fold Rules (Mobile 375px)](#2-above-the-fold-rules-mobile-375px)
+- [3. CTA Placement Rules](#3-cta-placement-rules)
+- [4. Social Proof Placement](#4-social-proof-placement)
+- [5. Pricing Presentation Rules](#5-pricing-presentation-rules)
+- [6. FAQ Rules](#6-faq-rules)
+- [7. Form Rules](#7-form-rules)
+- [8. Typography System](#8-typography-system)
+- [9. Spacing & Layout System](#9-spacing--layout-system)
+- [10. Color Rules](#10-color-rules)
+- [11. Image Rules](#11-image-rules)
+- [12. Animation Rules](#12-animation-rules)
+- [13. Mobile-Specific Rules](#13-mobile-specific-rules)
+- [14. Conversion Psychology Rules](#14-conversion-psychology-rules)
+- [15. Performance Budget](#15-performance-budget)
+- [16. Lovable/React Portability Rules](#16-lovablereact-portability-rules)
+- [17. Exit Intent Patterns](#17-exit-intent-patterns)
+
 Load this file in Step 3 (page generation). These are data-backed construction rules, not evaluation criteria. The landing-page-audit handles evaluation.
 
 Source: Perplexity Deep Research, April 2026. 99 references analyzed.

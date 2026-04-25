@@ -21,6 +21,9 @@ Quality bar is also higher: stronger structure, more rigorous metric verificatio
 - `Desktop/Digischola/brand/idea-bank.json` — source client-win entries
 - `Desktop/Digischola/brand/pillars.md` — must be LOCKED
 
+**Shared context:**
+- `.claude/shared-context/analyst-profile.md` — workflow, voice standards, formatting preferences
+
 **Skill references:**
 - `references/case-study-structure.md` — Setup → Problem → Diagnosis → Fix → Result → Lesson framework
 - `references/platform-adaptations.md` — per-channel rules (slide count, tweet length, blog headers, IG visual density)

@@ -154,10 +154,7 @@ Key constraints: same issue numbering as the HTML dashboard, identical fix recom
 
 ## Learnings & Rules
 
-<!--
-Format: [DATE] [CLIENT TYPE] Finding → Action
-Keep under 30 lines. Prune quarterly. See references/feedback-loop.md for protocol.
--->
+<!-- Format: [DATE] [CLIENT TYPE] Finding → Action. Keep under 30 lines. Prune quarterly. See references/feedback-loop.md for protocol. -->
 
 - [2026-04] [General] Finding: Dashboard specs describing what to build (sections, layout, interactions) without a working HTML scaffold produces broken, unstyled output. Every run reinvents the HTML/CSS/JS from scratch and fails differently. Action: Bundle a complete HTML dashboard template in `assets/dashboard-template.html` with all CSS, Chart.js config, collapsible JS, and dark mode styling pre-built. Skill should populate the template with audit data, not generate HTML from scratch.
 - [2026-04] [General] Finding: All 3 test runs independently wrote similar dashboard code — classic signal for bundling a script. Action: Create `scripts/generate_dashboard.py` that takes structured audit JSON and produces the final HTML from the template.

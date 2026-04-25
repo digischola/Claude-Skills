@@ -13,6 +13,9 @@ Keeps the 15-creator reference file fresh. Rotation: 4 creators per Sunday → f
 
 ## Context Loading
 
+**Shared context:**
+- `.claude/shared-context/analyst-profile.md` — workflow, voice standards (creators are mimicked for inspiration only, never voice-cloned)
+
 **Read inputs:**
 - `references/tracked-creators.md` — the 15 creators, their handles, channels, niches, current rotation index
 - `references/refresh-strategy.md` — how Claude conducts the per-creator scan

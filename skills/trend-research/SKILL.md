@@ -19,6 +19,9 @@ content-calendar pulls from idea-bank. If work-capture has been quiet for a week
 - `Desktop/Digischola/brand/voice-guide.md` — relevance filter (skip trends that need em dashes / hype words)
 - `Desktop/Digischola/brand/icp.md` — relevance filter (skip trends irrelevant to wellness / spiritual / hospitality / B2B / freelancer / SMB ICPs)
 
+**Shared context:**
+- `.claude/shared-context/analyst-profile.md` — workflow, voice/quality standards used as relevance filter
+
 **Skill references:**
 - `references/pillar-niches.md` — keyword seeds + tracked sources per pillar
 - `references/web-search-strategy.md` — how Claude conducts the autonomous scan

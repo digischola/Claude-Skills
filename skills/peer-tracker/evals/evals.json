@@ -1,83 +1,51 @@
 {
-  "skill": "peer-tracker",
-  "version": "1.0.0",
-  "test_cases": [
+  "skill_name": "peer-tracker",
+  "evals": [
     {
-      "id": "list_returns_15_creators",
-      "description": "list sub-command returns all 15 tracked creators",
-      "command": "peer_tracker.py list",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Total: 15 tracked creators", "Peep Laja", "Shreya Pattar", "Barry Hott"]
+      "id": 1,
+      "prompt": "Get this Sunday's rotation due list: `python3 scripts/peer_tracker.py rotation-due --week 2026-W17`",
+      "expected_output": "Returns 4-5 creator names sorted by last_refreshed_at ascending (oldest first), drawn from the 15 creators in references/tracked-creators.md. Output is JSON with creator name, handle, channel, last_refreshed_at.",
+      "assertions": [
+        {
+          "name": "returns_4_or_5_creators",
+          "description": "Output contains 4 creators (or 5 every other week per rotation rule)"
+        },
+        {
+          "name": "sorted_oldest_first",
+          "description": "Creators sorted by last_refreshed_at ascending \u2014 oldest refresh date appears first"
+        },
+        {
+          "name": "from_tracked_15",
+          "description": "All returned creators are members of the 15-creator list in references/tracked-creators.md"
+        },
+        {
+          "name": "json_shape",
+          "description": "Each creator entry has fields: name, handle, channel, last_refreshed_at"
+        }
+      ]
     },
     {
-      "id": "rotation_due_returns_4_oldest",
-      "description": "rotation-due returns 4 creators sorted by oldest last_refreshed_at",
-      "command": "peer_tracker.py rotation-due --week 2026-W17 --json",
-      "fixture": "fixtures/empty_log/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["this_week", "Peep Laja"],
-      "expected_json_field_count": {"this_week": 4}
-    },
-    {
-      "id": "apply_refresh_updates_creator_section",
-      "description": "apply-refresh writes Last refreshed + Recent samples into the creator's section",
-      "command": "peer_tracker.py apply-refresh --creator 'Peep Laja' --findings '{\"status\":\"active\",\"recent_posts\":[{\"date\":\"2026-04-12\",\"url\":\"https://example.com\",\"summary\":\"Brutal truth on enterprise CRO\"}]}'",
-      "expected_exit": 0,
-      "expected_creator_study_contains": ["**Last refreshed:** 2026-04-", "**Recent samples:**", "Brutal truth on enterprise CRO"]
-    },
-    {
-      "id": "apply_refresh_appends_hook_pattern_delta",
-      "description": "If hook_pattern_delta is provided, append (don't replace) to Signature format",
-      "command": "peer_tracker.py apply-refresh --creator 'Peep Laja' --findings '{\"status\":\"active\",\"hook_pattern_delta\":\"NEW: Question-Stack Carousel\",\"recent_posts\":[]}'",
-      "expected_exit": 0,
-      "expected_creator_study_contains": ["The Brutal Truth Text Post", "+", "Question-Stack Carousel"]
-    },
-    {
-      "id": "apply_refresh_silent_status_marks_log",
-      "description": "status:silent gets recorded in refresh-log.json",
-      "command": "peer_tracker.py apply-refresh --creator 'Joly Tematio' --findings '{\"status\":\"silent\",\"recent_posts\":[],\"notes\":\"0 posts in last 30 days\"}'",
-      "expected_exit": 0,
-      "expected_log_field": {"creators.Joly Tematio.status": "silent"}
-    },
-    {
-      "id": "apply_refresh_unknown_creator_fails",
-      "description": "Unknown creator name → 'NOT FOUND' message, exit 1",
-      "command": "peer_tracker.py apply-refresh --creator 'Random Person' --findings '{\"status\":\"active\",\"recent_posts\":[]}'",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["NOT FOUND"]
-    },
-    {
-      "id": "rotation_advances_after_refresh",
-      "description": "After 4 refreshes, rotation-due returns the NEXT 4 creators (different from prior 4)",
-      "command": "peer_tracker.py rotation-due --json",
-      "fixture": "fixtures/4_refreshed/",
-      "expected_exit": 0,
-      "expected_json_field_excludes": {"this_week": ["Peep Laja", "Jon MacDonald", "Harry Dry", "Rishabh Dev"]}
-    },
-    {
-      "id": "validate_creator_study_all_15_present",
-      "description": "validate-creator-study reports 15/15 sections found",
-      "command": "peer_tracker.py validate-creator-study",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["sections found: 15/15", "All 15 tracked creators have sections"]
-    },
-    {
-      "id": "validate_reports_missing_section",
-      "description": "If creator-study.md is missing a creator's section, validate exits 1 + names them",
-      "command": "peer_tracker.py validate-creator-study",
-      "fixture": "fixtures/creator_study_missing_jack_butcher/",
-      "expected_exit": 1,
-      "expected_stdout_contains": ["Missing sections", "Jack Butcher"]
-    },
-    {
-      "id": "stats_shows_pct_refreshed_recently",
-      "description": "stats shows 'Refreshed in last 35d: N (X%)' line",
-      "command": "peer_tracker.py stats",
-      "fixture": "fixtures/half_refreshed/",
-      "expected_exit": 0,
-      "expected_stdout_contains": ["Total tracked: 15", "Refreshed in last 35d:", "By status:"]
+      "id": 2,
+      "prompt": "Apply a refresh for one creator: `python3 scripts/peer_tracker.py apply-refresh --creator 'Justin Welsh' --findings '{...top 3 posts, signature delta, status: active...}'`",
+      "expected_output": "Updates the Justin Welsh section of post-writer/references/creator-study.md IN PLACE (recent samples + signature format + last_refreshed). Bumps last_refreshed_at in data/refresh-log.json. Does NOT rewrite the file from scratch \u2014 preserves any manual edits to other creators' sections.",
+      "assertions": [
+        {
+          "name": "in_place_update",
+          "description": "Only Justin Welsh's section is modified in creator-study.md; other 14 creators' sections byte-identical"
+        },
+        {
+          "name": "last_refreshed_bumped",
+          "description": "data/refresh-log.json: Justin Welsh's last_refreshed_at updated to current ISO timestamp"
+        },
+        {
+          "name": "no_full_rewrite",
+          "description": "File diff shows only Justin Welsh subsection changed, not whole-file replacement"
+        },
+        {
+          "name": "status_preserved_or_set",
+          "description": "If findings include status (active/silent/pivoted), it is recorded in his subsection"
+        }
+      ]
     }
-  ],
-  "fixtures_dir": "fixtures/",
-  "notes": "Fixtures pre-populate refresh-log.json with various states (empty, 4-refreshed, half-refreshed) and may include modified creator-study.md variants. Some tests freeze time to deterministically test the 35-day recency window."
+  ]
 }

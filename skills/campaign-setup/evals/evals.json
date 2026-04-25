@@ -3,14 +3,66 @@
   "evals": [
     {
       "id": "retreat-house-phase1-google-only",
-      "description": "Downstream mode: consume Retreat House paid-media-strategy + ad-copywriter + landing-page-builder outputs. Phase 1 = Google only. Expect 8 CSVs + checklist + runbook. 0 CRITICAL from validator.",
-      "inputs": {
+      "prompt": "Run campaign-setup with: client_dir=Retreat House/Retreat House; mode=downstream; platforms=['google']; phase=1. Downstream mode: consume Retreat House paid-media-strategy + ad-copywriter + landing-page-builder outputs. Phase 1 = Google only. Expect 8 CSVs + checklist + runbook. 0 CRITICAL from validator.",
+      "assertions": [
+        {
+          "name": "file_01_campaigns",
+          "description": "file `deliverables/campaign-setup/google-ads/01-campaigns.csv` is present in deliverables"
+        },
+        {
+          "name": "file_02_ad_groups",
+          "description": "file `deliverables/campaign-setup/google-ads/02-ad-groups.csv` is present in deliverables"
+        },
+        {
+          "name": "file_03_keywords",
+          "description": "file `deliverables/campaign-setup/google-ads/03-keywords.csv` is present in deliverables"
+        },
+        {
+          "name": "file_04_responsive_search_ads",
+          "description": "file `deliverables/campaign-setup/google-ads/04-responsive-search-ads.csv` is present in deliverables"
+        },
+        {
+          "name": "file_05_sitelink_extensions",
+          "description": "file `deliverables/campaign-setup/google-ads/05-sitelink-extensions.csv` is present in deliverables"
+        },
+        {
+          "name": "file_06_callout_extensions",
+          "description": "file `deliverables/campaign-setup/google-ads/06-callout-extensions.csv` is present in deliverables"
+        },
+        {
+          "name": "file_08_negative_keywords",
+          "description": "file `deliverables/campaign-setup/google-ads/08-negative-keywords.csv` is present in deliverables"
+        },
+        {
+          "name": "file_README",
+          "description": "file `deliverables/campaign-setup/google-ads/README.md` is present in deliverables"
+        },
+        {
+          "name": "file_pre_launch_checklist",
+          "description": "file `deliverables/campaign-setup/pre-launch-checklist.md` is present in deliverables"
+        },
+        {
+          "name": "file_launch_runbook",
+          "description": "file `deliverables/campaign-setup/launch-runbook.md` is present in deliverables"
+        },
+        {
+          "name": "validator_critical_count",
+          "description": "validator critical-failure count is 0"
+        },
+        {
+          "name": "placeholder_tokens",
+          "description": "placeholder token count: >= 1 (account ID + conversion action names at minimum)"
+        }
+      ],
+      "_original_inputs": {
         "client_dir": "Retreat House/Retreat House",
         "mode": "downstream",
-        "platforms": ["google"],
+        "platforms": [
+          "google"
+        ],
         "phase": 1
       },
-      "expected_outputs": {
+      "_original_expected_outputs": {
         "files_present": [
           "deliverables/campaign-setup/google-ads/01-campaigns.csv",
           "deliverables/campaign-setup/google-ads/02-ad-groups.csv",
@@ -29,13 +81,42 @@
     },
     {
       "id": "standalone-saas-b2b",
-      "description": "Standalone mode: no upstream deliverables. Skill asks 12-question intake. Expect Google + Meta CSVs with heavy <REPLACE_ME> annotations.",
-      "inputs": {
+      "prompt": "Run campaign-setup with: mode=standalone; client_type=SaaS B2B; platforms=['google', 'meta']. Standalone mode: no upstream deliverables. Skill asks 12-question intake. Expect Google + Meta CSVs with heavy <REPLACE_ME> annotations.",
+      "assertions": [
+        {
+          "name": "file_01_campaigns",
+          "description": "file `deliverables/campaign-setup/google-ads/01-campaigns.csv` is present in deliverables"
+        },
+        {
+          "name": "file_meta_bulk_import",
+          "description": "file `deliverables/campaign-setup/meta-ads/meta-bulk-import.csv` is present in deliverables"
+        },
+        {
+          "name": "file_pre_launch_checklist",
+          "description": "file `deliverables/campaign-setup/pre-launch-checklist.md` is present in deliverables"
+        },
+        {
+          "name": "validator_critical_count",
+          "description": "validator critical-failure count is 0"
+        },
+        {
+          "name": "placeholder_tokens",
+          "description": "placeholder token count: >= 10"
+        },
+        {
+          "name": "readme_includes",
+          "description": "README must include `STANDALONE MODE`"
+        }
+      ],
+      "_original_inputs": {
         "mode": "standalone",
         "client_type": "SaaS B2B",
-        "platforms": ["google", "meta"]
+        "platforms": [
+          "google",
+          "meta"
+        ]
       },
-      "expected_outputs": {
+      "_original_expected_outputs": {
         "files_present": [
           "deliverables/campaign-setup/google-ads/01-campaigns.csv",
           "deliverables/campaign-setup/meta-ads/meta-bulk-import.csv",
@@ -48,38 +129,72 @@
     },
     {
       "id": "char-limit-violations",
-      "description": "Inject ad copy that exceeds Google RSA 30-char / 90-char limits. Validator must flag every violation as CRITICAL.",
-      "inputs": {
+      "prompt": "Run campaign-setup with: mode=test; headlines_over_limit=3; descriptions_over_limit=2. Inject ad copy that exceeds Google RSA 30-char / 90-char limits. Validator must flag every violation as CRITICAL.",
+      "assertions": [
+        {
+          "name": "validator_critical_count",
+          "description": "validator critical-failure count is >= 5"
+        },
+        {
+          "name": "validator_message_substring",
+          "description": "validator output contains the substring `chars (max 30)`"
+        }
+      ],
+      "_original_inputs": {
         "mode": "test",
         "headlines_over_limit": 3,
         "descriptions_over_limit": 2
       },
-      "expected_outputs": {
+      "_original_expected_outputs": {
         "validator_critical": ">= 5",
         "validator_message_contains": "chars (max 30)"
       }
     },
     {
       "id": "orphan-references",
-      "description": "CSVs reference a campaign name that doesn't exist in 01-campaigns.csv. Validator must flag as CRITICAL.",
-      "inputs": {
+      "prompt": "Run campaign-setup with: mode=test; orphan_ad_groups=1; orphan_keywords=2. CSVs reference a campaign name that doesn't exist in 01-campaigns.csv. Validator must flag as CRITICAL.",
+      "assertions": [
+        {
+          "name": "validator_critical_count",
+          "description": "validator critical-failure count is >= 3"
+        },
+        {
+          "name": "validator_message_substring",
+          "description": "validator output contains the substring `not found`"
+        }
+      ],
+      "_original_inputs": {
         "mode": "test",
         "orphan_ad_groups": 1,
         "orphan_keywords": 2
       },
-      "expected_outputs": {
+      "_original_expected_outputs": {
         "validator_critical": ">= 3",
         "validator_message_contains": "not found"
       }
     },
     {
       "id": "meta-asset-manifest-pending",
-      "description": "Meta bulk CSV references <PENDING_UPLOAD> tokens because user hasn't uploaded assets yet. Validator must WARN (not CRITICAL) and block launch via checklist Section 0.",
-      "inputs": {
+      "prompt": "Run campaign-setup with: mode=test; meta_pending_assets=4. Meta bulk CSV references <PENDING_UPLOAD> tokens because user hasn't uploaded assets yet. Validator must WARN (not CRITICAL) and block launch via checklist Section 0.",
+      "assertions": [
+        {
+          "name": "validator_warning_count",
+          "description": "validator warning count is >= 1"
+        },
+        {
+          "name": "validator_message_substring",
+          "description": "validator output contains the substring `PENDING_UPLOAD`"
+        },
+        {
+          "name": "checklist_section_0_lists_pending",
+          "description": "pre-launch-checklist Section 0 lists pending Meta assets"
+        }
+      ],
+      "_original_inputs": {
         "mode": "test",
         "meta_pending_assets": 4
       },
-      "expected_outputs": {
+      "_original_expected_outputs": {
         "validator_warning": ">= 1",
         "validator_message_contains": "PENDING_UPLOAD",
         "checklist_section_0_must_list": true
