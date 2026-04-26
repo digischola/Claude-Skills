@@ -67,9 +67,16 @@ def lint_source_labels(page_name, content):
     labeled paragraph all count as labeled. This avoids penalising writing
     that puts the source tag on one line and the data details on the next.
     Table rows and bullets are counted. Change-history tail is excluded.
+
+    briefs.md is exempt — it is append-only verbatim client text with one
+    implicit [INTAKE] source per dated entry; per-paragraph labelling would
+    be noise. strategy.md is exempt — market-research output uses its own
+    finding-level labels and is linted by that skill.
     """
     issues = []
     if is_template(content):
+        return issues
+    if page_name in ("briefs.md", "strategy.md"):
         return issues
 
     # Strip Change History tail — meta, not data
@@ -138,9 +145,14 @@ def lint_blank_fields(page_name, content):
 
 
 def lint_change_history(page_name, content):
-    """Check Change History section exists and has entries."""
+    """Check Change History section exists and has entries.
+    briefs.md is exempt — it is itself the change history (append-only dated entries).
+    strategy.md is exempt — market-research owns its own change tracking.
+    """
     issues = []
     if is_template(content):
+        return issues
+    if page_name in ("briefs.md", "strategy.md"):
         return issues
 
     if '## Change History' not in content:
@@ -159,6 +171,7 @@ def lint_change_history(page_name, content):
 def lint_standard_sections(page_name, content):
     """Check that populated pages have the standard wiki sections.
     offerings.md is exempt — it uses per-offering H2 headings instead of standard sections.
+    briefs.md is exempt — it uses append-only dated entries.
     Pages with 3+ custom H2 sections are considered fully populated — skip 'Details' check
     since the template placeholder has been replaced with real content sections."""
     issues = []
@@ -167,6 +180,10 @@ def lint_standard_sections(page_name, content):
 
     # offerings.md has its own structure (per-offering sections)
     if page_name == "offerings.md":
+        return issues
+
+    # briefs.md is append-only with dated entry headers; no Findings/Details/Implications structure
+    if page_name == "briefs.md":
         return issues
 
     present_sections = set(re.findall(r'^## (.+)', content, re.MULTILINE))

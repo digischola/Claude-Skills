@@ -88,8 +88,8 @@ def render_plist(interval: int) -> str:
         tick_script=str(TICK_SCRIPT),
         brand_folder=str(BRAND_FOLDER),
         interval=interval,
-        stdout=str(BRAND_FOLDER / "scheduler.stdout.log"),
-        stderr=str(BRAND_FOLDER / "scheduler.stderr.log"),
+        stdout=str(Path.home() / "Library" / "Logs" / "digischola" / "scheduler.stdout.log"),
+        stderr=str(Path.home() / "Library" / "Logs" / "digischola" / "scheduler.stderr.log"),
         home=str(Path.home()),
     )
 

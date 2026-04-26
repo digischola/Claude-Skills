@@ -26,6 +26,7 @@ Read before starting:
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md`
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 ## Inputs
 

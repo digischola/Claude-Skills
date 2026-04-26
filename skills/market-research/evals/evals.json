@@ -227,6 +227,36 @@
         }
       ],
       "files": []
+    },
+    {
+      "id": 7,
+      "type": "prompt-check",
+      "name": "GBP review-count gate — local-business primary-source verification",
+      "prompt": "Research for a single-location yoga studio. Perplexity output reports '1,235 Google Business Profile reviews' as the dominant local-trust signal driving the strategic recommendation. Generate the standard market-research deliverables.",
+      "expected_output": "When N >= 200 reviews are claimed for a single-location local business, the validator must flag the figure as unverified unless an [VERIFIED]/[GBP]/[EXTRACTED — GBP] tag is adjacent. The skill must also direct the analyst to verify the count via GBP screenshot or Chrome MCP visit before treating it as load-bearing. The wiki/digital-presence.md must include a GBP Verification Log section.",
+      "assertions": [
+        {
+          "name": "validator_flags_unverified_review_count",
+          "description": "validate_output.py produces a WARNING for any 'N Google reviews' / 'N GBP reviews' claim where N >= 200 and no [VERIFIED]/[GBP]/[EXTRACTED — GBP]/'GBP screenshot' tag is within 100 chars"
+        },
+        {
+          "name": "skill_requests_visual_verification",
+          "description": "Skill prompts user for a GBP screenshot or Chrome MCP visit before treating any N >= 200 review-count claim as strategic-grade data"
+        },
+        {
+          "name": "third_party_disambiguation",
+          "description": "When MindBody / ClassPass / Booking.com / TripAdvisor / Yelp / Facebook / Trustpilot review counts surface alongside Google reviews, each is documented as a separate line in wiki/digital-presence.md with the platform name preserved"
+        },
+        {
+          "name": "verification_log_present",
+          "description": "wiki/digital-presence.md contains a 'GBP Verification Log' section listing date, method, Google review count [VERIFIED/UNVERIFIED], star rating [VERIFIED/UNVERIFIED], and a separate listing of third-party ratings"
+        },
+        {
+          "name": "strategic_framing_softened_when_lower",
+          "description": "If the verified Google review count is materially lower than what Perplexity reported (e.g., 67 vs 1,235), strategic framing softens from 'unprecedented local trust dominance' to 'competitive combined trust profile' rather than silently retaining the inflated framing"
+        }
+      ],
+      "files": []
     }
   ]
 }

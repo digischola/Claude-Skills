@@ -29,6 +29,7 @@ Read these before drafting anything:
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md`
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 - `.claude/shared-context/accuracy-protocol.md`
 
 If pillars.md is not LOCKED, abort with: "Pillars not approved. Run personal-brand-dna first."

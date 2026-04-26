@@ -12,6 +12,7 @@ Extract the complete DNA of a personal brand from all available sources and prod
 Read these shared-context files before starting:
 - `shared-context/analyst-profile.md` — workflow, voice standards, quality bar
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 If a personal-brand wiki already exists at `Desktop/{Brand}/brand/`, read `brand-wiki.md` first. This may be a refresh, not a fresh build.
 

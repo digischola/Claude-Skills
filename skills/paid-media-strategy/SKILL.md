@@ -12,18 +12,24 @@ Senior media buyer-level campaign strategy for Google Ads, Meta Ads, or both pla
 Read these shared context files before starting:
 - `shared-context/analyst-profile.md` — workflow, client types, quality standards
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
+- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to `outputs/`, intermediate MD/JSON/CSV to `working/`
+- `shared-context/client-shareability.md` — client-facing files must read like first copies; no correction trails / audit history / internal-process commentary. Validator: `python3 ~/.claude/scripts/check_client_shareability.py {client}`
 
 If a client wiki exists (`{client-folder}/wiki/`), read it first — strategy.md, offerings.md, competitors.md, audiences.md. The wiki is the primary input.
 
 ## Process Overview
 
-### Step 1: Client Intake & Wiki Check
+### Step 1: Client Intake, Wiki Check & Brief Anchor
 
-**Check for existing research.** Look for `{client-folder}/wiki/` from a prior market-research session. If it exists, read all wiki pages — this is the foundation. If no wiki exists, flag that market research should run first (this skill depends on it). **If no wiki exists and user wants to skip market-research:** proceed with intake questions only. Mark all wiki-dependent insights as BLANK. Flag in report: "Strategy based on limited data — market-research skill recommended before launch."
+**Check for existing research.** Look for `{client-folder}/wiki/` from a prior market-research session. If it exists, read all wiki pages — this is the foundation. If no wiki exists, flag that market research should run first (this skill depends on it).
 
-**Gather any missing info:** business name, URL, platform focus (Google, Meta, or Both), monthly budget range, primary conversion action (purchase, lead, app install, booking), geographic targeting scope, any existing campaigns or account history.
+**Read the active brief (MANDATORY when wiki/briefs.md exists).** Open `{client-folder}/wiki/briefs.md` (or per-program `{Program}/wiki/briefs.md` for multi-program clients). Identify all `[ACTIVE]` entries. The verbatim client text + parsed fields are the **strategy North Star**. Every campaign, budget allocation, and tactic in this strategy must trace to a brief entry, OR be flagged as `[INFERRED — extending the brief]` with one-line rationale. Do not invent campaigns, products, or infrastructure not in the brief without flagging.
 
-**Platform selection:** Ask which platform(s) this strategy covers. This determines which reference files to load and which decision trees to apply.
+**Read all offerings.** Open `{client-folder}/_shared/wiki/offerings.json` (or `wiki/offerings.json`). The strategy must explicitly address every product: DEPLOYED in which campaign, or OMITTED with a one-line reason. No silent omissions — that's how the $39 Midday Recharge Pass got dropped from Living Flow's Live-stream strategy in 2026-04-25.
+
+**Gather any missing info** ONLY for fields the brief left blank: business name, URL, platform focus, monthly budget range, primary conversion action, geographic targeting, ad-account history.
+
+**Platform selection:** If the brief specifies a platform, use that. Only ask if blank.
 
 ### Step 2: Guided Strategy Questions
 
@@ -76,6 +82,22 @@ Apply accuracy protocol: [EXTRACTED] for wiki data, [INFERRED] for strategy synt
 Read `references/report-structure.md` for the full template.
 
 Write the strategy report covering all 8 dimensions. Each section includes: rationale, specific settings/values, decision logic explanation, and "what to watch" monitoring notes.
+
+**Brief Alignment Check (mandatory final pass before saving the report):**
+
+1. **North-Star match.** For each `[ACTIVE]` brief in `wiki/briefs.md`, verify the strategy's primary recommendations match the brief's verbatim ask. Budget matches? Featured products match? Audience matches? Geography matches? Any mismatch must be flagged in the report's "Brief Alignment" section with `[INFERRED — extending brief]` rationale.
+
+2. **Offering coverage matrix.** Render a table at the bottom of the strategy: for every product in `wiki/offerings.json`, mark `DEPLOYED IN: <campaign>` or `OMITTED — <one-line reason>`. No silent omissions. Template:
+
+   ```
+   | Offering | Status | Where / Why |
+   |---|---|---|
+   | $49 / 2-week intro pass | DEPLOYED | Local Studio AG-Hyperlocal + Live-stream AG-Format |
+   | $39 / 30-day Midday Recharge | OMITTED | Time-window restricted to 12:15pm — Phase 2 niche test once primary intro-pass campaigns have data |
+   | Annual $1,790 | OMITTED | Retention SKU — outside acquisition campaign scope |
+   ```
+
+3. **Anti-over-architecting check.** For each Phase 0 / prerequisite / new-product / new-LP recommendation in the strategy, verify the brief actually requested it. If the brief said "test campaign with existing intro passes" and the strategy proposes a dedicated landing page + new digital SKU + 7-day free trial, that's scope drift. Move those to a clearly-labeled "Phase 2 — Optimizations Beyond Brief" section, NOT pre-launch blockers. Default for unflagged drift: demote to Phase 2.
 
 Save as `{client-folder}/deliverables/{business-name}-paid-media-strategy.md`.
 
@@ -175,3 +197,4 @@ Keep under 30 lines. Prune quarterly. See references/feedback-loop.md for protoc
 - [2026-04-12] [General] Finding: Retreat House dashboard required heavy manual modifications to template-dual-platform.html because the simultaneous template has no concept of phased platform launches. → Action: Created template-dual-phased.html with phased split bars, phase-tagged campaigns, monthly budget progression, and platform-agnostic placeholders. Supports light/dark mode via body class.
 - [2026-04-12] [General] Finding: Creative brief JSON lacked visual direction, landing page mapping, A/B testing plan, and proof element hierarchy. Brief was ~75% complete for ad-copywriter and ~50% for creative production. → Action: Added 4 new field groups to creative-brief-spec.md: visual_direction (with image_gen_prompt_prefix for AI image tools), landing_page (url + page_type + message match), ab_testing (priority variable + test pairs), proof_elements (media mentions, certifications, stats with campaign mapping). 5 new validation rules.
 - [2026-04-16] [Validator hardening] Finding: two validator blind spots. (a) Step 5.5 produces `creative-brief.json` — the pipeline's spine contract — but the validator never checked that it existed or parsed. A paid-media-strategy session could "pass" with no brief at all, then silently break ad-copywriter, landing-page-builder, and campaign-setup 30 minutes later. (b) Cross-file campaign-name match used pure substring containment (`cn in rn or rn in cn`), so "Summer" wrongly matched "Summer Sale Campaign" — real drift could pass. → Action: (a) added `validate_creative_brief_presence()` step that globs for `*-creative-brief.json` in the deliverables folder, parses it, requires `business_name` + `campaigns[]`, and warns if no campaign has `visual_direction.image_gen_prompt_prefix`; (b) replaced substring match with `_is_structured_variant()` — accepts exact equality OR structured separator variants (`" — "`, `" – "`, `": "`, `" | "`, `" / "`) with a 60% minimum length-overlap guard. Eliminates false matches on short names inside longer ones.
+- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `wiki/log.md` (by-design change log) and `wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** working/CLIENT-paid-media-strategy.md, outputs/CLIENT-strategy-dashboard.html, working/CLIENT-media-plan.csv, working/CLIENT-creative-brief.json — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.

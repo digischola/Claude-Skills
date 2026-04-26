@@ -266,8 +266,17 @@ def tick(brand_folder: Path, dry_run: bool, verbose: bool, skip_lock: bool = Fal
                 logging.error(f"  ✗ {draft.name} dispatcher exception: {e}")
                 results["exception"] += 1
 
-        # Manual-channel overdue re-notifications
+        # Manual-channel overdue re-notifications.
+        #
+        # Throttle: only re-fire if it's been ≥RENOTIFY_COOLDOWN_HOURS since the
+        # last re-notification (or no re-notification yet). Without this throttle
+        # the StartInterval=900 cron would fire a banner every 15 min for every
+        # overdue manual post — user reported "3-4 prompts every 15 min, can't
+        # manage notifications." Cooldown is 4h per scheduler-publisher
+        # Learnings 2026-04-26b.
+        RENOTIFY_COOLDOWN_HOURS = 4
         overdue = scan_overdue_manual(brand_folder)
+        skipped_in_cooldown = 0
         for draft, fm, hours in overdue:
             channel = fm.get("channel", "?")
             entry_id = fm.get("entry_id", draft.stem)
@@ -275,14 +284,33 @@ def tick(brand_folder: Path, dry_run: bool, verbose: bool, skip_lock: bool = Fal
                 fio.update_fields(draft, posting_status="manual_publish_overdue",
                                   manual_overdue_at=fio.now_ist_iso())
                 logging.warning(f"  ⊘ {entry_id} {channel} marked manual_publish_overdue ({hours:.0f}h)")
-            else:
-                # 24-48h window: re-notify
+                continue
+
+            # 24-48h window: re-notify with 4h cooldown.
+            last_renotified = fio.parse_iso(fm.get("last_renotified_at"))
+            should_renotify = True
+            if last_renotified is not None:
+                if last_renotified.tzinfo is None:
+                    last_renotified = last_renotified.replace(tzinfo=timezone.utc)
+                hours_since_last = (now_utc() - last_renotified).total_seconds() / 3600
+                if hours_since_last < RENOTIFY_COOLDOWN_HOURS:
+                    should_renotify = False
+                    skipped_in_cooldown += 1
+                    logging.debug(f"  ⏸ {entry_id} {channel} re-notify skipped "
+                                  f"({hours_since_last:.1f}h since last, "
+                                  f"<{RENOTIFY_COOLDOWN_HOURS}h cooldown)")
+
+            if should_renotify:
                 if not dry_run:
                     # Pass draft path so banner click reveals the file in Finder
                     # (2026-04-22 UX batch: banners previously had no click action).
                     manual_pub.fire_overdue_reminder(channel, entry_id, int(hours),
                                                     draft_path=draft)
+                    fio.update_fields(draft, last_renotified_at=fio.now_ist_iso())
                 logging.info(f"  ↻ {entry_id} {channel} re-notified ({hours:.0f}h since)")
+
+        if skipped_in_cooldown:
+            logging.info(f"  re-notify cooldown: {skipped_in_cooldown} skipped")
 
         logging.info(f"tick end: {results} (overdue manual: {len(overdue)})")
     finally:

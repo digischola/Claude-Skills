@@ -27,6 +27,7 @@ A pure-cron version would skip the creative half. A pure-Claude version would re
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md` — workflow, voice/quality standards used to gate ritual outputs
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 **Skill references:**
 - `references/wednesday-planning-flow.md` — full Wednesday step-by-step

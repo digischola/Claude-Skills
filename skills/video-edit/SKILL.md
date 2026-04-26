@@ -18,7 +18,8 @@ Skill runs the pipeline and drops a finished MP4 at `Desktop/{Client}/{Project}/
 ### Step 1 — Load context
 
 1. Read [analyst-profile.md](../../shared-context/analyst-profile.md) for Mayank's voice/quality standards.
-2. Identify **client**, **project folder**, **brief**, **source video path** from the user message. If missing, ask for the minimum: which client + what mood/feel?
+2. Read [output-structure.md](../../shared-context/output-structure.md) — for client-folder videos drop the final MP4 in `outputs/` and re-run `~/.claude/scripts/build_outputs_index.py {client}`; for Digischola, drop into `brand/videos/edits/` or `brand/queue/pending-approval/` then run `~/.claude/scripts/build_digischola_index.py`.
+3. Identify **client**, **project folder**, **brief**, **source video path** from the user message. If missing, ask for the minimum: which client + what mood/feel?
 3. Default brand config path: `Desktop/{Client}/brand/brand-identity.md`. If the file is absent, use Digischola's brand config as a neutral fallback and flag the missing client brand.
 
 ### Step 2 — Run the prepare phase

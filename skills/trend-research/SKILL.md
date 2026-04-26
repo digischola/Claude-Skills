@@ -21,6 +21,7 @@ content-calendar pulls from idea-bank. If work-capture has been quiet for a week
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md` — workflow, voice/quality standards used as relevance filter
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 **Skill references:**
 - `references/pillar-niches.md` — keyword seeds + tracked sources per pillar

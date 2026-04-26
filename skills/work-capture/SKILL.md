@@ -12,6 +12,7 @@ Turn raw work signal into structured content candidates in the personal-brand id
 Read before starting:
 - `shared-context/analyst-profile.md`
 - `shared-context/accuracy-protocol.md`
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 - `Desktop/{Brand}/brand/pillars.md` — approved pillars (required for tagging)
 - `Desktop/{Brand}/brand/voice-guide.md` — tone per channel (required for format candidates)
 - `Desktop/{Brand}/brand/idea-bank.json` — append target

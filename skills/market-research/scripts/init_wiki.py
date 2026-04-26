@@ -40,9 +40,10 @@ SHARED_PAGES = {
     "offerings": "Products, Services & Offerings",
 }
 
-# Pages that belong per-program (research — different per program)
+# Pages that belong per-program (research + briefs — different per program)
 PROGRAM_PAGES = {
     "strategy": "Market Research & Strategy",
+    "briefs": "Client Briefs — What Was Asked",
 }
 
 # Legacy: all pages together for single-program mode
@@ -51,7 +52,51 @@ ALL_PAGES = {**SHARED_PAGES, **PROGRAM_PAGES}
 
 def create_wiki_page(wiki_dir, slug, title, name, today):
     """Create a single wiki page with template structure."""
-    content = f"""# {title} — {name}
+    if slug == "briefs":
+        # Briefs page is append-only; uses different template (no Marketing Implications etc.)
+        content = f"""# {title} — {name}
+
+> Append-only log of client requests. Latest `[ACTIVE]` entry drives current strategy.
+> Skills downstream of business-analysis MUST read this file and anchor recommendations to active brief(s).
+
+## How to use this page
+
+- **New ask from client?** Append a new dated entry below. Mark it `[ACTIVE]`.
+- **Supersedes a prior ask?** Mark the prior entry `[SUPERSEDED by YYYY-MM-DD]`. Don't delete.
+- **Verbatim is sacred.** Capture the client's actual words first. Parsed fields go below.
+- **Source labels:** Tag verbatim as `[EXTRACTED]` (client-sent text) or `[INFERRED]` (paraphrased from a call) per accuracy protocol.
+
+## Briefs
+
+_No briefs captured yet. Append below as they arrive._
+
+<!--
+Template for new entries:
+
+## YYYY-MM-DD — Short title  [ACTIVE]
+
+**Received via:** WhatsApp / email / call notes / etc.
+**Date received:** YYYY-MM-DD
+**Channel:** [the inbound channel]
+
+**Verbatim** `[EXTRACTED]`:
+> "Client's exact words go here, unedited."
+
+**Parsed:**
+- Campaigns: [list]
+- Budget: [amount + cadence]
+- Featured products: [from offerings.md]
+- Audience: [geo, demographics, segments]
+- Constraints: [time, infrastructure, scope limits client specified]
+- Open questions: [things to clarify before strategy]
+-->
+
+## Change History
+
+- {today}: Page created (empty template)
+"""
+    else:
+        content = f"""# {title} — {name}
 
 > Last updated: {today} | Sources: 0 | Confidence: PENDING
 

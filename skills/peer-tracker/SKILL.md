@@ -15,6 +15,7 @@ Keeps the 15-creator reference file fresh. Rotation: 4 creators per Sunday → f
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md` — workflow, voice standards (creators are mimicked for inspiration only, never voice-cloned)
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 **Read inputs:**
 - `references/tracked-creators.md` — the 15 creators, their handles, channels, niches, current rotation index

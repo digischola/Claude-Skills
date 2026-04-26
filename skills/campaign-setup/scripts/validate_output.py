@@ -54,6 +54,40 @@ GOOGLE_LIMITS = {
     "Value": 25,  # structured snippet values
 }
 
+# Google Ads Personalized Advertising Restrictions — health / financial / employment / housing
+# categories that auto-reject at Editor import. See references/restricted-keyword-categories.md
+# for the full pattern catalog and reframing recipes. Triggered by 2026-04-26 Living Flow case
+# (`yoga for back pain sydney` rejected at import as "Health category not accepted").
+# Format: (compiled_pattern, category_label, suggested_reframing)
+RESTRICTED_KEYWORD_PATTERNS = [
+    # Health conditions (yoga / wellness / fitness / therapy)
+    (re.compile(r'\byoga\s+for\s+(back|neck|joint|hip|shoulder)\s+pain\b'),
+     'health-condition (musculoskeletal pain)',
+     '"yoga for desk workers" / "mobility yoga" / "stretching yoga"'),
+    (re.compile(r'\byoga\s+for\s+(anxiety|depression|stress|insomnia|adhd|ptsd|autism)\b'),
+     'mental-health condition',
+     '"calming yoga" / "restorative yoga" / "evening yoga"'),
+    (re.compile(r'\byoga\s+for\s+(arthritis|fibromyalgia|sciatica|migraines?|chronic\s+pain)\b'),
+     'health condition (chronic)',
+     '"gentle yoga for seniors" / "low-impact yoga" / "slow flow yoga"'),
+    (re.compile(r'\byoga\s+for\s+(weight\s+loss|fertility)\b'),
+     'weight/reproductive health',
+     '"yoga for fitness" / "power yoga" / DROP if reproductive'),
+    (re.compile(r'\b(weight\s+loss|lose\s+\d+\s*(?:pounds|kg|lbs)|belly\s+fat)\b'),
+     'weight-loss claim',
+     '"fitness program" / "body transformation" / "core workout"'),
+    (re.compile(r'\btherapy\s+for\s+(depression|ptsd|addiction|eating\s+disorder|anxiety)\b'),
+     'mental-health diagnosis',
+     'DROP — diagnosis-targeted; reframe as "online therapist" / "talk therapy"'),
+    # Financial / employment / housing (Personalized Ads policy)
+    (re.compile(r'\b(bad\s+credit|debt\s+consolidation\s+poor\s+credit|low.?income|section\s+8|unemployed\s+jobs)\b'),
+     'financial / employment / housing status',
+     'DROP — protected attribute targeting'),
+    (re.compile(r'\b(no\s+degree|dropout|high\s+school\s+dropout)\s+(job|career|loan)\b'),
+     'education-attainment status',
+     'DROP — protected attribute targeting'),
+]
+
 META_LIMITS = {
     # Body 125 = soft truncation warning (Meta max ~500 — copy survives truncation is OK)
     # Title 40 / Link Description 27 = hard renderable limits, CRITICAL if exceeded
@@ -180,6 +214,19 @@ def validate_google(root: Path) -> None:
         ct = row.get("Criterion Type", "")
         if ct and ct not in {"Exact", "Phrase", "Broad", "Negative Exact", "Negative Phrase", "Negative Broad"}:
             log("CRITICAL", area, f"03-keywords.csv row {i}: invalid Criterion Type '{ct}'")
+        # Restricted-keyword pre-filter (Personalized Advertising Restrictions).
+        # Auto-rejected at Editor import for health/financial/employment/housing categories.
+        # See references/restricted-keyword-categories.md for full pattern list + reframing recipes.
+        # Only applied to positive keywords; negatives are exempt (they SHOULD reference these terms).
+        kw_text = (row.get("Keyword", "") or "").lower()
+        if kw_text and not ct.startswith("Negative"):
+            for pattern, label, reframe in RESTRICTED_KEYWORD_PATTERNS:
+                if re.search(pattern, kw_text):
+                    log("CRITICAL", area,
+                        f"03-keywords.csv row {i}: keyword '{kw_text}' matches restricted category "
+                        f"({label}) — Google's Personalized Advertising Restrictions auto-reject this at import. "
+                        f"Suggested reframe: {reframe}. See references/restricted-keyword-categories.md.")
+                    break
 
     # ----- RSAs -----
     check_schema(rsas, {"Campaign", "Ad Group", "Ad Type", "Ad Status", "Final URL", "Headline 1", "Description 1", "Description 2"}, area, "04-responsive-search-ads.csv")
@@ -237,17 +284,32 @@ def validate_google(root: Path) -> None:
                 log("WARNING", area, f"Callouts: campaign '{campaign}' has only {count} callouts (recommended minimum: 4)")
 
     if snippets:
-        check_schema(snippets, {"Asset Type", "Status", "Header", "Value 1"}, area, "07-structured-snippets.csv")
+        # 2026-04-26 fix: Editor's parser rejects per-column Value 1/Value 2/... format
+        # with "There are too few values for a structured snippet" — even when 3+ values
+        # are populated. Required format: single `Snippet Values` column with `;`-delimited
+        # values. See references/google-ads-editor-schema.md §7.
         valid_headers = {"Amenities", "Brands", "Courses", "Degree Programs", "Destinations", "Featured Hotels", "Insurance Coverage", "Models", "Neighborhoods", "Service Catalog", "Services", "Shows", "Styles", "Types"}
-        for i, row in enumerate(snippets, start=2):
-            if row.get("Header", "") and row.get("Header", "") not in valid_headers:
-                log("CRITICAL", area, f"07-structured-snippets.csv row {i}: Header '{row.get('Header')}' not in Google's fixed header list")
-            values = [row.get(f"Value {v}", "") for v in range(1, 11)]
-            non_empty_values = [v for v in values if v and v.strip()]
-            if len(non_empty_values) < 3:
-                log("CRITICAL", area, f"07-structured-snippets.csv row {i}: needs at least 3 values, has {len(non_empty_values)}")
-            for idx, v in enumerate(values, start=1):
-                check_char_limit(v, GOOGLE_LIMITS["Value"], f"Value {idx} row {i}", area)
+        snippet_columns = set(snippets[0].keys()) if snippets else set()
+        per_column_format = any(c.startswith("Value ") and c[6:].strip().isdigit() for c in snippet_columns)
+        semicolon_format = "Snippet Values" in snippet_columns
+        if per_column_format and not semicolon_format:
+            log("CRITICAL", area, "07-structured-snippets.csv uses per-column Value 1/Value 2/... format — REJECTED by Ads Editor parser. Required: single 'Snippet Values' column, semicolon-delimited (`Vinyasa;Yin;Beginners`). See references/google-ads-editor-schema.md §7.")
+        if semicolon_format:
+            check_schema(snippets, {"Asset Type", "Status", "Header", "Snippet Values"}, area, "07-structured-snippets.csv")
+            for i, row in enumerate(snippets, start=2):
+                if row.get("Header", "") and row.get("Header", "") not in valid_headers:
+                    log("CRITICAL", area, f"07-structured-snippets.csv row {i}: Header '{row.get('Header')}' not in Google's fixed header list")
+                raw = row.get("Snippet Values", "") or ""
+                values = [v.strip() for v in raw.split(";") if v.strip()]
+                if len(values) < 3:
+                    log("CRITICAL", area, f"07-structured-snippets.csv row {i}: 'Snippet Values' has only {len(values)} value(s) — minimum 3 required. Use `;` to delimit (e.g. `Vinyasa;Yin;Beginners`)")
+                for idx, v in enumerate(values, start=1):
+                    check_char_limit(v, GOOGLE_LIMITS["Value"], f"Snippet value {idx} row {i}", area)
+        elif per_column_format:
+            # Schema-level critical already logged above. Don't double-fail per-row.
+            for i, row in enumerate(snippets, start=2):
+                if row.get("Header", "") and row.get("Header", "") not in valid_headers:
+                    log("CRITICAL", area, f"07-structured-snippets.csv row {i}: Header '{row.get('Header')}' not in Google's fixed header list")
 
     if negatives:
         check_schema(negatives, {"Keyword", "Criterion Type"}, area, "08-negative-keywords.csv")

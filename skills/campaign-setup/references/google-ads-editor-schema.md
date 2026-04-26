@@ -149,6 +149,8 @@ Sitelinks can be attached at Account, Campaign, or Ad Group level.
 
 ## 7. Structured Snippets CSV (`07-structured-snippets.csv`)
 
+> **2026-04-26 fix:** Per-column `Value 1`/`Value 2`/... format is REJECTED by Google Ads Editor's current parser with the error "There are too few values for a structured snippet. Create at least 3" — even when 3+ values are populated. Use the **single `Snippet Values` column with semicolon-delimited values** instead. The validator enforces this format.
+
 | Column | Type | Required | Example | Notes |
 |---|---|---|---|---|
 | Campaign | string | ⚪ | | |
@@ -156,11 +158,15 @@ Sitelinks can be attached at Account, Campaign, or Ad Group level.
 | Asset Type | enum | ✅ | `Structured Snippet` | Literal |
 | Status | enum | ✅ | `Enabled` | |
 | Header | enum | ✅ | `Services` | Values from Google's fixed header list: Amenities, Brands, Courses, Degree Programs, Destinations, Featured Hotels, Insurance Coverage, Models, Neighborhoods, Service Catalog, Services, Shows, Styles, Types |
-| Value 1 | string | ✅ | `ROI Calculator` | Max 25 chars per value |
-| Value 2 | string | ⚪ | `Compliance Guide` | |
-| Value 3 | string | ⚪ | | |
-| Value 4 | string | ⚪ | | |
-| ... up to Value 10 | | | | Minimum 3 values per snippet |
+| Snippet Values | string | ✅ | `Vinyasa Flow;Yin Yoga;Beginners Yoga;Yang to Yin` | Semicolon-delimited. **Minimum 3 values** per snippet. Max 25 chars per value. Up to 10 values. |
+
+**Example row:**
+```csv
+Campaign,Ad Group,Asset Type,Status,Header,Snippet Values
+LF-Livestream-AU-Search,,Structured Snippet,Enabled,Types,Vinyasa;Yin;Beginners;Gentle;Yang to Yin
+```
+
+**DO NOT** emit `Value 1`,`Value 2`,...,`Value 10` columns — that schema is documented in older Google references but no longer matches Editor's import parser. The validator will CRITICAL-fail if it sees the per-column format.
 
 ---
 

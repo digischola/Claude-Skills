@@ -19,8 +19,12 @@ def validate_markdown(filepath):
     results = []
 
     # 1. Source labels present
-    extracted_count = len(re.findall(r'\[EXTRACTED\]', content))
-    inferred_count = len(re.findall(r'\[INFERRED\]', content))
+    # Accepts bare `[EXTRACTED]` / `[INFERRED]` AND citation-suffixed variants
+    # like `[EXTRACTED — Source Name [42]]`, `[EXTRACTED from business.md]`,
+    # `[INFERRED — reasoning]`. The latter is more rigorous than the former.
+    # Pattern: open bracket → label → optional whitespace + non-`]` content → close bracket.
+    extracted_count = len(re.findall(r'\[EXTRACTED(?:[\s—:\-][^\]]*)?\]', content))
+    inferred_count = len(re.findall(r'\[INFERRED(?:[\s—:\-][^\]]*)?\]', content))
     total_labels = extracted_count + inferred_count
     results.append({
         "assertion": "source_labels_present",
@@ -146,6 +150,56 @@ def validate_markdown(filepath):
         "detail": "Data Gaps & Limitations section found" if has_gaps else "No Data Gaps section — needed for honest assessment",
         "severity": "WARNING" if not has_gaps else "OK"
     })
+
+    # 11. GBP review-count gate (local-business primary-source verification).
+    # See references/local-business-verification.md. Triggered by 2026-04-25 Living Flow
+    # case: Perplexity reported 1,235 Google reviews; reality was 67. The 1,235 was
+    # MindBody votes surfaced in GBP "Reviews from the web" panel.
+    # Approach: scan for review-count claims with N >= 200; require a verification
+    # tag ([VERIFIED] / [GBP] / [EXTRACTED — GBP] / "GBP screenshot") within
+    # ~100 chars, otherwise flag as WARNING.
+    review_pattern = re.compile(
+        r'(\d{1,3}(?:,\d{3})+|\d{3,})\s*(?:[+\s]*)?\b'
+        r'(?:google\s+(?:business\s+profile\s+)?review|gbp\s+review|business\s+profile\s+review)',
+        re.IGNORECASE
+    )
+    suspicious_review_claims = []
+    for m in review_pattern.finditer(content):
+        n_str = m.group(1).replace(',', '')
+        try:
+            n = int(n_str)
+        except ValueError:
+            continue
+        if n < 200:
+            continue
+        start = max(0, m.start() - 100)
+        end = min(len(content), m.end() + 100)
+        window = content[start:end]
+        verified = bool(re.search(
+            r'\[VERIFIED|\[GBP\b|\[EXTRACTED\s*[—\-]\s*GBP|GBP\s+screenshot|GBP\s+verified|primary[- ]source\s+verified',
+            window, re.IGNORECASE
+        ))
+        if not verified:
+            suspicious_review_claims.append((n, m.group(0)[:60]))
+    if suspicious_review_claims:
+        details = "; ".join(f"{n} reviews ('{snippet}...')" for n, snippet in suspicious_review_claims[:3])
+        results.append({
+            "assertion": "gbp_review_count_verification",
+            "passed": False,
+            "detail": (
+                f"{len(suspicious_review_claims)} review-count claim(s) ≥200 without GBP verification tag. "
+                f"Watch for MindBody/ClassPass/Booking.com 'Reviews from the web' conflation. "
+                f"See references/local-business-verification.md. Flagged: {details}"
+            ),
+            "severity": "WARNING"
+        })
+    else:
+        results.append({
+            "assertion": "gbp_review_count_verification",
+            "passed": True,
+            "detail": "No unverified large review counts detected (or all carry [VERIFIED]/[GBP] tags)",
+            "severity": "OK"
+        })
 
     return results
 

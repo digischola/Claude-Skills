@@ -23,6 +23,7 @@ Quality bar is also higher: stronger structure, more rigorous metric verificatio
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md` — workflow, voice standards, formatting preferences
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 **Skill references:**
 - `references/case-study-structure.md` — Setup → Problem → Diagnosis → Fix → Result → Lesson framework

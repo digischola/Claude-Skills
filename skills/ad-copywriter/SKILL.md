@@ -12,6 +12,8 @@ Generates production-ready ad copy, AI image prompts, and video storyboards from
 Read these shared context files before starting:
 - `shared-context/analyst-profile.md` — workflow, client types, quality standards
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
+- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to `outputs/`, intermediate MD/JSON/CSV to `working/`
+- `shared-context/client-shareability.md` — client-facing files must read like first copies; no correction trails / audit history / internal-process commentary. Validator: `python3 ~/.claude/scripts/check_client_shareability.py {client}`
 
 ## Process Overview
 
@@ -29,7 +31,15 @@ Check in this order — Refresh Mode takes priority because it's the narrowest a
 - Read the creative brief JSON — campaigns, personas, hooks, formats, visual_direction, landing_page, ab_testing, proof_elements, brand_voice
 - Read `{client-folder}/wiki/strategy.md` for competitor context
 - Read `{client-folder}/deliverables/brand-config.json` for brand identity
+- **Read offerings (Gate B source-of-truth):** `{client-folder}/wiki/offerings.md` — or `{client-folder}/_shared/wiki/offerings.md` for multi-program clients. This is the cross-check authority for every service-claim phrase generated in Step 4.
+- **Detect Gate A trigger conditions** in the creative brief (any one fires gated-output mode):
+  1. `do_not_launch_until_phase_0_complete: true`
+  2. Any `phase_0_prerequisites[].status` ∈ {`GATED`, `BLOCKED`, `PENDING`}
+  3. `verdict` ∈ {`DO-NOT-LAUNCH`, `BEST-CASE`, `GATED`}
+  4. `framing` containing `best-case`
 - Skip to Step 3
+
+See `references/offerings-cross-check.md` for the full Gate A + Gate B protocol.
 
 **Standalone mode** (no creative brief, no rotation brief):
 - Proceed to Step 2
@@ -86,7 +96,16 @@ Read these reference files (load only sections relevant to the client's platform
 - Brand voice do/don't from creative brief respected throughout
 - Label each copy block: [BRIEF] = from creative brief hooks, [GENERATED] = new, [ADAPTED] = modified from brief
 
-Save as `{client-folder}/deliverables/{business-name}-ad-copy-report.md`.
+**Gate B — Service-offering cross-check (always-on):**
+For every persona / ad-group label / headline / description / callout / snippet value that names a specific service, modality, or class style, verify it appears in `wiki/offerings.md`. If unmatched: drop, reframe to a verified offering, or wrap as `<<UNVERIFIED-CLAIM:phrase>>`. See `references/offerings-cross-check.md` §Gate B for the full protocol and common false-claim categories (prenatal yoga, chair yoga, EMDR, hydrafacial, etc.).
+
+**Output filename:**
+- **Default:** `{client-folder}/deliverables/{business-name}-ad-copy-report.md`
+- **Gate A fired** (Step 1 detected gated launch state): write **two** files:
+  - `{business-name}-ad-copy-best-case.md` — banner: "BEST CASE — DO NOT IMPORT until Phase 0 complete". Includes gated claims for forward planning.
+  - `{business-name}-ad-copy-current-state.md` — banner: "Current-state copy — safe for production import". Gated claims stripped per `phase_0_prerequisites[].claim_phrases`. The Step 5 CSV is generated **only from this file**.
+
+Both files MUST include a `## Gate Audit (auto-generated)` section listing triggers, stripped phrases, and Gate B verified/failed claims. See `references/offerings-cross-check.md` §"Logging requirements" for the audit-section template.
 
 ### Step 5: Generate Platform CSV Sheets
 
@@ -163,15 +182,16 @@ Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts
 
 ## Learnings & Rules
 
-- [2026-04-13] [PREMIUM ARCHITECTURE] Finding: All 16 Google descriptions failed validation on first pass. Report showed "88 chars" but actual count was 91-100. Cause: manual char counting is unreliable, especially with punctuation-heavy copy. → Action: Always run validate_output.py BEFORE writing the report char count column. Never trust hand-counted chars.
-- [2026-04-13] [PREMIUM ARCHITECTURE] Finding: Em-dashes (—) in descriptions waste 1 char each vs using a period or comma, and introduce counting ambiguity. → Action: Avoid em-dashes in Google descriptions. Use periods or commas instead. Save chars for actual copy.
-- [2026-04-13] [PREMIUM ARCHITECTURE] Finding: validate_output.py had broken final summary logic using sys.stdout.getvalue() which only works with StringIO. → Action: Replaced with counter-based tracking (total_criticals, total_warnings) and flush_logs() helper function.
-- [2026-04-13] [PREMIUM ARCHITECTURE] Finding: Meta primary text over 125 chars is expected and normal (truncation in feed view). Validator correctly flags as WARNING not CRITICAL. → Action: No change — warnings are informational, not blocking.
-- [2026-04-13] [PREMIUM ARCHITECTURE] Finding: 5 RSAs x 4 descriptions = 20 descriptions to validate. At 90-char limit, even 1-2 extra chars per description compounds to 16 CRITICALs. → Action: Target 75 chars for descriptions, giving 15-char safety margin. Only push to 85+ when absolutely needed for copy quality.
-- [2026-04-13] [GENERAL] Finding: Background agents cannot write files (permission issues in this environment). → Action: Always write files in main thread. Use agents only for research/read tasks.
-- [2026-04-16] [GENERAL] Finding: v1 image prompts were 85-140 words (too bloated) and based on aesthetic assumptions, not performance data. Research shows: shorter prompts (1-3 sentences after prefix) produce more consistent AI output, dark images underperform by 70%, high contrast = +32% CTR, Google Display must have NO text overlay. → Action: Added creative-research.md reference file, updated image-prompt-patterns.md with 10 performance rules, prompt templates now include "ultra-realistic photograph" + specific lens + light background bias. Step 6 and Step 7 now load creative-research.md.
-- [2026-04-16] [GENERAL] Finding: validate_output.py video storyboard regex only catches `Voiceover:` but deliverable uses `**Voiceover:**` (markdown bold). Reports 7 "missing" VO when all 10 frames have VO. Image prompt regex also undercounts blockquoted prompts. → Action: Low priority fix — warnings are false positives, not false negatives. Validator still catches real structural issues (missing fields, char limits).
-- [2026-04-16] [Validator] Finding: Deep-read audit upgraded the `**Voiceover:**` issue from "low priority" to a real bug. The regex does technically match mid-string, but the capture group `(.+)` swallowed the trailing `**`, so VO text came back as `** Hello world` instead of `Hello world`. Polluted word counts, combined-VO-script generation, and stage-direction checks. Same issue on `text overlay:`. → Action: Updated both patterns in `scripts/validate_output.py` to `\*{0,2}voiceover:\*{0,2}\s*(.+)` (and equivalent for text overlay) so leading/trailing `**` around the label is absorbed, not captured. Smoke-tested against plain, bold, bullet+bold, heading, and blockquote+bold forms — all capture clean text.
-- [2026-04-16] [Knowledge promotion] Finding: ad-copywriter was the only skill of 8 without an Output Checklist in SKILL.md — paid-media-strategy, business-analysis, market-research, campaign-setup, landing-page-audit, landing-page-builder, post-launch-optimization all had one. Missing checklist meant completion criteria were implicit and varied session-to-session. → Action: Added 13-item Output Checklist between Step 8 close and Failure Handling. Covers mode detection, character limits, framework labels, source labels, per-platform CSV outputs, image-prompt prefix usage, creative-research rule compliance, VO script cleanliness + duration word budget, message-match honoring, validator pass, wiki update.
-- [2026-04-16] [Validator hardening] Finding: three validator blind spots meant brand + message-match rules existed in SKILL.md but weren't enforced. (a) `image_gen_prompt_prefix` from creative-brief never verified in image-prompts output — skills could silently drop brand-consistent prompts. (b) `landing_page.message_match_notes` never verified in generated copy — losing the ad→LP echo that drives +20-35% conversion lift. (c) VO word-count vs video duration budget never checked — AI-voice delivery would sound rushed when frames went >25 words. → Action: extended `scripts/validate_output.py` to accept an optional `*-creative-brief.json` arg. On load, it (1) runs a 5-word significant-window match to verify the image prompt prefix flows through, (2) does a word-overlap check to confirm message_match_notes language is echoed in the ad copy report at ≥50% coverage, and (3) flags frames with >25 VO words and storyboards whose total VO exceeds `~2.5 wps × declared-seconds × 1.2` budget. Smoke-tested against a mock Bali Retreats brief — all three checks fire correctly on passing and failing inputs.
-- [2026-04-16] [Refresh Mode — learning loop closes] Finding: creative fatigue was detected by post-launch-optimization Layer 4 (URGENT/PLAN/MONITOR status) but had no automated handoff to ad-copywriter — the analyst had to manually translate fatigue flags into a new copy brief each week, losing framework/brand consistency and creating multi-hour iteration loops. → Action: added Refresh Mode as a third operating mode alongside Standalone and Downstream. Trigger: `*-rotation-brief.json` in the client's deliverables folder. Created `references/refresh-mode.md` documenting the rotation-brief schema (fatigued creatives with fatigue signals, original copy, `keep[]` / `change[]` constraints, new_angles_to_try, strategy_guardrails), the workflow overrides for Steps 2/4/5/8, the `[REFRESH]` source label, and versioned ad naming (`_v2`, `_v3`). SKILL.md Step 1 now detects rotation-brief first (highest-priority mode). post-launch-optimization Layer 4 now emits the rotation-brief JSON. New eval #6 covers the full path. **RULE:** Creative refresh is a closed loop: fatigue signal → machine-readable handoff → drop-in replacement copy with original preserved as A/B control. No more manual translation.
+<!-- Pre-2026-04-26 entries pruned: encoded into scripts/validate_output.py (char-limit enforcement, VO regex, image-prompt prefix, message-match, VO duration budget) and references/ (creative-research.md, refresh-mode.md, image-prompt-patterns.md). See git log for history. -->
+
+- [2026-04-16] [Refresh Mode] Creative fatigue → ad-copywriter handoff was manual. Added Refresh Mode (3rd operating mode alongside Standalone/Downstream); trigger = `*-rotation-brief.json`; new files preserve framework/persona/CTA, change hook angle/imagery/proof; `[REFRESH]` source label + `_v2`/`_v3` ad naming. See `references/refresh-mode.md`. Eval #6 covers the full path. **RULE:** Creative refresh = closed loop: fatigue signal → machine-readable handoff → drop-in replacement copy with original preserved as A/B control.
+
+- [2026-04-26] [CRITICAL — Living Flow Yoga / wellness / Phase-0-gated brief] **ad-copywriter generated production copy claiming services that don't exist** (free trial, prenatal yoga, trimester-safe modifications, chair yoga). Caught at pre-launch — would have shipped to Google Ads if not audited. Two failure modes:
+  1. **Gated mechanism leakage:** brief carried `do_not_launch_until_phase_0_complete: true` + GATED phase_0_prerequisites; skill produced 60+ production headlines/CSV rows around "7-Day Free Trial" anyway.
+  2. **Search-demand-without-service-offering:** "Pregnancy / Pre-Postnatal" persona seeded from keyword volume (670/mo AU); offerings.md documents only Vinyasa / Yin / Beginners / Yang to Yin. Every downstream skill treated search demand as equivalent to service offering.
+  → **Action — Gate A + Gate B coded into validator (2026-04-26):**
+  - **Gate A:** brief flags Phase-0 → MUST emit `*-ad-copy-best-case.md` + `*-ad-copy-current-state.md`; CSV generated only from current-state. Validator CRITICAL-fails if single report or CSV contains gated-claim phrases.
+  - **Gate B:** scan copy for service-claim phrases (22 yoga/wellness/therapy/fitness/beauty patterns); cross-check against `wiki/offerings.md` or `_shared/wiki/offerings.md`; CRITICAL-fail any unverified claim.
+  - Full protocol in `references/offerings-cross-check.md`. Eval #7 covers gated-brief + offerings-mismatch scenario. Risk avoided: ACL §18/§29 false-advertising exposure + Google Ads policy disapprovals + near-100% bounce on /pricing/.
+  **RULE:** Search demand ≠ service offering. Every persona, ad group, headline, callout, snippet must trace to a verified offerings.md entry — or drop, reframe, or wrap as `<<UNVERIFIED-CLAIM>>`.
+- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `wiki/log.md` (by-design change log) and `wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** working/CLIENT-ad-copy-report.md, working/CLIENT-google-ads.csv, working/CLIENT-meta-ads.csv, working/CLIENT-image-prompts.md, working/CLIENT-video-storyboards.md — all overwritten in place on re-run. Refresh Mode _v2/_v3 ad-NAMING (in Meta Ads Manager) is preservation-of-A/B-control, NOT a re-run pattern — those are distinct ad-copy rotations, not the same case being re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.

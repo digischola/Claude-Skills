@@ -141,6 +141,38 @@
       ]
     },
     {
+      "id": 7,
+      "name": "Gate A + Gate B — gated brief with offerings mismatch",
+      "prompt": "Generate ad copy for Living Flow Yoga (live-stream campaign). Creative brief carries do_not_launch_until_phase_0_complete: true and phase_0_prerequisites with GATED status for 'standalone digital SKU' and '7-day free trial'. Brief lists 'Pregnancy / Pre-Postnatal' as a persona based on AU keyword volume. _shared/wiki/offerings.md documents only Vinyasa Flow / Yin / Beginners / Yang to Yin — no prenatal yoga, no free trial in MindBody.",
+      "expected_output": "Two ad-copy-report files generated (best-case + current-state). Production CSV strips 'free trial' / 'prenatal' / 'chair yoga' claims. Validator passes Gate A (output split detected) and Gate B (no unverified service claims in production files). Gate Audit section in report confirms triggers + stripped phrases.",
+      "assertions": [
+        {
+          "name": "gate_a_dual_output",
+          "description": "Both *-ad-copy-best-case.md and *-ad-copy-current-state.md generated when do_not_launch_until_phase_0_complete is true"
+        },
+        {
+          "name": "gate_a_csv_strip",
+          "description": "Production google-ads.csv contains zero matches against phase_0_prerequisites[].claim_phrases (free trial, 7-day free trial, etc.)"
+        },
+        {
+          "name": "gate_b_offerings_check",
+          "description": "Validator scans copy for service-claim phrases (prenatal, chair yoga, kids yoga, trimester-safe, etc.) and CRITICAL-fails any phrase not in offerings.md"
+        },
+        {
+          "name": "gate_b_reframe_or_drop",
+          "description": "Skill output reframes 'Pregnancy / Pre-Postnatal' persona — either drops it entirely or replaces with a verified-offering-aligned persona (e.g., Beginners-only)"
+        },
+        {
+          "name": "gate_audit_section",
+          "description": "Ad copy report includes a 'Gate Audit (auto-generated)' section listing Gate A triggers + stripped phrases + Gate B verified/failed claims"
+        },
+        {
+          "name": "validator_exit_nonzero",
+          "description": "If gates are violated, validate_output.py exits with non-zero status — production must not ship"
+        }
+      ]
+    },
+    {
       "id": 6,
       "name": "Refresh Mode — fatigued creative rotation",
       "prompt": "Thrive Retreats: post-launch-optimization flagged Emily_Teacher_Training_Hero_v1 as URGENT fatigue (frequency 3.7, CTR decline 42%, CPA up 68%). Run ad-copywriter in Refresh Mode to generate 2+ replacement variants per the rotation-brief.json.",

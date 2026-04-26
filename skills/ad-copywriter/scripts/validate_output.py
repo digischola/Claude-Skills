@@ -28,6 +28,18 @@ total_warnings = 0
 # echoed in copy, etc. Populated by main() before validators run.
 CREATIVE_BRIEF = None
 
+# Offerings.md content for Gate B service-offering cross-check.
+# Populated by main() — looks up {client}/wiki/offerings.md or
+# {client}/_shared/wiki/offerings.md based on file path of inputs.
+# See references/offerings-cross-check.md for protocol.
+OFFERINGS_TEXT = None
+OFFERINGS_PATH = None
+
+# Track whether the analyst supplied both -best-case and -current-state outputs
+# when Gate A fires. Populated by classify_file().
+HAS_BEST_CASE_REPORT = False
+HAS_CURRENT_STATE_REPORT = False
+
 def log_critical(msg): criticals.append(msg)
 def log_warning(msg): warnings.append(msg)
 def log_info(msg): infos.append(msg)
@@ -42,7 +54,14 @@ def flush_logs():
     criticals.clear(); warnings.clear(); infos.clear()
 
 def classify_file(path):
+    global HAS_BEST_CASE_REPORT, HAS_CURRENT_STATE_REPORT
     name = os.path.basename(path).lower()
+    if 'ad-copy-best-case' in name:
+        HAS_BEST_CASE_REPORT = True
+        return 'report_best_case'
+    if 'ad-copy-current-state' in name:
+        HAS_CURRENT_STATE_REPORT = True
+        return 'report_current_state'
     if 'ad-copy-report' in name: return 'report'
     if 'google-ads' in name and name.endswith('.csv'): return 'google_csv'
     if 'meta-ads' in name and name.endswith('.csv'): return 'meta_csv'
@@ -50,6 +69,233 @@ def classify_file(path):
     if 'video-storyboard' in name: return 'video_storyboards'
     if 'creative-brief' in name and name.endswith('.json'): return 'creative_brief'
     return None
+
+
+def _find_offerings_md(input_paths):
+    """Walk up from any input path to find wiki/offerings.md or _shared/wiki/offerings.md.
+
+    Used by Gate B (service-offering cross-check). Searches for both single-program
+    and multi-program (_shared/) wiki layouts. Returns (text, path) or (None, None).
+    See references/offerings-cross-check.md for protocol.
+    """
+    candidates = []
+    for ip in input_paths:
+        cur = os.path.dirname(os.path.abspath(ip))
+        # Walk up max 5 levels from each input file
+        for _ in range(5):
+            for sub in ('wiki/offerings.md', '_shared/wiki/offerings.md',
+                        '_shared/wiki/business.md', 'wiki/business.md'):
+                cand = os.path.join(cur, sub)
+                if cand not in candidates:
+                    candidates.append(cand)
+            parent = os.path.dirname(cur)
+            if parent == cur:
+                break
+            cur = parent
+    for cand in candidates:
+        if os.path.exists(cand):
+            try:
+                with open(cand, 'r', encoding='utf-8') as f:
+                    return f.read(), cand
+            except OSError:
+                pass
+    return None, None
+
+
+def _detect_gate_a_triggers(brief):
+    """Return list of Gate A trigger reasons (empty = not gated).
+
+    See references/offerings-cross-check.md §"Gate A — Trigger conditions".
+    """
+    if not isinstance(brief, dict):
+        return []
+    triggers = []
+    if brief.get('do_not_launch_until_phase_0_complete') is True:
+        triggers.append('do_not_launch_until_phase_0_complete=true')
+    prereqs = brief.get('phase_0_prerequisites') or []
+    if isinstance(prereqs, list):
+        gated = [p for p in prereqs if isinstance(p, dict)
+                 and str(p.get('status', '')).upper() in {'GATED', 'BLOCKED', 'PENDING'}]
+        if gated:
+            triggers.append(f'{len(gated)} phase_0_prerequisites with GATED/BLOCKED/PENDING status')
+    verdict = str(brief.get('verdict', '')).upper()
+    if verdict in {'DO-NOT-LAUNCH', 'DO_NOT_LAUNCH', 'BEST-CASE', 'BEST_CASE', 'GATED'}:
+        triggers.append(f'verdict={verdict}')
+    framing = str(brief.get('framing', '')).lower()
+    if 'best-case' in framing or 'best case' in framing:
+        triggers.append(f'framing={framing}')
+    return triggers
+
+
+# Default gated-claim phrases that recur across wellness/yoga/fitness clients.
+# Per references/offerings-cross-check.md, the brief's
+# phase_0_prerequisites[].claim_phrases[] takes precedence; this is a fallback list.
+DEFAULT_GATED_PHRASES = [
+    'free trial', '7-day free trial', '14-day free trial', '7 day free trial',
+    'try free', 'start free', 'free week', 'free month',
+    'no credit card', 'cancel anytime free',
+]
+
+
+def _collect_gated_phrases(brief):
+    """Extract claim_phrases from gated phase_0_prerequisites; fall back to defaults."""
+    phrases = set()
+    if isinstance(brief, dict):
+        for p in brief.get('phase_0_prerequisites') or []:
+            if not isinstance(p, dict):
+                continue
+            if str(p.get('status', '')).upper() not in {'GATED', 'BLOCKED', 'PENDING'}:
+                continue
+            for ph in p.get('claim_phrases') or []:
+                if isinstance(ph, str) and ph.strip():
+                    phrases.add(ph.strip().lower())
+            # Use the prerequisite name itself as a phrase
+            name = p.get('name')
+            if isinstance(name, str) and name.strip():
+                phrases.add(name.strip().lower())
+    if not phrases:
+        phrases = set(DEFAULT_GATED_PHRASES)
+    return phrases
+
+
+def validate_gate_a(files, brief):
+    """Gate A — Phase-0 leakage prevention.
+
+    If brief flags a gated launch state, output MUST be split into best-case +
+    current-state reports, and CSV must be generated from current-state only.
+    See references/offerings-cross-check.md §Gate A.
+    """
+    if not brief:
+        log_info("Gate A skipped — no creative brief loaded")
+        return False
+
+    triggers = _detect_gate_a_triggers(brief)
+    if not triggers:
+        log_info("Gate A — not fired (brief has no Phase-0 / DO-NOT-LAUNCH / BEST-CASE flags)")
+        return False
+
+    log_info(f"Gate A FIRED — triggers: {', '.join(triggers)}")
+
+    # Require both best-case + current-state files
+    if not (HAS_BEST_CASE_REPORT and HAS_CURRENT_STATE_REPORT):
+        if 'report' in files:
+            log_critical(
+                f"Gate A fired but only single ad-copy-report found. "
+                f"Required: *-ad-copy-best-case.md AND *-ad-copy-current-state.md. "
+                f"See references/offerings-cross-check.md §Gate A. "
+                f"Fix: split the deliverable — best-case keeps gated claims; current-state strips them."
+            )
+        else:
+            log_critical(
+                "Gate A fired but no ad-copy report found at all. "
+                "Generate both *-ad-copy-best-case.md and *-ad-copy-current-state.md."
+            )
+
+    # Scan CSVs for gated-claim phrases
+    gated_phrases = _collect_gated_phrases(brief)
+    for csv_key in ('google_csv', 'meta_csv'):
+        if csv_key not in files:
+            continue
+        with open(files[csv_key], 'r', encoding='utf-8') as f:
+            csv_text = f.read().lower()
+        leaked = [p for p in gated_phrases if p in csv_text]
+        if leaked:
+            log_critical(
+                f"Gate A leak — {csv_key} contains gated-claim phrases that should be stripped "
+                f"from production CSV: {leaked[:5]}. Move these to best-case file only."
+            )
+    return True
+
+
+# Service-claim phrase patterns for Gate B. Each pattern's match must appear
+# in offerings.md (lemma-fuzzy). Patterns ordered by specificity — yoga-specific
+# first, then general wellness/fitness/therapy. Extend per sector as needed.
+SERVICE_CLAIM_PATTERNS = [
+    # Yoga / wellness modalities
+    (r'\bprenatal\s+yoga\b', 'prenatal yoga'),
+    (r'\bpostnatal\s+yoga\b', 'postnatal yoga'),
+    (r'\bpre[- ]postnatal\b', 'pre/postnatal yoga'),
+    (r'\bchair\s+yoga\b', 'chair yoga'),
+    (r'\bkids\s+yoga\b', 'kids yoga'),
+    (r'\baerial\s+yoga\b', 'aerial yoga'),
+    (r'\bhot\s+yoga\b', 'hot yoga'),
+    (r'\bbikram\b', 'bikram yoga'),
+    (r'\bashtanga\b', 'ashtanga yoga'),
+    (r'\bkundalini\b', 'kundalini yoga'),
+    (r'\brestorative\s+yoga\b', 'restorative yoga'),
+    (r'\btrimester[- ]safe\b', 'trimester-safe modifications'),
+    (r'\bpregnancy[- ]safe\b', 'pregnancy-safe modifications'),
+    # Therapy / mental health modalities
+    (r'\bemdr\b', 'EMDR therapy'),
+    (r'\bketamine[- ]assisted\b', 'ketamine-assisted therapy'),
+    (r'\bsomatic\s+(?:experiencing|therapy)\b', 'somatic therapy'),
+    # Fitness specifics
+    (r'\bcrossfit\b', 'CrossFit'),
+    (r'\bf45\b', 'F45'),
+    (r'\breformer\s+pilates\b', 'reformer pilates'),
+    # Beauty / spa
+    (r'\bhydrafacial\b', 'hydrafacial'),
+    (r'\bmicroneedling\b', 'microneedling'),
+    (r'\bchemical\s+peel\b', 'chemical peel'),
+]
+
+
+def validate_gate_b(files):
+    """Gate B — Service-offering cross-check.
+
+    Every service-claim phrase in copy must trace back to offerings.md. Fuzzy match.
+    See references/offerings-cross-check.md §Gate B.
+    """
+    if not OFFERINGS_TEXT:
+        log_warning(
+            "Gate B unverified — no offerings.md found in {client}/wiki/ or {client}/_shared/wiki/. "
+            "Service claims in ad copy could not be cross-checked. "
+            "See references/offerings-cross-check.md §Gate B."
+        )
+        return
+
+    offerings_lower = OFFERINGS_TEXT.lower()
+
+    # Aggregate copy text from all production outputs (skip best-case which is
+    # forward-planning, not production).
+    copy_text = ''
+    for key in ('report', 'report_current_state', 'google_csv', 'meta_csv'):
+        if key in files:
+            try:
+                with open(files[key], 'r', encoding='utf-8') as f:
+                    copy_text += '\n' + f.read()
+            except OSError:
+                pass
+
+    if not copy_text.strip():
+        log_info("Gate B skipped — no production copy files to scan")
+        return
+
+    copy_lower = copy_text.lower()
+    failed_claims = []
+    verified_claims = []
+    for pattern, label in SERVICE_CLAIM_PATTERNS:
+        if not re.search(pattern, copy_lower):
+            continue
+        # Claim is in copy. Now check offerings.md.
+        # Lemma-fuzzy: try the label, also try its head word.
+        head_word = label.split()[0]
+        if re.search(pattern, offerings_lower) or head_word.lower() in offerings_lower:
+            verified_claims.append(label)
+        else:
+            failed_claims.append(label)
+
+    if failed_claims:
+        log_critical(
+            f"Gate B FAILED — {len(failed_claims)} service claim(s) in ad copy not found in "
+            f"offerings.md ({OFFERINGS_PATH}): {failed_claims}. "
+            f"Either drop the claim, reframe to a verified offering, or wrap as "
+            f"<<UNVERIFIED-CLAIM:phrase>>. See references/offerings-cross-check.md §Gate B."
+        )
+    if verified_claims:
+        log_info(f"Gate B — {len(verified_claims)} service claim(s) verified against offerings.md: {verified_claims}")
+    if not failed_claims and not verified_claims:
+        log_info(f"Gate B — no specific service claims detected (offerings source: {OFFERINGS_PATH})")
 
 def _brief_collect_strings(node, keys):
     """Walk the creative brief dict and collect all string values for given keys."""
@@ -387,7 +633,7 @@ def main():
         print(__doc__)
         sys.exit(1)
 
-    global CREATIVE_BRIEF
+    global CREATIVE_BRIEF, OFFERINGS_TEXT, OFFERINGS_PATH
     files = {}
     for path in sys.argv[1:]:
         if not os.path.exists(path):
@@ -408,12 +654,21 @@ def main():
             print(f"  ⚠️  Creative brief load failed ({e}) — cross-validation disabled")
             CREATIVE_BRIEF = None
 
+    # Pre-load offerings.md for Gate B service-offering cross-check.
+    # Walks up from any input file to locate {client}/wiki/offerings.md or
+    # {client}/_shared/wiki/offerings.md.
+    OFFERINGS_TEXT, OFFERINGS_PATH = _find_offerings_md(list(files.values()))
+
     print("🔍 Ad Copywriter — Output Validation")
     for ftype, fpath in files.items():
         print(f"   {ftype:20s}: {fpath}")
+    if OFFERINGS_PATH:
+        print(f"   {'offerings_source':20s}: {OFFERINGS_PATH}")
 
     validators = [
         ('report', 'Ad Copy Report', validate_report),
+        ('report_best_case', 'Ad Copy — Best Case (forward planning)', validate_report),
+        ('report_current_state', 'Ad Copy — Current State (production)', validate_report),
         ('google_csv', 'Google Ads CSV', validate_google_csv),
         ('meta_csv', 'Meta Ads CSV', validate_meta_csv),
         ('image_prompts', 'Image Prompts', validate_image_prompts),
@@ -435,10 +690,25 @@ def main():
         validate_cross_file(files)
         flush_logs()
 
+    # Gate A — Phase-0 leakage prevention
+    print(f"\n{'='*60}")
+    print("  Gate A — Phase-0 Leakage Prevention")
+    print(f"{'='*60}")
+    validate_gate_a(files, CREATIVE_BRIEF)
+    flush_logs()
+
+    # Gate B — Service-offering cross-check (always-on)
+    print(f"\n{'='*60}")
+    print("  Gate B — Service-Offering Cross-Check")
+    print(f"{'='*60}")
+    validate_gate_b(files)
+    flush_logs()
+
     # Final summary
     print(f"\n{'='*60}")
     if total_criticals > 0:
         print(f"  ❌ Validation FAILED — {total_criticals} critical issue(s), {total_warnings} warning(s)")
+        sys.exit(1)
     else:
         print(f"  ✅ Validation passed — no critical issues ({total_warnings} warning(s))")
 

@@ -33,6 +33,7 @@ A standalone skill enables:
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md` — workflow, voice standards (no em dashes, no hype, conservative client naming)
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 **Skill references:**
 - `references/hook-pattern-anatomy.md` — what makes a pattern, how to add one

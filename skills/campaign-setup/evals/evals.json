@@ -199,6 +199,50 @@
         "validator_message_contains": "PENDING_UPLOAD",
         "checklist_section_0_must_list": true
       }
+    },
+    {
+      "id": "structured-snippet-per-column-rejection",
+      "prompt": "Run campaign-setup with: 07-structured-snippets.csv emitted in per-column format (Value 1, Value 2, ...). Validator must CRITICAL-fail because Editor's parser rejects this format with 'There are too few values for a structured snippet.' Required format is single 'Snippet Values' column with semicolon-delimited values.",
+      "assertions": [
+        {
+          "name": "validator_critical_per_column_format",
+          "description": "Validator output contains the phrase 'per-column Value 1/Value 2/... format' OR 'REJECTED by Ads Editor parser'"
+        },
+        {
+          "name": "validator_suggests_semicolon_format",
+          "description": "Validator output references 'Snippet Values' column with semicolon-delimited example (e.g. 'Vinyasa;Yin;Beginners')"
+        },
+        {
+          "name": "schema_doc_updated",
+          "description": "references/google-ads-editor-schema.md §7 documents the semicolon format and explicitly warns against the per-column format"
+        }
+      ]
+    },
+    {
+      "id": "restricted-keyword-pre-filter",
+      "prompt": "Run campaign-setup for a wellness/yoga client. Keyword set includes 'yoga for back pain sydney' (musculoskeletal pain), 'yoga for anxiety' (mental health), and 'weight loss program' (weight-loss claim). Google's Personalized Advertising Restrictions auto-reject these at Editor import. Validator must pre-filter and CRITICAL-fail per match before launch.",
+      "assertions": [
+        {
+          "name": "validator_flags_health_condition_keywords",
+          "description": "Validator CRITICAL-fails 'yoga for back pain sydney' with category 'health-condition (musculoskeletal pain)' and suggests reframe (desk workers / mobility yoga)"
+        },
+        {
+          "name": "validator_flags_mental_health_keywords",
+          "description": "Validator CRITICAL-fails 'yoga for anxiety' with category 'mental-health condition' and suggests reframe (calming yoga / restorative yoga)"
+        },
+        {
+          "name": "validator_flags_weight_loss_keywords",
+          "description": "Validator CRITICAL-fails 'weight loss program' with category 'weight-loss claim' and suggests reframe (fitness program / body transformation)"
+        },
+        {
+          "name": "negatives_exempt",
+          "description": "Negative keyword variants of these patterns are NOT flagged — negatives SHOULD reference restricted terms to block irrelevant traffic"
+        },
+        {
+          "name": "reference_doc_present",
+          "description": "references/restricted-keyword-categories.md exists with full pattern catalog + sector-specific reframing recipes"
+        }
+      ]
     }
   ]
 }
