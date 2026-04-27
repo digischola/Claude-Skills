@@ -29,6 +29,39 @@ Every image prompt follows this structure:
 
 **Prompt length target:** 40-80 words after the prefix. Previous prompts were 85-140 words — research shows shorter, more specific prompts produce more consistent results.
 
+## Standalone-prompt mandate (MANDATORY — added 2026-04-27)
+
+The deliverable file MUST present each prompt as a complete, copy-pasteable string. The user opens the file, hits Copy on one cell, pastes into Gemini, and the prompt is ready to run.
+
+**FORBIDDEN patterns** (these create copy-paste friction at the user's end):
+- `[universal prefix]` placeholder inside a prompt block, expecting the user to mentally substitute
+- Per-cell metadata (aspect ratio, text-overlay zone, performance priority) ABOVE the prompt block but not IN it
+- A single shared prefix block at the top of the file with each cell appending body-only text below
+
+**REQUIRED format per cell:**
+1. Cell heading
+2. ONE code block containing the FULL prompt: prefix substituted in, scene description, lens + lighting, aspect-ratio instruction embedded as natural language ("Vertical 9:16 composition") AND as Midjourney flag if multi-tool target (`--ar 9:16`).
+3. Optional metadata table BELOW the code block (priority, intended placement, text-overlay zone for post-production) — never above.
+
+If the AI image generator cannot reliably produce embedded text (any number, headline, label inside the image), the prompt MUST instruct: "Leave clean negative space at [zone] for post-production text overlay" — never ask the AI to render the text itself. AI image gens hallucinate text 60-80% of the time.
+
+## HTML prompt-library deliverable (MANDATORY — added 2026-04-27)
+
+Alongside the markdown image-prompts file, the skill MUST also generate `{business-name}-prompt-library.html` — a one-page dashboard with:
+
+- One card per prompt (cell)
+- Per-card "Copy full prompt" button (one click → clipboard)
+- Per-card metadata visible at a glance: aspect ratio, priority, intended placement, post-production overlay note
+- Brand-config-derived styling (read from `deliverables/brand-config.json`)
+- Mobile-readable (founder may copy from phone)
+
+The MD file remains as the analyst-readable archive. The HTML is the production tool.
+
+**Validation (CRITICAL):**
+- HTML must NOT contain `[universal prefix]` placeholder strings inside any prompt block
+- Every prompt block must be a self-contained complete prompt
+- Every prompt card must have a working `navigator.clipboard.writeText()` button
+
 ### Component Breakdown
 
 1. **Prefix** (from creative brief `visual_direction.image_gen_prompt_prefix`): Sets the persistent style, color palette, and mood across all images for this campaign. Never modify the prefix — append to it.
