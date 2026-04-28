@@ -40,18 +40,57 @@ The deliverable file MUST present each prompt as a complete, copy-pasteable stri
 
 **REQUIRED format per cell:**
 1. Cell heading
-2. ONE code block containing the FULL prompt: prefix substituted in, scene description, lens + lighting, aspect-ratio instruction embedded as natural language ("Vertical 9:16 composition") AND as Midjourney flag if multi-tool target (`--ar 9:16`).
-3. Optional metadata table BELOW the code block (priority, intended placement, text-overlay zone for post-production) — never above.
+2. ONE code block containing the FULL prompt: prefix substituted in, scene description, lens + lighting, aspect-ratio instruction embedded as natural language.
+3. Metadata BELOW the code block (priority, intended placement, reference-image requirement) — never above.
 
-If the AI image generator cannot reliably produce embedded text (any number, headline, label inside the image), the prompt MUST instruct: "Leave clean negative space at [zone] for post-production text overlay" — never ask the AI to render the text itself. AI image gens hallucinate text 60-80% of the time.
+## Embedded text rendering (REVISED 2026-04-28)
 
-## HTML prompt-library deliverable (MANDATORY — added 2026-04-27)
+**Modern models (Gemini 2+, ChatGPT-Imagen 2, Meta AI 2025+) render embedded text reliably.** A/B test on 2026-04-27 confirmed: all 4 permutations (Gemini × ChatGPT, JSON × prose) rendered exact chip text + headline + ₹ + → button correctly on the first try.
+
+DO write embedded text into prompts when the design calls for it — exact copy strings, font specs, positions, sizes. The previous "leave clean space for post-production overlay" rule is REVERTED for typography-heavy creatives. Use post-production overlay only when the analyst explicitly prefers Figma control over AI rendering.
+
+## Dual-format mandate (MANDATORY — added 2026-04-28)
+
+Every prompt MUST be available in TWO formats:
+
+1. **Spec-prose format** — designer-brief-style natural language with named sections (BRAND DESIGN SYSTEM / COMPOSITION GRID / SUBJECT / TEXT ELEMENTS / NEGATIVE EXCLUSIONS).
+2. **JSON format** — structured object with the same content, fields-as-constraints, prefixed with one instruction line: `Generate one image based on this design specification. Treat every field as a constraint. Use the exact_copy strings verbatim — render them as visible typography, not as concepts.`
+
+A/B test result (2026-04-27): JSON and prose tied on Gemini, prose edged JSON on ChatGPT. Different analysts and different cells will favor different formats. The HTML prompt library MUST present both formats per card with a tab toggle.
+
+## Reference-image flagging (MANDATORY — added 2026-04-28)
+
+Every prompt MUST carry two metadata fields the HTML library renders as an animated badge:
+
+- `requires_reference_image: true | false`
+- `reference_subject: string` — describes WHAT the user must attach (e.g., "Mayank's portrait photo", "actual product packaging shot", "venue exterior photo", "team member headshot")
+
+**When to flag `true`:**
+- Founder / team-member portraits — for likeness consistency across creatives
+- Product shots — when the brand sells a specific physical product
+- Venue / location shots — when a specific place is being depicted
+- Custom logos or brand artifacts — when the artifact is unique and non-typographic
+
+**When to flag `false`:**
+- Generic UI / dashboard / chart mockups (abstract, no specific real-world subject)
+- Conceptual illustrations
+- Abstract data visualizations
+- Stock-style scenes with no specific likeness requirement
+
+The HTML library MUST render flagged cards with a pulsing/animated badge in the card head, the reference subject visible at a glance. The analyst should not have to dig into the JSON to discover a card needs an attachment.
+
+This logic generalizes across all clients — whatever subject specificity the brand demands (founder face for personal-brand clients, product packaging for D2C clients, venue exteriors for event/wellness clients, team member headshots for professional services), the same flag system applies.
+
+## HTML prompt-library deliverable (MANDATORY — added 2026-04-27, expanded 2026-04-28)
 
 Alongside the markdown image-prompts file, the skill MUST also generate `{business-name}-prompt-library.html` — a one-page dashboard with:
 
 - One card per prompt (cell)
-- Per-card "Copy full prompt" button (one click → clipboard)
-- Per-card metadata visible at a glance: aspect ratio, priority, intended placement, post-production overlay note
+- **Two-tab toggle per card: JSON / Spec-prose** — both formats with their own copy buttons
+- Per-card "Copy full prompt" button per format tab (one click → clipboard)
+- Per-card metadata visible at a glance: aspect ratio, priority, intended placement
+- **Animated reference-image badge** on cards where `requires_reference_image: true` (pulse animation, sky-blue or amber accent, paperclip icon, "Attach: {reference_subject}" text)
+- Filter chips (priority, angle, reference-required-only)
 - Brand-config-derived styling (read from `deliverables/brand-config.json`)
 - Mobile-readable (founder may copy from phone)
 
@@ -60,7 +99,8 @@ The MD file remains as the analyst-readable archive. The HTML is the production 
 **Validation (CRITICAL):**
 - HTML must NOT contain `[universal prefix]` placeholder strings inside any prompt block
 - Every prompt block must be a self-contained complete prompt
-- Every prompt card must have a working `navigator.clipboard.writeText()` button
+- Every prompt card must have a working `navigator.clipboard.writeText()` button per format tab
+- Every card with `requires_reference_image: true` must render the animated badge
 
 ### Component Breakdown
 

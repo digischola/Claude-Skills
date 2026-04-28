@@ -57,12 +57,13 @@ The following files define universal standards and must NEVER be edited, overwri
 - `.claude/shared-context/accuracy-protocol.md`
 - `.claude/shared-context/skill-architecture-standards.md`
 - `.claude/shared-context/analyst-profile.md`
+- `.claude/shared-context/copywriting-rules.md`
 
-Everything else — SKILL.md files, reference files, scripts, assets, evals — can be created, modified, or deleted as needed. Only the above four files are locked.
+Everything else — SKILL.md files, reference files, scripts, assets, evals — can be created, modified, or deleted as needed. Only the above five files are locked.
 
 If a user explicitly asks to update these files, confirm the specific change before making it. Never modify them as a side effect of another task.
 
-**Filesystem-level enforcement.** These four files are `chmod 444` (read-only) with SHA-256 checksums verified at session start by `scripts/verify_kernel.sh`. Drift fires a macOS notification. To make an authorized kernel edit:
+**Filesystem-level enforcement.** These five files are `chmod 444` (read-only) with SHA-256 checksums verified at session start by `scripts/verify_kernel.sh`. Drift fires a macOS notification. To make an authorized kernel edit:
 
 1. `scripts/verify_kernel.sh --unlock` (chmod 644)
 2. Edit the file

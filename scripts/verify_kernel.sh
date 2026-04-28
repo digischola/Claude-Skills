@@ -34,6 +34,7 @@ KERNEL_FILES=(
   "shared-context/accuracy-protocol.md"
   "shared-context/skill-architecture-standards.md"
   "shared-context/analyst-profile.md"
+  "shared-context/copywriting-rules.md"
 )
 
 cd "$REPO_ROOT" || { echo "ERROR: cannot cd to $REPO_ROOT"; exit 2; }
@@ -81,7 +82,8 @@ cmd_verify() {
   fi
 
   if /usr/bin/shasum -a 256 -c "$CHECKSUMS_FILE" --status; then
-    echo "✓ Kernel integrity verified (4/4 files match baseline)"
+    local n=${#KERNEL_FILES[@]}
+    echo "✓ Kernel integrity verified ($n/$n files match baseline)"
     exit 0
   else
     echo "✗ KERNEL DRIFT DETECTED"
