@@ -111,16 +111,19 @@ KNOWN_DESKTOP_FOLDERS = {
     "remotion-promo",
 }
 
-# Known subfolders inside Desktop/Digischola/brand/
+# Known subfolders inside Desktop/Digischola/brand/ (top-level, post-2026-04-29 _engine/ convention).
+# Skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media build dirs, configs)
+# all live INSIDE _engine/. Daily-workflow folders stay at top.
 KNOWN_BRAND_FOLDERS = {
-    "queue", "calendars", "performance", "remotion-studio", "hyperframes-scenes",
-    "music", "face-samples", "voice-samples", "social-images",
-    "_mining", "_research", "weekly-ritual", "_archive", "tools",
+    "queue", "calendars", "performance", "videos", "social-images",
+    "_engine", "_archive", "tools",
 }
 
+# Files protected anywhere under Desktop/Digischola/brand/_engine/ (or its wiki/ subdir).
 LOCKED_BRAND_FILES = {
     "brand-wiki.md", "pillars.md", "voice-guide.md", "brand-identity.md",
     "credentials.md", "channel-playbook.md", "icp.md",
+    "voice-flavor.md", "voice-lock.md",
     "wiki-config.json", "idea-bank.json", "credential-usage-log.json",
     "weekly-ritual.state.json", "housekeeping.state.json",
 }
@@ -187,34 +190,51 @@ def is_protected(path: Path, parts: tuple[str, ...]) -> tuple[str, str] | None:
         if name == "SKILL.md":
             return ("skill-md", "skill SKILL.md")
 
-    # 3. LOCKED brand wiki (direct children of brand/)
-    if "Digischola" in parts and "brand" in parts:
-        idx = parts.index("brand")
-        if len(parts) == idx + 2 and name in LOCKED_BRAND_FILES:
-            return ("locked-brand-wiki", f"brand/{name}")
+    # 3. LOCKED brand wiki (under brand/_engine/ — files at _engine/ root or _engine/wiki/).
+    # Post-2026-04-29 _engine/ convention: brand DNA + skill state moved into brand/_engine/.
+    if "Digischola" in parts and "brand" in parts and "_engine" in parts:
+        if name in LOCKED_BRAND_FILES:
+            return ("locked-brand-wiki", f"brand/_engine/{name}")
 
     # 4. Performance data (performance/ directly under brand/)
     if "Digischola" in parts and "brand" in parts and "performance" in parts:
         if name == "log.json" or name.endswith(".md"):
             return ("performance-data", f"brand/performance/{name}")
 
-    # 5. Client wiki (anything under {Client}/{Project}/wiki/ or _shared/wiki/)
-    if len(parts) >= 3 and "wiki" in parts:
-        # Under Desktop/{Client}/{Project}/wiki/...
-        desktop_idx = _find_desktop_idx(parts)
-        if desktop_idx is not None and "wiki" in parts[desktop_idx:]:
-            return ("client-wiki", "client wiki page")
-
-    # 6. Client primary deliverables
-    if "deliverables" in parts:
+    # 5. Client wiki (anything under {Client}/{Project}/_engine/wiki/ or {Client}/_engine/wiki/).
+    # Post-2026-04-29: wiki/ moved into _engine/wiki/. _shared/ collapsed into client-root _engine/.
+    if "_engine" in parts and "wiki" in parts:
         desktop_idx = _find_desktop_idx(parts)
         if desktop_idx is not None:
-            ext = path.suffix.lower()
-            if ext in (".md", ".html", ".json", ".csv", ".pdf") and not path.is_dir():
-                return ("client-deliverable", f"deliverable {ext}")
-            # Preserve campaign-setup subdirs
-            if "campaign-setup" in parts:
-                return ("client-deliverable", "campaign-setup output tree")
+            return ("client-wiki", "client wiki page")
+
+    # 6. Client primary deliverables.
+    # Post-2026-04-29 _engine/ convention:
+    #   - Presentables (HTML/MP4/PDF + campaign-setup folder bundle) sit at folder root.
+    #   - Internals (md/json/csv reports, briefs, page-specs) live in _engine/working/.
+    desktop_idx = _find_desktop_idx(parts)
+    if desktop_idx is not None and not path.is_dir():
+        ext = path.suffix.lower()
+        # campaign-setup folder bundle (anywhere) stays protected
+        if "campaign-setup" in parts:
+            return ("client-deliverable", "campaign-setup output tree")
+        # Working internals
+        if "_engine" in parts and "working" in parts and ext in (".md", ".json", ".csv"):
+            return ("client-deliverable", f"working {ext}")
+        # _engine/brand-config.json + _engine/wiki-config.json at engine root
+        if "_engine" in parts and name in ("brand-config.json", "wiki-config.json"):
+            return ("client-deliverable", f"_engine/{name}")
+        # Top-level presentables in a client/program folder. We treat depth >= desktop_idx + 3
+        # as a program subfolder (Desktop/{Client}/{Project}/file.ext); depth desktop_idx + 2 is
+        # client-root presentables (cross-program). Both are deliverables.
+        if ext in (".html", ".mp4", ".mov", ".webm", ".pdf"):
+            # Skip the .claude tree
+            if ".claude" in parts:
+                return None
+            # Skip Digischola brand/ — those are handled by personal-brand-specific rules elsewhere
+            if "Digischola" in parts:
+                return None
+            return ("client-deliverable", f"top-level presentable {ext}")
 
     # 7. Active scheduler / housekeeping logs (never delete the live files)
     if name in ("scheduler.log", "scheduler-failures.log", "housekeeping.log"):
@@ -341,8 +361,9 @@ def classify_likely_bloat(path: Path, parts: tuple[str, ...], is_dir: bool, stat
     name = path.name
     p_str = str(path)
 
-    # Raw research sources — perplexity and screenshots and keyword CSVs older than 90d
-    if "sources" in parts:
+    # Raw research sources — perplexity and screenshots and keyword CSVs older than 90d.
+    # Post-2026-04-29 _engine/ convention: client sources live in _engine/sources/.
+    if "sources" in parts and "_engine" in parts:
         desktop_idx = _find_desktop_idx(parts)
         if desktop_idx is not None and age > 90:
             if name.startswith("perplexity-") and name.endswith(".md"):
@@ -352,26 +373,29 @@ def classify_likely_bloat(path: Path, parts: tuple[str, ...], is_dir: bool, stat
             if "keyword" in name.lower() and path.suffix.lower() == ".csv":
                 return ("old-keyword-csv", f"{age:.0f}d old keyword CSV")
 
-    # Brand mining artifacts older than 60 days
-    if "Digischola" in parts and "_mining" in parts and age > 60:
+    # Brand mining artifacts older than 60 days.
+    # Path: Desktop/Digischola/brand/_engine/_mining/...
+    if "Digischola" in parts and "_engine" in parts and "_mining" in parts and age > 60:
         return ("old-mining", f"{age:.0f}d old mining artifact")
 
-    # Trend research weekly folders older than 56 days
-    if "Digischola" in parts and "_research" in parts and "trends" in parts:
+    # Trend research weekly folders older than 56 days.
+    # Path: Desktop/Digischola/brand/_engine/_research/trends/{YYYY-WNN}/
+    if "Digischola" in parts and "_engine" in parts and "_research" in parts and "trends" in parts:
         # A weekly folder looks like 2026-W04
         if is_dir and len(name) == 7 and name[4] == "-" and name[5] == "W" and age > 56:
             return ("old-trend-week", f"{age:.0f}d old trend week {name}")
 
-    # Old published drafts (>180 days)
+    # Old published drafts (>180 days). queue/ stays at top of brand/.
     if "Digischola" in parts and "queue" in parts and "published" in parts and path.suffix == ".md" and age > 180:
         return ("old-published", f"{age:.0f}d old published draft")
 
-    # Remotion intermediates older than 30 days
+    # Remotion intermediates older than 30 days.
+    # Path: Desktop/Digischola/brand/_engine/remotion-studio/out/...
     if "remotion-studio" in parts and "out" in parts and age > 30:
         if path.suffix.lower() in (".mp4", ".png", ".mov", ".webm"):
             return ("remotion-intermediate", f"{age:.0f}d old render intermediate")
 
-    # _renders folder older than 30 days
+    # _renders folder older than 30 days. Path: Desktop/Digischola/brand/_engine/_renders/...
     if "Digischola" in parts and "_renders" in parts and age > 30:
         return ("old-render", f"{age:.0f}d old render")
 
@@ -452,8 +476,10 @@ def classify_ambiguous(path: Path, parts: tuple[str, ...], is_dir: bool, stat, a
     if not is_dir:
         size = stat.st_size
         if size > 50 * 1024 * 1024:
-            # Allow known patterns
-            if "remotion-studio" in parts or "music" in parts or "face-samples" in parts:
+            # Allow known patterns. Media build dirs now live under _engine/ post-2026-04-29.
+            if ("remotion-studio" in parts or "music" in parts
+                    or "face-samples" in parts or "voice-samples" in parts
+                    or "hyperframes-scenes" in parts):
                 return None
             if path.suffix.lower() in (".mp4", ".mov", ".webm"):
                 return None
@@ -530,7 +556,11 @@ def extract_deliverable_suffix(fname: str) -> str | None:
 
 
 def analyze_deliverables_groups(report: dict, only_tier: str | None) -> None:
-    """Post-walk: detect same-suffix clusters in any deliverables/ dir.
+    """Post-walk: detect same-suffix clusters in any client deliverable surface.
+
+    Post-2026-04-29 _engine/ convention: presentables (HTML/MP4/PDF) live at the
+    program-folder root and intermediate working files (md/json/csv) live in
+    _engine/working/. We scan both surfaces.
 
     For each cluster with >=2 files, flag all but the newest as AMBIGUOUS
     'possibly-superseded'. User decides per item (e.g., 'kingscliff' vs
@@ -545,8 +575,23 @@ def analyze_deliverables_groups(report: dict, only_tier: str | None) -> None:
         if QUARANTINE_ROOT in rp.parents or rp == QUARANTINE_ROOT:
             dirs[:] = []
             continue
-        # We want files inside any 'deliverables' dir (including nested like campaign-setup/)
-        if "deliverables" not in rp.parts:
+        rp_parts = rp.parts
+        # Skip personal-brand and framework dirs.
+        if "Digischola" in rp_parts or ".claude" in rp_parts:
+            continue
+        # Eligible scan surfaces:
+        #   1. Inside _engine/working/ (intermediate md/json/csv reports + briefs)
+        #   2. Inside campaign-setup/ folder bundles (anywhere)
+        #   3. Top-level program/client folder roots: depth 2-3 below Desktop, NOT inside _engine/
+        in_engine_working = "_engine" in rp_parts and "working" in rp_parts
+        in_campaign_setup = "campaign-setup" in rp_parts
+        desktop_idx = _find_desktop_idx(rp_parts)
+        in_program_root = (
+            desktop_idx is not None
+            and len(rp_parts) in (desktop_idx + 2, desktop_idx + 3)
+            and "_engine" not in rp_parts
+        )
+        if not (in_engine_working or in_campaign_setup or in_program_root):
             continue
         for fname in files:
             if fname.startswith("."):

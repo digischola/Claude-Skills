@@ -1,6 +1,6 @@
 # Platform Specs (2026 Algorithm + Structure)
 
-Source: Perplexity deep research 2026-04-18 at `Desktop/Digischola/brand/_research/post-writer-research.md`. Re-read this file before drafting any post.
+Source: Perplexity deep research 2026-04-18 at `Desktop/Digischola/brand/_engine/_research/post-writer-research.md`. Re-read this file before drafting any post.
 
 ## LinkedIn
 

@@ -4,7 +4,7 @@ Load this file in Steps 4-7 of the ad-copywriter skill. Defines the exact struct
 
 ## Deliverable 1: Ad Copy Report (.md)
 
-**Filename:** `{business-name}-ad-copy-report.md`
+**Filename:** `ad-copy-report.md` (in `_engine/working/` — folder location encodes client + program)
 
 ### Structure
 
@@ -79,7 +79,7 @@ Campaigns: {count}
 
 ## Deliverable 2: Google Ads CSV
 
-**Filename:** `{business-name}-google-ads.csv`
+**Filename:** `google-ads.csv` (in `_engine/working/`)
 
 ### Columns (in order)
 
@@ -111,7 +111,7 @@ Before writing the CSV, run this check on every cell:
 
 ## Deliverable 3: Meta Ads CSV
 
-**Filename:** `{business-name}-meta-ads.csv`
+**Filename:** `meta-ads.csv` (in `_engine/working/`)
 
 ### Columns (in order)
 
@@ -141,7 +141,7 @@ For carousel ads, include additional columns or note in Ad Name:
 
 ## Deliverable 4: Image Prompts (.md)
 
-**Filename:** `{business-name}-image-prompts.md`
+**Filename:** `image-prompts.md` (in `_engine/working/`)
 
 ### Structure
 
@@ -185,7 +185,7 @@ Total Prompts: {count}
 
 ## Deliverable 5: Video Storyboards (.md)
 
-**Filename:** `{business-name}-video-storyboards.md`
+**Filename:** `video-storyboards.md` (in `_engine/working/`)
 
 ### Structure
 

@@ -14,15 +14,15 @@ Two clean paths. Neither uses generative AI images. Everything is code-rendered,
   - One static portrait on outro only; no other photographs; no AI image generation anywhere.
   - Creative gate: `references/motion-design-playbook.md`. Primitive catalog: `references/ui-mockup-vocabulary.md`. Dual-engine architecture: `references/v7-pipeline-architecture.md`.
 
-**Consistency discipline**: both engines read `brand/remotion-studio/src/theme/design-tokens.json` (single source of truth for palette / fonts / easing / duration). Run `scripts/build_shared_tokens.py` to regenerate `brand/hyperframes-scenes/shared/tokens.css` after any token edit. Scene routing: `scripts/scene_spec.py::SCENE_ROUTING`. Render log captured per scene to `brand/queue/assets/<entry_id>/render_log.jsonl` for future learning.
+**Consistency discipline**: both engines read `brand/_engine/remotion-studio/src/theme/design-tokens.json` (single source of truth for palette / fonts / easing / duration). Run `scripts/build_shared_tokens.py` to regenerate `brand/_engine/hyperframes-scenes/shared/tokens.css` after any token edit. Scene routing: `scripts/scene_spec.py::SCENE_ROUTING`. Render log captured per scene to `brand/queue/assets/<entry_id>/render_log.jsonl` for future learning.
 
 ## Context Loading
 
-**Brand wiki (LOCKED, read first):**
-- `Desktop/Digischola/brand/brand-identity.md` — colors (#3B9EFF accent, #4ADE80 success, #EF4444 warning), fonts (Orbitron / Space Grotesk / Manrope), logo, UI rules
-- `Desktop/Digischola/brand/voice-guide.md` — emoji policy (Restrained), client-naming (Conservative)
-- `Desktop/Digischola/brand/voice-lock.md` — ChatterBox voice-clone reference corpus
-- `Desktop/Digischola/brand/pillars.md` — status must be LOCKED
+**Brand wiki (LOCKED, read first — post-2026-04-29 `_engine/wiki/` convention):**
+- `Desktop/Digischola/brand/_engine/wiki/brand-identity.md` — colors (#3B9EFF accent, #4ADE80 success, #EF4444 warning), fonts (Orbitron / Space Grotesk / Manrope), logo, UI rules
+- `Desktop/Digischola/brand/_engine/wiki/voice-guide.md` — emoji policy (Restrained), client-naming (Conservative)
+- `Desktop/Digischola/brand/_engine/wiki/voice-lock.md` — ChatterBox voice-clone reference corpus
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — status must be LOCKED
 
 **Skill references:**
 - `references/motion-design-playbook.md` — **creative gate for Path B**. Every new reel scene must hit this bar.
@@ -36,7 +36,7 @@ Two clean paths. Neither uses generative AI images. Everything is code-rendered,
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md`
-- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (top-level `queue/`, `calendars/`, `performance/`, `videos/`, `social-images/`; skill internals + brand DNA wiki in `brand/_engine/`); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 ## Inputs
 
@@ -59,11 +59,11 @@ Creative standard: `references/motion-design-playbook.md` (non-negotiable gate).
 
 ### Step 1: Validate preconditions
 
-- `brand/remotion-studio/` is set up (one-time install, see `references/remotion-guide.md`)
-- `brand-identity.md` LOCKED
-- `voice-lock.md` exists (ChatterBox corpus enrolled)
+- `brand/_engine/remotion-studio/` is set up (one-time install, see `references/remotion-guide.md`)
+- `_engine/wiki/brand-identity.md` LOCKED
+- `_engine/wiki/voice-lock.md` exists (ChatterBox corpus enrolled)
 - Source draft has `## Scene breakdown` section with 4-6 scenes
-- BGM track available at `brand/music/<pillar-slug>.mp3` (optional — omit for silent+VO-only)
+- BGM track available at `brand/_engine/music/<pillar-slug>.mp3` (optional — omit for silent+VO-only)
 
 ### Step 2: Generate voiceover
 
@@ -75,13 +75,13 @@ Run `scripts/generate_reel.py --draft <source>` which:
 1. Parses scene breakdown (reuses `parse_scenes()` logic ported from `.archive-v6/generate_tow_prompts.py`)
 2. Classifies each scene type from heading label: `hook` / `problem_beat` / `insight_beat` / `data_reveal` / `cta` / `outro`
 3. Maps each scene_type → Remotion composition name + duration
-4. Emits a per-reel Remotion props JSON at `brand/remotion-studio/props/<entry_id>.json`
+4. Emits a per-reel Remotion props JSON at `brand/_engine/remotion-studio/props/<entry_id>.json`
 
 ### Step 4: Render each scene via Remotion
 
 `generate_reel.py` invokes Remotion CLI per scene:
 ```
-cd brand/remotion-studio && npx remotion render <CompositionName> \
+cd brand/_engine/remotion-studio && npx remotion render <CompositionName> \
   --props=<tempfile>.json \
   <assets>/scene-<N>-rmt.mp4
 ```
@@ -149,7 +149,7 @@ Cross-skill flag: when parsing a draft, if `## Scene breakdown` is missing but c
 ## Anti-patterns
 
 - ❌ Do NOT use generative AI image tools (Kling, Meta AI, Veo, Nano Banana, Midjourney, DALL-E) for reel scenes. Path B is code-rendered only.
-- ❌ Do NOT render photographs into reel scenes. Exception: `brand/face-samples/face-01.jpg` on outro only.
+- ❌ Do NOT render photographs into reel scenes. Exception: `brand/_engine/face-samples/face-01.jpg` on outro only.
 - ❌ Do NOT invent brand colors or fonts. Use brand-identity.md LOCKED specs.
 - ❌ Do NOT use em dashes in any rendered text (universal rule).
 - ❌ Do NOT render internal IDs (entry_id, UUIDs) in visible slide/scene chrome.
@@ -163,8 +163,8 @@ Format: [DATE] [CONTEXT] Finding → Action. Keep the most recent ~20 entries.
 See references/feedback-loop.md for protocol + context tags.
 Quarterly housekeeping: run scripts/audit_skill.py to flag stale references / orphan scripts / missing version tags.
 -->
-- [2026-04-22] [v7.4 DUAL-ENGINE — Remotion + Hyperframes coexist, rule-based routing by scene_type] After two DataReveal + KineticHook bakeoff comparisons (tie-or-lose outcomes for Hyperframes vs v7.3 Remotion UI-mockup scenes) AND reading HeyGen's full Hyperframes docs + the Remotion vs Hyperframes article, decision was made NOT to replace Remotion but to ADD Hyperframes as a second engine. Rationale: each has different best cases — Remotion for UI-mockup teardown with deterministic React primitives; Hyperframes for social-platform-native overlays via its catalog blocks (x-post, instagram-follow, tiktok-follow, reddit-post, spotify-card, macos-notification, yt-lower-third) which Remotion has no counterpart for. Shipped: (1) `brand/remotion-studio/src/theme/design-tokens.json` as single source of truth for palette/fonts/easing/durations; (2) `scripts/build_shared_tokens.py` regenerates `brand/hyperframes-scenes/shared/tokens.css` from the JSON + validates brand.ts parity; (3) `scripts/scene_spec.py` with normalized Scene dataclass + SCENE_ROUTING + HYPERFRAMES_CATALOG_MAP; (4) `generate_reel.py` extended with `render_scene_hyperframes()` + dual-engine main loop that routes per scene_type + appends render events to `<entry_id>/render_log.jsonl`; (5) `brand/hyperframes-scenes/` project initialized with x-post catalog block pre-installed + tokens.css linked. Rule locked: both engines read tokens.json — no engine gets to drift on palette/fonts/easing/durations. Learning hook: after 10+ reels, performance-review skill can read render_log.jsonl and surface engine preferences per scene_type.
-- [2026-04-21] [v7.3 DESIGN PIVOT — UI-mockup aesthetic (Cody Plofker direction)] After geometric abstractions shipped in v7.1 and Mayank reviewed the reel ("worst design i have seen — when someone is talking about landing page, a landing page scrolling with hover animations can visualize an actual landing page mockup"), the geometric/kinetic direction was abandoned mid-pipeline. New direction: realistic browser mockups + landing pages + form animations + eye-gaze trails + callout arrows — every scene should feel like watching Cody Plofker teardown a live LP. Built 10 UIMockup primitives in `brand/remotion-studio/src/components/UIMockups.tsx` (BrowserFrame, LandingPageMockup with 5 variants, Counter with pace option, Cursor, GazeTrail, FoldLine, CalloutArrow, BrowserCycler, FormReducer, LiftChart). All 5 compositions rewritten to compose these primitives. Subtitles shrunk 96→56px (School B default) / 72px (School A), anchor dropped 1760→1560 for lower-third position. Docs added: `references/ui-mockup-vocabulary.md` (primitive catalog), `references/v7-pipeline-architecture.md` (end-to-end dataflow), `references/remotion-guide.md` (studio structure + CLI). Rule locked: **Path B always uses realistic UI mockups, never generic geometric abstractions. Design discussions happen in user's language ("landing page with hover animations") not technical jargon ("stagger containers").**
+- [2026-04-22] [v7.4 DUAL-ENGINE — Remotion + Hyperframes coexist, rule-based routing by scene_type] After two DataReveal + KineticHook bakeoff comparisons (tie-or-lose outcomes for Hyperframes vs v7.3 Remotion UI-mockup scenes) AND reading HeyGen's full Hyperframes docs + the Remotion vs Hyperframes article, decision was made NOT to replace Remotion but to ADD Hyperframes as a second engine. Rationale: each has different best cases — Remotion for UI-mockup teardown with deterministic React primitives; Hyperframes for social-platform-native overlays via its catalog blocks (x-post, instagram-follow, tiktok-follow, reddit-post, spotify-card, macos-notification, yt-lower-third) which Remotion has no counterpart for. Shipped: (1) `brand/_engine/remotion-studio/src/theme/design-tokens.json` as single source of truth for palette/fonts/easing/durations; (2) `scripts/build_shared_tokens.py` regenerates `brand/_engine/hyperframes-scenes/shared/tokens.css` from the JSON + validates brand.ts parity; (3) `scripts/scene_spec.py` with normalized Scene dataclass + SCENE_ROUTING + HYPERFRAMES_CATALOG_MAP; (4) `generate_reel.py` extended with `render_scene_hyperframes()` + dual-engine main loop that routes per scene_type + appends render events to `<entry_id>/render_log.jsonl`; (5) `brand/_engine/hyperframes-scenes/` project initialized with x-post catalog block pre-installed + tokens.css linked. Rule locked: both engines read tokens.json — no engine gets to drift on palette/fonts/easing/durations. Learning hook: after 10+ reels, performance-review skill can read render_log.jsonl and surface engine preferences per scene_type.
+- [2026-04-21] [v7.3 DESIGN PIVOT — UI-mockup aesthetic (Cody Plofker direction)] After geometric abstractions shipped in v7.1 and Mayank reviewed the reel ("worst design i have seen — when someone is talking about landing page, a landing page scrolling with hover animations can visualize an actual landing page mockup"), the geometric/kinetic direction was abandoned mid-pipeline. New direction: realistic browser mockups + landing pages + form animations + eye-gaze trails + callout arrows — every scene should feel like watching Cody Plofker teardown a live LP. Built 10 UIMockup primitives in `brand/_engine/remotion-studio/src/components/UIMockups.tsx` (BrowserFrame, LandingPageMockup with 5 variants, Counter with pace option, Cursor, GazeTrail, FoldLine, CalloutArrow, BrowserCycler, FormReducer, LiftChart). All 5 compositions rewritten to compose these primitives. Subtitles shrunk 96→56px (School B default) / 72px (School A), anchor dropped 1760→1560 for lower-third position. Docs added: `references/ui-mockup-vocabulary.md` (primitive catalog), `references/v7-pipeline-architecture.md` (end-to-end dataflow), `references/remotion-guide.md` (studio structure + CLI). Rule locked: **Path B always uses realistic UI mockups, never generic geometric abstractions. Design discussions happen in user's language ("landing page with hover animations") not technical jargon ("stagger containers").**
 - [2026-04-21] [v7.3 POLISH bugs fixed] Three end-of-session fixes: (1) CalloutArrow label `"9 \u2192 3 fields"` was escaped in JSON → replaced with literal Unicode `→` character; (2) ProblemBeat stopwatch block + callout label overlapped — moved callout fromY 300→420 to sit below stopwatch; (3) Counter Expo-Out easing settled early in Hook scene (hit 40 at frame 45 of 87) — added `pace="linear"` prop so it ticks uniformly across scene duration. Verified frame-by-frame: hook counter paces 7→22→40 across scene, problem callout label sits cleanly below stopwatch, data arrow renders "9 → 3 fields" correctly.
 - [2026-04-21] [v7.2 QA gate wired as post-render step] Built `scripts/qa_reel.py` running 3 checks on frames extracted at 2fps: visual_density ≥ 0.08 (empty-frame detector via ffmpeg signalstats Yavg/Yvar), pure_black_ratio ≤ 0.92 (bg-dominated detector), frame_delta ≥ 0.01 (motion presence via SSIM between consecutive frames). `generate_reel.py` invokes qa_reel.py after stitch; non-zero exit warns without blocking. On wellness-LP smoke, 39/39 frames passed after v7.2 build. Rule: QA gate catches shape-level failures (black hole, empty, stuck); human review still needed for creative-intent match.
 - [2026-04-21] [v7.2 KaraokeCaption rewrite — bypass + sticky-active] `createTikTokStyleCaptions` from @remotion/captions grouped 6 words with tight inter-word gaps onto one page, overflowing 900px max-width. Fix: bypassed it — built `groupIntoPages(words, maxWordsPerPage)` with hard caps (School A = 1 word/page, School B = 2 words/page). Also added sticky-active rule in RenderedPage: `const stickyActiveIdx = page.tokens.reduce((best, t, idx) => currentTimeMs >= t.fromMs ? idx : best, -1);` — last-started word stays highlighted until next word starts, no dead-state where all words are dim. Rule: when @remotion library behavior doesn't fit our design, bypass with local logic rather than layering workarounds on top.
@@ -186,3 +186,4 @@ Quarterly housekeeping: run scripts/audit_skill.py to flag stale references / or
 - [2026-04-19] [Brief template gap → NO INTERNAL IDS rule] Fixed generate_brief.py BRAND_BLOCK to explicitly forbid entry_id/source-id/UUID text in visible chrome. Active rule.
 - [2026-04-19] [Initial build] v1 ships as thin orchestrator: brief-gen + asset-import only. Free-only stack.
 - [2026-04-22] [Notification-UX batch] Renderers now use `shared-scripts/notify.py:notify_reviewable_artifact()` instead of inline osascript. **render_html_carousel.py:** dropped the standalone `preview.html` generator — the click target is now `http://127.0.0.1:8765/#draft-<filename>` in review_queue where caption + body + Approve/Edit/Reject buttons sit on the same page. Helper auto-spawns review_queue.py if not running. **render_html_mp4.py:** added the missing notification (it had none) with same click-to-review-card pattern. **generate_reel.py:** replaced the old `osascript display notification "Reel v7 ready"` with the helper. Fail-case notifications use sound "Basso". No more dead-end render banners — every render lands on a draft card where the user can act.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top. → Updated brand wiki paths in SKILL.md context loading (`brand-identity.md`, `voice-guide.md`, `voice-lock.md`, `pillars.md` under `_engine/wiki/`), media build dirs throughout (`remotion-studio/`, `hyperframes-scenes/`, `voice-samples/`, `face-samples/`, `music/` under `_engine/`), `references/v7-pipeline-architecture.md`, `references/ui-mockup-vocabulary.md`, `references/remotion-guide.md`, `references/voice-cloning-setup.md`, `references/archive/hyperframes-setup.md`, `assets/README.md`, `evals/evals.json`, and all path constants in `scripts/build_shared_tokens.py` (TOKENS_JSON, TOKENS_CSS, BRAND_TS), `scripts/generate_reel.py` (REMOTION_STUDIO, HYPERFRAMES_SCENES), `scripts/enroll_voice.py` (voice_samples_dir, voice_lock_path), `scripts/clone_voice.py` (find_reference samples_dir + voice_lock + transcript-search anchor), `scripts/generate_brief.py` (Hyperframes engine path strings), `.archive-v6/generate_tow_prompts.py` (parse_face_lock + reference text), `.archive-v6/assemble_reel.py` (resolve_bgm music_dir). queue/assets/ + queue/briefs/ output paths unchanged (queue stays at top); top-level outputs `brand/videos/` + `brand/social-images/` unchanged (presentables stay at top per the convention).

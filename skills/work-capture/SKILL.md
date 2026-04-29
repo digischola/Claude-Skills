@@ -13,11 +13,11 @@ Read before starting:
 - `shared-context/analyst-profile.md`
 - `shared-context/accuracy-protocol.md`
 - `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
-- `Desktop/{Brand}/brand/pillars.md` — approved pillars (required for tagging)
-- `Desktop/{Brand}/brand/voice-guide.md` — tone per channel (required for format candidates)
-- `Desktop/{Brand}/brand/idea-bank.json` — append target
+- `Desktop/{Brand}/brand/_engine/wiki/pillars.md` — approved pillars (required for tagging)
+- `Desktop/{Brand}/brand/_engine/wiki/voice-guide.md` — tone per channel (required for format candidates)
+- `Desktop/{Brand}/brand/_engine/idea-bank.json` — append target
 
-The pillar-approval gate is enforced in `scripts/append_to_idea_bank.py` (reads `pillars.md` first 20 lines for a `Status: LOCKED` marker). If the gate blocks, tell the user to run `personal-brand-dna` and change pillars.md status to LOCKED. Bypass via `--force-unlocked` is reserved for test-fixture seeding only.
+The pillar-approval gate is enforced in `scripts/append_to_idea_bank.py` (reads `_engine/wiki/pillars.md` first 20 lines for a `Status: LOCKED` marker). If the gate blocks, tell the user to run `personal-brand-dna` and change pillars.md status to LOCKED. Bypass via `--force-unlocked` is reserved for test-fixture seeding only.
 
 ## Process
 
@@ -50,7 +50,7 @@ One raw input can yield multiple entries. Split them.
 ### Step 3: Tag each entry
 
 For each entry, produce:
-- `suggested_pillar` — one of the approved pillar IDs from `pillars.md`
+- `suggested_pillar` — one of the approved pillar IDs from `_engine/wiki/pillars.md`
 - `channel_fit` — array of channels the entry naturally works for (LinkedIn / Instagram / X / WA-Status / WA-Channel / Facebook)
 - `format_candidates` — array of concrete formats (LI-post / LI-carousel / IG-carousel / IG-reel / X-tweet / X-thread / WA-status / WA-channel-post)
 - `tags` — free-form strings (client name, tool, vertical, topic)
@@ -64,12 +64,12 @@ Run `scripts/append_to_idea_bank.py {brand_folder} {entry_json}`. Script:
 - Validates the entry schema
 - Assigns a UUID
 - Timestamps the capture
-- Appends atomically to `idea-bank.json`
+- Appends atomically to `_engine/idea-bank.json`
 - Updates `last_updated` in the file
 
 ### Step 5: Surface top candidates (optional, on request)
 
-If user asks "what should I post today?", read idea-bank.json, filter by `status: raw` and recency, apply `references/candidate-ranking.md` heuristic (freshness × pillar-balance × format-variety), and surface top 3 entries with a one-line reason for each.
+If user asks "what should I post today?", read `_engine/idea-bank.json`, filter by `status: raw` and recency, apply `references/candidate-ranking.md` heuristic (freshness × pillar-balance × format-variety), and surface top 3 entries with a one-line reason for each.
 
 ### Step 6: Feedback Loop
 
@@ -77,10 +77,10 @@ Read `references/feedback-loop.md`. Add dated learning if a pattern surfaced (e.
 
 ## Output Checklist
 
-- [ ] pillars.md status confirmed as LOCKED before capture (abort otherwise)
+- [ ] `_engine/wiki/pillars.md` status confirmed as LOCKED before capture (abort otherwise)
 - [ ] Each raw input produces ≥1 structured entry
 - [ ] Every entry has: type, suggested_pillar, channel_fit, format_candidates, tags, status
-- [ ] Entry appended to idea-bank.json atomically
+- [ ] Entry appended to `_engine/idea-bank.json` atomically
 - [ ] No entries with blank required fields
 
 ## Anti-patterns
@@ -98,3 +98,4 @@ Format: [DATE] [CONTEXT] Finding → Action. Keep under 30 lines. Prune quarterl
 - [2026-04-18] [Initial] Skill built alongside personal-brand-dna. Schema seeded in idea-bank.json with 7 entry types and status lifecycle (raw, shaped, drafted, scheduled, posted, killed).
 - [2026-04-18] [Gate enforcement] Moved pillars-LOCKED check from prose-only Step 1 language into `scripts/append_to_idea_bank.py` as a hard gate (exit code 2). Previously the gate was advisory; now the script physically blocks until pillars.md has `Status: LOCKED`. Bypass flag `--force-unlocked` added for test fixture seeding. Tested both paths: blocked on DRAFT, passed on force.
 - [2026-04-18] [Location — verified empirically] Tested nesting under `.claude/skills/personal-brand/work-capture/` for visual grouping: discovery broke (skill vanished from the harness list). Flattened back to `.claude/skills/work-capture/` (resolves to Claude Skills Git repo via symlink). → Rule: Claude Code skill discovery is strictly one-level-deep; use naming prefixes for grouping (rename option: `personal-brand-work-capture`) instead of subfolders.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top of `Digischola/brand/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

@@ -42,7 +42,7 @@ For every distinct purchase option visible on the page, capture:
 
 4. **Cross-check the count.** Use a separate query: "How many distinct $N price points appear on this page?" The product count must match (allowing for free trials and gift vouchers).
 
-5. **Save to `wiki/offerings.json`** as the machine-readable source of truth. Render `wiki/offerings.md` from it.
+5. **Save to `_engine/wiki/offerings.json`** as the machine-readable source of truth. Render `_engine/wiki/offerings.md` from it.
 
 ## Validator cross-check
 

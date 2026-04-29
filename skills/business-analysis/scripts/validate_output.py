@@ -18,17 +18,20 @@ from pathlib import Path
 
 
 def check_folder_structure(client_dir):
-    """Check client folder has required directories."""
-    required = ["sources", "wiki", "deliverables"]
-    missing = [d for d in required if not (client_dir / d).is_dir()]
+    """Check client folder has required directories under _engine/."""
+    engine_dir = client_dir / "_engine"
+    if not engine_dir.is_dir():
+        return "CRITICAL", "Missing _engine/ directory"
+    required = ["sources", "wiki", "working"]
+    missing = [d for d in required if not (engine_dir / d).is_dir()]
     if missing:
-        return "CRITICAL", f"Missing directories: {', '.join(missing)}"
+        return "CRITICAL", f"Missing _engine/ subdirectories: {', '.join(missing)}"
     return "PASS", "All required directories present"
 
 
 def check_wiki_pages(client_dir):
     """Check base wiki pages exist."""
-    wiki_dir = client_dir / "wiki"
+    wiki_dir = client_dir / "_engine" / "wiki"
     required_pages = ["business.md", "brand-identity.md", "digital-presence.md", "offerings.md", "index.md", "log.md"]
     missing = [p for p in required_pages if not (wiki_dir / p).exists()]
     if missing:
@@ -38,9 +41,9 @@ def check_wiki_pages(client_dir):
 
 def check_brand_config(client_dir):
     """Check brand-config.json exists and has required fields."""
-    config_path = client_dir / "deliverables" / "brand-config.json"
+    config_path = client_dir / "_engine" / "brand-config.json"
     if not config_path.exists():
-        return "CRITICAL", "brand-config.json not found in deliverables/"
+        return "CRITICAL", "brand-config.json not found in _engine/"
 
     try:
         config = json.loads(config_path.read_text())
@@ -60,7 +63,7 @@ def check_brand_config(client_dir):
 
 def check_wiki_config(client_dir):
     """Check wiki-config.json exists and is valid."""
-    config_path = client_dir / "wiki-config.json"
+    config_path = client_dir / "_engine" / "wiki-config.json"
     if not config_path.exists():
         return "CRITICAL", "wiki-config.json not found"
 
@@ -79,7 +82,7 @@ def check_wiki_config(client_dir):
 
 def check_source_labels(client_dir):
     """Check wiki pages have EXTRACTED/INFERRED labels."""
-    wiki_dir = client_dir / "wiki"
+    wiki_dir = client_dir / "_engine" / "wiki"
     pages_to_check = ["business.md", "brand-identity.md", "digital-presence.md", "offerings.md"]
     labeled_count = 0
     total_pages = 0
@@ -116,7 +119,7 @@ def check_source_labels(client_dir):
 
 def check_blank_fields(client_dir):
     """Check that BLANK fields have explanations."""
-    wiki_dir = client_dir / "wiki"
+    wiki_dir = client_dir / "_engine" / "wiki"
     issues = []
 
     for md_file in wiki_dir.glob("*.md"):
@@ -135,7 +138,7 @@ def check_blank_fields(client_dir):
 
 def check_offerings_documented(client_dir):
     """Check offerings.md has at least one offering section."""
-    offerings_path = client_dir / "wiki" / "offerings.md"
+    offerings_path = client_dir / "_engine" / "wiki" / "offerings.md"
     if not offerings_path.exists():
         return "CRITICAL", "offerings.md not found"
 
@@ -157,7 +160,7 @@ def check_offerings_documented(client_dir):
 
 def check_digital_presence(client_dir):
     """Check digital-presence.md has been populated."""
-    dp_path = client_dir / "wiki" / "digital-presence.md"
+    dp_path = client_dir / "_engine" / "wiki" / "digital-presence.md"
     if not dp_path.exists():
         return "CRITICAL", "digital-presence.md not found"
 
@@ -176,7 +179,7 @@ def check_digital_presence(client_dir):
 
 def check_prioritization(client_dir):
     """Check offering prioritization analysis exists."""
-    business_path = client_dir / "wiki" / "business.md"
+    business_path = client_dir / "_engine" / "wiki" / "business.md"
     if not business_path.exists():
         return "WARNING", "business.md not found"
 
@@ -189,7 +192,7 @@ def check_prioritization(client_dir):
 
 def check_downstream_flag(client_dir):
     """Check log.md has a downstream connection flag."""
-    log_path = client_dir / "wiki" / "log.md"
+    log_path = client_dir / "_engine" / "wiki" / "log.md"
     if not log_path.exists():
         return "WARNING", "log.md not found"
 
@@ -202,7 +205,7 @@ def check_downstream_flag(client_dir):
 
 def check_index_updated(client_dir):
     """Check index.md has been updated from template."""
-    index_path = client_dir / "wiki" / "index.md"
+    index_path = client_dir / "_engine" / "wiki" / "index.md"
     if not index_path.exists():
         return "CRITICAL", "index.md not found"
 

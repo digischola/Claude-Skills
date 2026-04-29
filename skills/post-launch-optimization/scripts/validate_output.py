@@ -2,10 +2,14 @@
 """Post-Launch Optimization — Output Validation Script
 
 Usage: python3 validate_output.py <file1> [file2] ...
-Files are detected by name pattern:
-  *-optimization-report.md  → Optimization report
-  *-optimization-dashboard.html → Dashboard
-  *optimization-config.json → Client config
+Files are detected by name pattern. Default short-name forms (preferred):
+  optimization-report.md       → Optimization report
+  optimization-dashboard.html  → Dashboard
+  optimization-config.json     → Client config
+
+Backwards-compat: legacy `{client}-`prefixed forms (e.g., `iskm-optimization-report.md`)
+are also detected via substring match. Prefer the short form for new client folders —
+folder location already encodes client + program.
 """
 
 import sys

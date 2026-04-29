@@ -1,174 +1,182 @@
 # Client Folder Output Structure
 
-Universal convention for organizing client deliverables. Every skill that produces client artifacts MUST write to this structure. Adopted 2026-04-26.
+Universal convention for organizing client and personal-brand deliverables. Every skill that produces client artifacts MUST write to this structure. Adopted 2026-04-29 (`_engine/` convention; supersedes the prior `outputs/` + `working/` + `_shared/` + `deliverables/` layout).
 
-## The structure
+## The rule
 
-```
-{Client Name}/
-├── index.html                  ← double-click entry point, lists outputs as cards
-├── outputs/                    ← consumable, double-clickable (browse here daily)
-│   ├── *.html                  ← dashboards, landing pages, audits
-│   ├── *.mp4 / *.mov           ← videos
-│   ├── *.pdf                   ← finished documents
-│   └── campaign-setup/         ← upload-ready CSV bundles (Google Ads / Meta Ads)
-├── working/                    ← intermediate / machine-readable / handoff files
-│   ├── *.md                    ← markdown reports (research, audit, ad-copy, strategy)
-│   ├── *.json                  ← creative briefs, page specs, rotation briefs, brand-config
-│   ├── *.csv                   ← keyword data, media plans, intermediate ad CSVs
-│   └── ...
-├── wiki/                       ← unchanged — skill-managed knowledge graph
-└── sources/                    ← unchanged — raw inputs (Perplexity, Keyword Planner exports, screenshots)
-```
+Two kinds of files exist in any client or personal-brand folder:
 
-For multi-program clients (Yoga Ashfield, Sri Krishna Mandir, etc.):
+- **Presentables** — what Mayank double-clicks: `.html`, `.pdf`, `.csv`, `.mp4`, `.mov`, `.webm`, `.png`, `.jpg`, plus any folder bundle whose entry point is a presentable (e.g. campaign-setup CSV bundles, landing-page-builder bundles with their own `index.html`).
+- **Internals** — everything else: `.md`, `.json`, intermediate CSVs, raw notes, screenshots, wiki pages, sources, working scratch, configs, skill state.
+
+**Top of the folder = presentables only. `_engine/` = everything else.** No `outputs/`, no `working/`, no `deliverables/`. The leading underscore on `_engine/` sorts it predictably in Finder and visually signals "skill-only state, do not open" — same convention as `.git`.
+
+Why the rule exists: when Mayank opens any client folder he should see only files he can consume directly. Markdown reports, JSON briefs, raw research, working scratch — he doesn't read those, they're skill scaffolding. Hiding them in `_engine/` makes the folder presentable on first open.
+
+## Single-program client
 
 ```
 {Client Name}/
-├── index.html                  ← top-level: links to each program's index
-├── _shared/                    ← unchanged — shared brand DNA, cross-program assets
-│   ├── wiki/
-│   └── deliverables/           ← keep `deliverables/` here; _shared/ is backend, not user-facing
-├── {Program A}/
-│   ├── index.html
-│   ├── outputs/
+├── index.html                          ← optional, double-click entry point
+├── {audit}.html                        ← presentables (audits, dashboards, landing pages)
+├── {dashboard}.html
+├── {video}.mp4
+├── {document}.pdf
+├── campaign-setup/                     ← upload-ready CSV bundle (folder-bundle counts as presentable)
+└── _engine/
+    ├── wiki/                           ← knowledge graph (md pages, log.md, etc.)
+    ├── sources/                        ← raw inputs (Perplexity dumps, screenshots, exports)
+    ├── working/                        ← intermediate skill output (md reports, json briefs, intermediate CSVs)
+    ├── brand-config.json               ← skill-managed config files
+    └── wiki-config.json
+```
+
+## Multi-program client
+
+```
+{Client Name}/
+├── {client-wide-deliverable}.html      ← cross-program presentables (brand guide, business overview)
+├── {client-wide-deliverable}.pdf
+├── _engine/                            ← client-wide internals (formerly `_shared/`)
+│   ├── wiki/                           ← cross-program brand DNA wiki
+│   ├── sources/
 │   ├── working/
-│   ├── wiki/
-│   └── sources/
+│   ├── brand-config.json               ← formerly `_shared/deliverables/brand-config.json`
+│   └── wiki-config.json
+├── {Program A}/
+│   ├── {program-deliverable}.html      ← program-specific presentables
+│   ├── {program-deliverable}.mp4
+│   └── _engine/
+│       ├── wiki/
+│       ├── sources/
+│       ├── working/
+│       └── wiki-config.json
 └── {Program B}/
-    ├── index.html
-    ├── outputs/
-    └── ...
+    └── ... (same shape)
 ```
+
+## Personal-brand (Digischola)
+
+The Digischola brand folder applies the same principle but its working surface is queue-based, not output-based. Mayank reviews `.md` drafts in `queue/pending-approval/` daily — those drafts are his consumption surface, so they stay at top.
+
+```
+~/Desktop/Digischola/
+├── index.html                          ← double-click entry point (auto-generated)
+├── strategic-context.md                ← strategy doc Mayank actually reads
+├── *.log                               ← scheduler logs (top-level, ad-hoc inspection)
+└── brand/
+    ├── queue/                          ← daily review surface
+    │   ├── pending-approval/           ← drafts to review (md + mp4 + bundles)
+    │   ├── published/                  ← shipped archive
+    │   ├── archive/
+    │   ├── assets/
+    │   └── briefs/
+    ├── calendars/                      ← weekly content plans (md, Mayank reads)
+    ├── performance/                    ← weekly performance reviews (md, Mayank reads)
+    ├── videos/                         ← finished video projects
+    ├── social-images/                  ← finished carousels & quote cards
+    └── _engine/                        ← skill-only state
+        ├── wiki/                       ← brand DNA wiki (brand-identity, voice-guide, pillars, icp, etc.)
+        ├── _mining/                    ← skill scratch (raw mining)
+        ├── _research/                  ← skill scratch (raw research)
+        ├── idea-bank.json
+        ├── weekly-ritual.state.json
+        ├── wiki-config.json
+        ├── face-samples/, voice-samples/, music/, hyperframes-scenes/, remotion-studio/   ← media assets and build projects
+        └── log.md                      ← migration / audit trail
+```
+
+The `queue/`, `calendars/`, `performance/`, `videos/`, `social-images/` folders stay at the top of `brand/` because they ARE Mayank's working surface — he opens them to review, plan, or browse output.
+
+The brand DNA `.md` files (`brand-identity.md`, `voice-guide.md`, `pillars.md`, `icp.md`, `channel-playbook.md`, `credentials.md`, `voice-flavor.md`, `voice-lock.md`, `brand-wiki.md`) move into `_engine/wiki/` — they're skill-managed knowledge graph, not daily review surface.
 
 ## Classification rules
 
-A file goes in **`outputs/`** if:
-- Mayank double-clicks it to consume: `.html`, `.mp4`, `.mov`, `.webm`, `.pdf`
-- It's a folder bundle of upload-ready CSVs: `campaign-setup/` (the entire bulk-import set)
-- It's a folder containing a finished `index.html` + assets (e.g., a landing-page-builder bundle)
+A file goes at the **top of its folder** if:
+- Mayank double-clicks it: `.html`, `.mp4`, `.mov`, `.webm`, `.pdf`, `.png`, `.jpg`, finished `.csv` bundles
+- It's a folder bundle whose entry point is a presentable (`campaign-setup/`, landing-page-builder bundles with their own `index.html`)
+- It's the auto-generated `index.html` front door
+- For Digischola only: it's a workflow surface folder (`queue/`, `calendars/`, `performance/`, `videos/`, `social-images/`) or a strategy doc Mayank actually reads (`strategic-context.md`)
 
-A file goes in **`working/`** if:
-- It's a markdown report (`*.md`) — Mayank rarely reads these; they're for skill chaining + audit trail
-- It's machine-readable (`*.json` — creative briefs, page specs, rotation briefs, brand-configs)
-- It's an intermediate CSV that gets transformed downstream (e.g., ad-copywriter's `*-google-ads.csv` is intermediate; the campaign-setup `01-campaigns.csv` is the upload-ready output)
-- It's keyword research data, media plans, segmentation tables, etc.
+A file goes in **`_engine/`** if:
+- It's `.md` (reports, audit findings, research, briefs, wiki pages) — Mayank's words: "MD I hardly read and they are not presentable"
+- It's `.json` (creative briefs, page specs, rotation briefs, brand-configs, skill state)
+- It's an intermediate CSV that gets transformed downstream (e.g. ad-copywriter's pre-bundle CSVs)
+- It's raw input (Perplexity exports, Keyword Planner CSVs, screenshots) → `_engine/sources/`
+- It's wiki-managed knowledge → `_engine/wiki/`
+- It's skill scratch / config → `_engine/working/` or `_engine/`
 
-When in doubt: if Mayank wouldn't open it directly, it goes in `working/`.
+When in doubt: if Mayank wouldn't open it directly to consume the contents, it goes in `_engine/`.
 
-## index.html — the front door
-
-Every client folder root and every program folder root gets an auto-generated `index.html`. It:
-
-- Lists every file in `outputs/` as a card, grouped by kind (Dashboard / Audit / Landing page / Video / Document / Campaign bulk-import)
-- Links directly to each artifact (relative paths)
-- Shows generation timestamp
-- Mentions `working/` exists (for the rare case Mayank needs the markdown / spec)
-- Renders dark-mode by default to match the dashboard aesthetic
-
-Top-level (multi-program) `index.html` lists each program as a program-card linking to that program's `index.html`.
-
-## Generation script
-
-`/Users/digischola/Desktop/.claude/scripts/build_outputs_index.py` does both:
-1. Migration (one-time): moves `deliverables/*` → `outputs/` or `working/` per the classification rules, then generates index files
-2. Index refresh (recurring): regenerates `index.html` files for clients whose `outputs/` contents have changed
-
-Usage:
-```bash
-# Migrate or refresh one client
-python3 ~/.claude/scripts/build_outputs_index.py "/Users/digischola/Desktop/{Client Name}"
-
-# Multiple clients
-python3 ~/.claude/scripts/build_outputs_index.py "{Client A}" "{Client B}" "{Client C}"
-
-# Dry-run to preview
-python3 ~/.claude/scripts/build_outputs_index.py --dry-run "{Client}"
-```
-
-After every client-skill session that produces new output files, the skill (or session-close hook) should re-run the index builder for that client folder.
-
-## Skill write paths — what to update
-
-Every skill that produces client artifacts must write to the new paths. Migration table:
+## Skill write paths — migration table
 
 | Artifact type | Old path | New path |
 |---|---|---|
-| Markdown reports (`*-report.md`, `*-research.md`, `*-strategy.md`) | `deliverables/` | `working/` |
-| HTML dashboards (`*-dashboard.html`, `*-research-dashboard.html`) | `deliverables/` | `outputs/` |
-| HTML landing pages (`*-landing-page.html`, `*-page-audit.html`) | `deliverables/` | `outputs/` |
-| MP4 videos | `deliverables/` | `outputs/` |
-| Creative briefs (`*-creative-brief.json`) | `deliverables/` | `working/` |
-| Page specs (`*-page-spec.json`) | `deliverables/` | `working/` |
-| Rotation briefs (`*-rotation-brief.json`) | `deliverables/` | `working/` |
-| Brand configs (`brand-config.json`) — single-program | `deliverables/` | `working/` |
-| Brand configs — multi-program | `_shared/deliverables/` | `_shared/deliverables/` (UNCHANGED — backend store) |
-| Intermediate CSVs (`*-google-ads.csv`, `*-meta-ads.csv`, `*-media-plan.csv`) | `deliverables/` | `working/` |
-| Campaign-setup bulk import bundle | `deliverables/campaign-setup/` | `outputs/campaign-setup/` |
-| Pre-launch checklist + launch runbook | `deliverables/campaign-setup/` | `outputs/campaign-setup/` (stays inside the bundle) |
+| Markdown reports (`*-report.md`, `*-research.md`, `*-strategy.md`, `*-audit-findings.md`) | `working/` or `deliverables/` | `_engine/working/` |
+| HTML dashboards (`*-dashboard.html`, `*-research-dashboard.html`) | `outputs/` or `deliverables/` | folder root |
+| HTML landing pages (`*-landing-page.html`, `*-page-audit.html`) | `outputs/` or `deliverables/` | folder root |
+| MP4 videos | `outputs/` or `deliverables/` | folder root |
+| PDF documents | `outputs/` or `deliverables/` | folder root |
+| Creative briefs (`*-creative-brief.json`) | `working/` or `deliverables/` | `_engine/working/` |
+| Page specs (`*-page-spec.json`) | `working/` or `deliverables/` | `_engine/working/` |
+| Rotation briefs (`*-rotation-brief.json`) | `working/` or `deliverables/` | `_engine/working/` |
+| Brand configs (`brand-config.json`) — single-program | `working/` or `deliverables/` | `_engine/brand-config.json` |
+| Brand configs — multi-program | `_shared/deliverables/brand-config.json` | `_engine/brand-config.json` (at client root) |
+| Intermediate CSVs (pre-bundle) | `working/` or `deliverables/` | `_engine/working/` |
+| Campaign-setup bulk import bundle | `outputs/campaign-setup/` or `deliverables/campaign-setup/` | `campaign-setup/` (folder root) |
+| Pre-launch checklist + launch runbook | `outputs/campaign-setup/` | `campaign-setup/` (stays inside the bundle) |
+| Wiki pages | `wiki/` | `_engine/wiki/` |
+| Wiki config | `wiki-config.json` (folder root) | `_engine/wiki-config.json` |
+| Sources / raw inputs | `sources/` | `_engine/sources/` |
+| Multi-program shared wiki | `_shared/wiki/` | `_engine/wiki/` (at client root, since `_shared/` is renamed to `_engine/`) |
 
-## Skill read paths — backward-compatibility
+## What `_engine/` looks like internally
 
-Existing client folders have the new structure (post-migration). New clients also get the new structure. So skill read paths can update directly to `working/` and `outputs/`.
-
-For any client folder where migration hasn't happened yet, run the migration script first.
+```
+_engine/
+├── wiki/                       ← managed by init_wiki.py and skill-specific wiki writers
+│   ├── index.md
+│   ├── log.md                  ← append-only audit log for this folder
+│   ├── strategy.md
+│   ├── business.md
+│   ├── brand-identity.md
+│   ├── offerings.md
+│   ├── digital-presence.md
+│   └── briefs.md               ← append-only client-brief history
+├── sources/                    ← raw, immutable inputs
+├── working/                    ← intermediate / machine-readable / handoff files
+│   ├── *.md
+│   ├── *.json
+│   └── *.csv
+├── wiki-config.json            ← schema config
+└── {other skill state}         ← brand-config.json, weekly-ritual.state.json, etc.
+```
 
 ## Don't touch
 
-- `wiki/` — managed by `init_wiki.py` and skill-specific writers
-- `sources/` — raw inputs, immutable
-- `_shared/` — multi-program backend store; structure stays as-is so cross-program skill reads keep working
+- `_engine/wiki/` — managed by `init_wiki.py` and skill-specific writers
+- `_engine/sources/` — raw inputs, immutable
 - `.git/`, `.DS_Store`, etc.
+- `Sri Krishna Mandir/Nrsimha Caturdasi 2026/site/` — read-only Lovable repo mirror, special-cased; stays at program root despite not being a "deliverable"
 
 ## Why this exists
 
-Mayank consumes outputs (HTML / MP4 / PDF / upload-ready CSVs). He rarely reads the markdown reports or JSON briefs that skills generate as scaffolding. The old `deliverables/` folder mixed both, forcing manual sifting. The split into `outputs/` (consumable) + `working/` (scaffolding) + `index.html` (front door) eliminates that sifting.
+Mayank consumes presentables (HTML / MP4 / PDF / upload-ready CSVs). He rarely reads the markdown reports or JSON briefs that skills generate as scaffolding. The pre-2026-04-29 layout had four sibling folders at every client root (`outputs/`, `working/`, `wiki/`, `sources/`) plus sometimes `deliverables/` and `_shared/`, all visually equal but semantically very different. Multi-program clients added a sixth (`_shared/`).
 
-Future skills must respect this split. Do not regress to a flat `deliverables/` folder.
+Collapsing all internals into one `_engine/` folder leaves the top of every client folder showing only what Mayank opens. Same principle, simpler shape.
+
+Future skills must respect this rule. Do not regress to flat `outputs/` + `working/` + `deliverables/` siblings.
 
 ---
 
-## Digischola personal-brand suite — different convention
+## Index builder
 
-The Digischola folder (`~/Desktop/Digischola/`) does **NOT** follow the `outputs/` + `working/` split. It already has good queue-based separation from before this convention existed:
+`/Users/digischola/Desktop/.claude/scripts/build_outputs_index.py` regenerates the auto-generated `index.html` front door for client folders. Under the new convention it scans the folder root (and program subfolders) for presentables instead of the old `outputs/` subfolder.
 
-```
-Digischola/
-├── index.html                  ← double-click entry point (auto-generated)
-├── strategic-context.md        ← brand strategy doc
-└── brand/
-    ├── queue/
-    │   ├── pending-approval/   ← drafts to review (ALL formats: .md posts, .mp4 videos, case-study/ bundles)
-    │   ├── published/          ← shipped archive
-    │   ├── archive/            ← old drafts
-    │   ├── assets/             ← per-post asset bundles (images, video clips)
-    │   └── briefs/             ← machine-readable post briefs
-    ├── calendars/              ← weekly content plans (YYYY-WXX.md)
-    ├── performance/            ← weekly performance reviews (YYYY-WXX.md)
-    ├── idea-bank.json          ← captured raw + shaped ideas
-    ├── videos/                 ← video edits + Remotion projects
-    ├── social-images/          ← finished carousels & quote cards
-    ├── _mining/, _research/    ← skill-internal scratch (do not consume directly)
-    └── ...
-```
-
-### Index builder for Digischola
-
-Run after any content-producing personal-brand skill (post-writer / repurpose / case-study-generator / visual-generator / scheduler-publisher / weekly-ritual / performance-review):
+Run after any client-skill session that produces new presentables:
 
 ```bash
-python3 ~/.claude/scripts/build_digischola_index.py
+python3 ~/.claude/scripts/build_outputs_index.py "/Users/digischola/Desktop/{Client Name}"
 ```
 
-The Digischola `index.html` aggregates:
-- Pending approval items grouped by channel/format (LinkedIn / X / Instagram / Reel)
-- This week's calendar (latest `calendars/YYYY-WXX.md`)
-- Last performance review (latest `performance/YYYY-WXX.md`)
-- Recent videos (latest 5 MP4s across queue + videos/)
-- Quick-link tiles (published archive, idea bank, social images, video projects, strategic-context)
-
-### Why different
-
-Client folders mix consumable HTML/MP4 with skill-scaffolding MD/JSON in one `deliverables/`. Personal-brand skills already separate by purpose: `pending-approval/` is BOTH a draft inbox AND a consumable destination (Mayank reads each MD draft to approve before publish). MD drafts in this context aren't scaffolding — they're the work product.
-
-Don't try to migrate Digischola to `outputs/` + `working/`. The queue-based structure is already correct. Just keep the `index.html` updated.
+For Digischola, `build_digischola_index.py` aggregates the queue + calendars + performance review surface. Same script, same purpose, just adapted to the queue-based shape.

@@ -1,6 +1,6 @@
 # Offerings Documentation Framework
 
-How to document each product/service/offering in the wiki. Every offering gets its own section in `wiki/offerings.md` with a standardized structure.
+How to document each product/service/offering in the wiki. Every offering gets its own section in `_engine/wiki/offerings.md` with a standardized structure.
 
 ---
 
@@ -22,7 +22,7 @@ An "offering" is anything the business sells, provides, or promotes as a distinc
 
 ## Per-Offering Documentation Structure
 
-Each offering section in `wiki/offerings.md` follows this format:
+Each offering section in `_engine/wiki/offerings.md` follows this format:
 
 ```markdown
 ## {Offering Name}

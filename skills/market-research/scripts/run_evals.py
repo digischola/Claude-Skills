@@ -214,7 +214,7 @@ def check_output(eval_case, md_content, html_content=None):
         ),
         "wiki_updated": lambda md, html: (
             True,  # Can't verify file system from here — manual check
-            "Wiki update requires manual verification (check wiki/log.md for entry)"
+            "Wiki update requires manual verification (check _engine/wiki/log.md for entry)"
         ),
         "strategic_implications_present": lambda md, html: (
             bool(re.search(r'[Ss]trategic|[Ii]mplication|[Rr]ecommend', md)),

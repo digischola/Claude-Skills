@@ -6,7 +6,7 @@ Describes how `campaign-setup` consumes upstream skill outputs and prepares data
 
 ## Upstream Inputs
 
-### 1. `market-research` → `{client}/wiki/strategy.md`
+### 1. `market-research` → `{client}/_engine/wiki/strategy.md`
 What this skill reads:
 - Buyer personas (used for audience naming, messaging tone)
 - Keywords (baseline for Google keyword expansion)
@@ -15,7 +15,7 @@ What this skill reads:
 
 Required fields in strategy.md: buyer_personas, keyword_seeds, cpl_benchmark, positioning.
 
-### 2. `paid-media-strategy` → `{client}/deliverables/{client}-paid-media-strategy.md` and `{client}-media-plan.csv`
+### 2. `paid-media-strategy` → `{client}/_engine/working/paid-media-strategy.md` and `{client}/_engine/working/media-plan.csv` (legacy fallback: `*-paid-media-strategy.md`, `*-media-plan.csv`)
 What this skill reads:
 - Campaign architecture (how many campaigns, how split)
 - Budget allocation (per campaign / per platform / per phase)
@@ -27,7 +27,7 @@ What this skill reads:
 Required columns in media-plan.csv:
 `Platform, Campaign Name, Campaign Type, Objective, Daily Budget, Bid Strategy, Target CPA, Locations, Languages, Audience, Phase, Start Date, End Date`
 
-### 3. `ad-copywriter` → `{client}-google-ads.csv`, `{client}-meta-ads.csv`, image prompts, video storyboards
+### 3. `ad-copywriter` → `google-ads.csv`, `meta-ads.csv`, image prompts, video storyboards (legacy fallback: `*-google-ads.csv`, `*-meta-ads.csv`)
 What this skill reads:
 - Google: RSAs with 15 headlines + 4 descriptions per ad group
 - Meta: primary text + headline + description per ad variant
@@ -39,7 +39,7 @@ Required columns in google-ads.csv:
 Required columns in meta-ads.csv:
 `Campaign, Ad Set, Ad Name, Creative Type, Body, Title, Link Description, Link, CTA, Asset Filename`
 
-### 4. `landing-page-builder` → `{client}-*-page-spec.json` + HTML prototype
+### 4. `landing-page-builder` → `page-spec.json` + HTML prototype (legacy fallback: `*-page-spec.json`)
 What this skill reads:
 - `page_url_slug` → populates Final URL
 - `analytics.conversion_events[].event` → maps to Google conversion actions and Meta custom events
@@ -74,7 +74,7 @@ What to flag downstream:
 - Any `<REPLACE_ME>` tokens still unresolved at launch
 
 ### 2. Wiki log entry format
-After completing the skill, write to `{client}/wiki/log.md`:
+After completing the skill, write to `{client}/_engine/wiki/log.md`:
 
 ```
 ## {{DATE}}
@@ -87,7 +87,7 @@ After completing the skill, write to `{client}/wiki/log.md`:
 ```
 
 ### 3. Handoff to client
-The deliverables folder structure (at `{client}/deliverables/campaign-setup/`) is the client handoff. It should be:
+The bundle folder structure (at `{client}/campaign-setup/`, sitting at the client/program folder root as a presentable) is the client handoff. It should be:
 - Self-contained (no external references required)
 - Versioned (include `generated_at` timestamp in README)
 - Auditable (each CSV traceable to an upstream source field)

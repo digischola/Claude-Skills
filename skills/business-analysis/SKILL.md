@@ -12,10 +12,10 @@ Extract the complete DNA of any business before marketing work begins. Creates t
 Read these shared context files before starting:
 - `shared-context/analyst-profile.md` — workflow, client types, quality standards
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
-- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to `outputs/`, intermediate MD/JSON/CSV to `working/`
+- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to the folder root, intermediate MD/JSON/CSV to `_engine/working/`
 - `shared-context/client-shareability.md` — client-facing files must read like first copies; no correction trails / audit history / internal-process commentary. Validator: `python3 ~/.claude/scripts/check_client_shareability.py {client}`
 
-If a client wiki already exists (`{client-folder}/wiki/`), read it first. This may be an update, not a fresh onboard.
+If a client wiki already exists (`{client-folder}/_engine/wiki/`), read it first. This may be an update, not a fresh onboard.
 
 ## Process Overview
 
@@ -23,14 +23,14 @@ If a client wiki already exists (`{client-folder}/wiki/`), read it first. This m
 
 **Structure detection:** Check if `Desktop/{Client Name}/` exists. If yes, run `market-research/scripts/init_wiki.py {path} --detect` to determine structure type (NEW_CLIENT, SINGLE_PROGRAM, MULTI_PROGRAM).
 
-**Create folder:** For new clients, create `Desktop/{Client Name}/{Business Name}/` with sources/, wiki/, deliverables/. For multi-program clients, business-analysis outputs to `_shared/` (brand DNA is shared across all programs).
+**Create folder:** For new clients, create `Desktop/{Client Name}/{Business Name}/` with `_engine/` (containing sources/, wiki/, working/). For multi-program clients, business-analysis outputs to the client root's `_engine/` (brand DNA is shared across all programs).
 
 **Init wiki:** Run `market-research/scripts/init_wiki.py` with appropriate mode:
 - New single-program: `init_wiki.py {client_folder} {business_name} {project_name}`
 - New multi-program: `init_wiki.py {client_folder} {business_name} --shared` then `--program "Name"`
 - Existing client, new program: `init_wiki.py {client_folder} {business_name} --program "Name"` (if already multi-program) or `--migrate "Name"` (to convert single→multi)
 
-Creates base pages (business.md, brand-identity.md, digital-presence.md, offerings.md) + index.md + log.md + wiki-config.json. If wiki exists, skip init. Read `market-research/references/multi-program-structure.md` for full multi-program folder layout.
+Creates base pages (business.md, brand-identity.md, digital-presence.md, offerings.md) + index.md + log.md + `_engine/wiki-config.json`. If wiki exists, skip init. Read `market-research/references/multi-program-structure.md` for full multi-program folder layout.
 
 ### Step 2: Website Crawl & Extraction
 
@@ -82,7 +82,7 @@ This check overrides the confidence level — even HIGH confidence with VISUAL_E
 
 Review the output's `allChromaticColors` array — it contains the full palette. **Check the `anomalies` array** — it flags situations that need human review: no external CSS found, all colors grayscale, utility colors rescued via prominence, no fonts detected, vestigial Google Fonts, very similar primary/secondary colors, missing logo, VISUAL_EDITOR_SITE, MONOCHROMATIC_SITE. Each anomaly has a severity (high/medium/low) and a suggested action.
 
-Save to `{client-folder}/deliverables/brand-config.json`.
+Save to `{client-folder}/_engine/brand-config.json`.
 
 Populate wiki `brand-identity.md`: colors (primary, secondary, supporting palette), fonts (primary + secondary), tone of voice (inferred from site copy — tag as [INFERRED]), logo URL, visual identity notes.
 
@@ -90,9 +90,9 @@ Populate wiki `brand-identity.md`: colors (primary, secondary, supporting palett
 
 Read `references/offerings-framework.md` for the documentation structure.
 
-**Pricing-page enumeration (MANDATORY when a `/pricing/`, `/membership/`, `/passes/`, or `/plans/` URL exists):** Read `references/pricing-enumeration.md`. Run **per-card structured extraction** (Chrome MCP or WebFetch) — NOT narrative summarization. For every distinct price card, capture name / price / billing_cycle / audience / channel / time_window / class_restriction / concession_price / purchase_url. Save machine-readable to `wiki/offerings.json` AND human-readable to `wiki/offerings.md`. Validator cross-checks distinct `$N` count on page vs offerings count — mismatch ≥ 2 = CRITICAL fail.
+**Pricing-page enumeration (MANDATORY when a `/pricing/`, `/membership/`, `/passes/`, or `/plans/` URL exists):** Read `references/pricing-enumeration.md`. Run **per-card structured extraction** (Chrome MCP or WebFetch) — NOT narrative summarization. For every distinct price card, capture name / price / billing_cycle / audience / channel / time_window / class_restriction / concession_price / purchase_url. Save machine-readable to `_engine/wiki/offerings.json` AND human-readable to `_engine/wiki/offerings.md`. Validator cross-checks distinct `$N` count on page vs offerings count — mismatch ≥ 2 = CRITICAL fail.
 
-For non-pricing-page offerings (services without a price card grid), document in `wiki/offerings.md` as separate sections:
+For non-pricing-page offerings (services without a price card grid), document in `_engine/wiki/offerings.md` as separate sections:
 - Name, description, target audience, pricing (if visible), page URL
 - USP / differentiator, seasonality, booking/purchase mechanism
 - Sector-specific data points from the loaded sector lens
@@ -113,11 +113,11 @@ Read `references/client-intake-template.md`. Use **AskUserQuestion** tool to ask
 7. Known competitors
 8. Capacity/seasonal constraints
 
-Populate `wiki/business.md` with intake data. Tag all intake responses as [INTAKE].
+Populate `_engine/wiki/business.md` with intake data. Tag all intake responses as [INTAKE].
 
 ### Step 6: Digital Presence Audit
 
-Assess and document in `wiki/digital-presence.md`:
+Assess and document in `_engine/wiki/digital-presence.md`:
 - **Website:** quality, speed perception, mobile-friendliness, CTA clarity, booking widgets, chat widgets
 - **Social media:** platforms active, follower counts, post frequency, engagement level
 - **Google Business Profile:** rating, review count, response rate (if local business)
@@ -135,7 +135,7 @@ Tag each data point: [EXTRACTED] if directly observed, [INFERRED] if interpreted
 
 ### Step 7: Offering Prioritization
 
-Based on all collected data — margins, audience size potential, competitive signals, seasonality, client goals — write a "Prioritization Analysis" section in `wiki/business.md`.
+Based on all collected data — margins, audience size potential, competitive signals, seasonality, client goals — write a "Prioritization Analysis" section in `_engine/wiki/business.md`.
 
 This is **observational, not prescriptive**. Present what the data suggests with evidence. Tag all insights as [INFERRED]. Example: "Yoga teacher training has higher price point ($3,500 vs $250/retreat drop-in) and lower seasonal dependency — data suggests stronger ROI potential for paid campaigns."
 
@@ -150,9 +150,9 @@ Do not make campaign decisions. Flag which offering(s) the data points toward an
 
 Fix all CRITICAL/ERROR failures before delivery. WARNINGs are advisory — review but don't block.
 
-**Flag connections:** Note in wiki/log.md: "Business analysis complete — ready for market-research skill on [offering name(s)]."
+**Flag connections:** Note in `_engine/wiki/log.md`: "Business analysis complete — ready for market-research skill on [offering name(s)]."
 
-Update wiki index.md and wiki-config.json.
+Update `_engine/wiki/index.md` and `_engine/wiki-config.json`.
 
 ### Step 9: Feedback Loop (Mandatory — Never Skip)
 
@@ -160,9 +160,9 @@ Read `references/feedback-loop.md`. Capture what worked/didn't. Add learnings be
 
 ## Output Checklist
 
-- [ ] Client folder created with sources/, wiki/, deliverables/
+- [ ] Client folder created with `_engine/` (containing sources/, wiki/, working/)
 - [ ] Wiki initialized with base pages (business, brand-identity, digital-presence, offerings)
-- [ ] brand-config.json saved to deliverables/
+- [ ] brand-config.json saved to `_engine/`
 - [ ] Every data point tagged [EXTRACTED] or [INFERRED]
 - [ ] Missing data shows BLANK with explanation
 - [ ] All offerings documented with per-offering sections
@@ -180,14 +180,15 @@ Pre-2026-04-12 entries pruned 2026-04-26 — encoded into extract_brand.py / lin
 - [2026-04-12] [Wellness] Crawl misses CTAs/widgets/incentives. Homepage WebFetch in Step 2 is mandatory. Booking subdomains must be classified as DIRECT_BOOKING/ENQUIRY_ONLY/HYBRID — getting this wrong cascades into every downstream skill.
 - [2026-04-12] [General] Step 6 has 3 mandatory checks: Meta Pixel (WebFetch homepage source), GBP (Chrome MCP Maps search), Meta Ad Library (Chrome MCP query by business name). Check Ad Library early — existing ads change campaign strategy.
 - [2026-04-12] [General] VISUAL_EDITOR_SITE anomaly (Webflow/Shopify/Squarespace): ALWAYS visually verify chromatic colors. Blog code blocks inject syntax highlighting palettes. Add MONOCHROMATIC_SITE anomaly when no accent colors visible despite script findings.
-- [2026-04-17] [Multi-program] lint_wiki.py now reads wiki-config.json `type` and lints only program-registered pages. Accepts dict OR list `pages`, paragraph-level label counting, `BLANK |` table cells.
+- [2026-04-17] [Multi-program] lint_wiki.py now reads `_engine/wiki-config.json` `type` and lints only program-registered pages. Accepts dict OR list `pages`, paragraph-level label counting, `BLANK |` table cells.
 - [2026-04-17] [Temple/WordPress-theme] extract_brand.py HIGH confidence surfaced Bootstrap defaults; live DOM getComputedStyle on buttons + h1-h3 revealed true palette. RULE: When HIGH-confidence output looks wrong for sector (temple no saffron, wellness no earth tones), DOM getComputedStyle check before trusting palette. Independent of VISUAL_EDITOR_SITE.
 - [2026-04-17] [SPA landing pages] React SPA returns only `<div id="root"></div>` to WebFetch. Identifiable via `gpt-engineer-file-uploads` in og:image. RULE: skip WebFetch, go direct to Chrome MCP navigate + read_page + javascript_tool.
 - [2026-04-25] [Wellness/WordPress-Divi] extract_brand.py surfaced `ETmodules` as primary fontFamily — that's Divi's icon font. Risk: `hustle-icons-font` + Divi default theme colors leak into allChromaticColors. Patch candidate: treat ETmodules + hustle-icons-font as icon fonts. Until patched: when `is_wordpress=true` and ETmodules appears, manually swap primary to fontSecondary.
 - [2026-04-25] [Wellness/MindBody] MindBody embedded purchase widget (studioid in URL) = DIRECT_BOOKING signal even when `/pricing/` renders static pass table.
-- [2026-04-26] [CRITICAL — Living Flow Yoga / wellness] **business-analysis missed 5 of 9 distinct products on the public pricing page** — including the $39 Midday Recharge Pass (the standalone monthly digital-eligible SKU we explicitly told the client did NOT exist), Single Month Unlimited ($199), Annual ($1,790), 6-Month ($950), Casual Class Pass ($27). Cascaded through every downstream skill: market-research's DO-NOT-LAUNCH verdict for Live-stream AU-wide rested on "no $39-49/mo digital SKU exists" — provably wrong. Root cause: Step 4 used narrative summarization, LLM grouped products into "intro passes" + "memberships" buckets and dropped standalone outliers. → **Patched 2026-04-26:** Step 4 now mandates per-card structured enumeration (NOT summarization) when any `/pricing/` `/membership/` `/passes/` `/plans/` URL is detected. Required fields per product captured to `wiki/offerings.json` AND `wiki/offerings.md`. Validator cross-checks distinct `$N` count on page vs offerings count — mismatch ≥ 2 = CRITICAL. Full protocol in `references/pricing-enumeration.md`. **RULE:** Every distinct price card on a public pricing page must produce one offerings entry. Narrative summarization is forbidden — LLM tendency is to group + drop outliers.
+- [2026-04-26] [CRITICAL — Living Flow Yoga / wellness] **business-analysis missed 5 of 9 distinct products on the public pricing page** — including the $39 Midday Recharge Pass (the standalone monthly digital-eligible SKU we explicitly told the client did NOT exist), Single Month Unlimited ($199), Annual ($1,790), 6-Month ($950), Casual Class Pass ($27). Cascaded through every downstream skill: market-research's DO-NOT-LAUNCH verdict for Live-stream AU-wide rested on "no $39-49/mo digital SKU exists" — provably wrong. Root cause: Step 4 used narrative summarization, LLM grouped products into "intro passes" + "memberships" buckets and dropped standalone outliers. → **Patched 2026-04-26:** Step 4 now mandates per-card structured enumeration (NOT summarization) when any `/pricing/` `/membership/` `/passes/` `/plans/` URL is detected. Required fields per product captured to `_engine/wiki/offerings.json` AND `_engine/wiki/offerings.md`. Validator cross-checks distinct `$N` count on page vs offerings count — mismatch ≥ 2 = CRITICAL. Full protocol in `references/pricing-enumeration.md`. **RULE:** Every distinct price card on a public pricing page must produce one offerings entry. Narrative summarization is forbidden — LLM tendency is to group + drop outliers.
 - [2026-04-27] [Multi-program] [lint_wiki.py false-positives on briefs.md / strategy.md] Re-running business-analysis on Living Flow Yoga (multi-program), the linter flagged briefs.md for "Missing standard section: ## Key Findings" and "Only 2/21 substantive lines in labeled paragraphs (10%)", and program strategy.md (owned by market-research) for "Only 7/140 substantive lines in labeled paragraphs (5%)". Both are false positives: briefs.md is append-only verbatim client text with one implicit [INTAKE] source per dated entry (per-paragraph labelling would be noise) and strategy.md is market-research output that uses its own finding-level labels and is linted by that skill. → **Patched 2026-04-27:** Added page-name exemptions to `lint_source_labels`, `lint_change_history`, and `lint_standard_sections` for both `briefs.md` and `strategy.md`. After patch: Local Studio + Live-stream + _shared all pass with 0 errors / 0 warnings. **RULE:** When a wiki page type has its own structural pattern (append-only entries, downstream-skill ownership) that deviates from the business.md / brand-identity.md / digital-presence.md / offerings.md template, exempt it explicitly in lint_wiki.py rather than letting analysts ship "lint passes with N warnings — they're false positives, ignore" — that erodes the validator's signal value over time.
-- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `wiki/log.md` (by-design change log) and `wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** wiki/business.md, wiki/brand-identity.md, wiki/digital-presence.md, wiki/offerings.md, deliverables/brand-config.json — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
+- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** `_engine/wiki/business.md`, `_engine/wiki/brand-identity.md`, `_engine/wiki/digital-presence.md`, `_engine/wiki/offerings.md`, `_engine/brand-config.json` — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
 - [2026-04-27] [Self-brand / marketing-services freelance — DigiSchola] Running business-analysis on Mayank's own DigiSchola brand, with explicit instruction to use a folder separate from the existing personal-brand wiki, worked cleanly with `Desktop/{Brand} Self-Audit/{Brand}/`. Two findings worth carrying forward: (1) When the audit subject is itself a marketing-services brand, Step 6 tracking findings double as immediate sales material (DigiSchola sells "tracking from day one" but its own site has zero pixels — a credibility paradox to surface in business.md Marketing Implications). (2) Solo-freelance brands in this segment make GBP optional — LinkedIn + Upwork + WhatsApp carry the local-trust signal. Not blocking, but Step 6 should explicitly accept `[BLANK] — because freelance services brand` as a valid outcome rather than treating the gap as a failure. Possible future: `freelance-services` sector lens. **RULE:** when the brand IS a marketing-services freelance practice, surface Step 6 self-audit gaps as creative material, not just gaps.
 - [2026-04-27] [General — lint_wiki.py BLANK regex strictness] Linter regex `\bBLANK\s*[—\-–:(\|]\s*\S` requires a separator IMMEDIATELY after BLANK. Three formats analysts naturally type but the regex rejects: `[BLANK] because ...` (brackets are not separators), `**BLANK** — because ...` (bold markers between BLANK and separator break the regex), `BLANK because ...` (the most common natural form). Required forms: `BLANK — reason`, `BLANK: reason`, `BLANK (reason)`, `BLANK | reason` (table cells). **RULE:** when writing wiki pages, use only the four accepted BLANK forms. Patch candidate (low priority): widen the regex to accept `[BLANK]` and `**BLANK**` so the tag-style is valid too — then analysts can use the same `[EXTRACTED] / [INFERRED] / [BLANK]` visual rhythm without breaking validation.
-- [2026-04-29] [Multi-program ISKM / Weekend Love Feast new-program add] Three findings adding a new program ("Weekend Love Feast") to a mature multi-program client (ISKM, already had `_shared/` + Nrsimha Caturdasi 2026): (1) `validate_all.py` run against the client root yields 8 CRITICALs — validators expect single-program shape (`<root>/wiki/`, `<root>/deliverables/`). For multi-program, point validators at `<root>/_shared/`. **RULE:** for multi-program clients, run `validate_all.py "<client>/_shared"` not `<client>`. Patch candidate: have `validate_all.py` auto-detect via `wiki-config.json#type` and route. (2) `lint_wiki.py` takes the program PARENT folder, not `<program>/wiki/` — it appends `/wiki` itself; the wiki path yields `wiki/wiki not-a-directory`. Document path semantics in `--help`. (3) When a React-SPA WebFetch returns nothing (standard SPA outcome), the Lovable repo mirror at `<program>/site/src/pages/<Program>.tsx` is the fastest source — TSX files contain FAQS, SCHEDULE arrays, hero JSX, useEffect meta-tag setters as plain literals. **RULE:** when a Lovable / GPT-Engineer mirror exists, prefer reading the TSX directly over Chrome MCP for static copy / schedule / FAQ extraction. Use Chrome MCP only when verifying live DOM state (real-time Supabase counters, computed CSS, runtime-only behaviour).
+- [2026-04-29] [Multi-program ISKM / Weekend Love Feast new-program add] Three findings adding a new program ("Weekend Love Feast") to a mature multi-program client (ISKM, already had `_shared/` + Nrsimha Caturdasi 2026): (1) `validate_all.py` run against the client root yields 8 CRITICALs — validators expect single-program shape (`<root>/wiki/`, `<root>/deliverables/`). For multi-program, point validators at `<root>/_shared/` (now `<root>/_engine/` post-refactor). **RULE:** for multi-program clients, run `validate_all.py "<client>/_engine"` not `<client>`. Patch candidate: have `validate_all.py` auto-detect via `wiki-config.json#type` and route. (2) `lint_wiki.py` takes the program PARENT folder, not `<program>/wiki/` — it appends `/wiki` itself; the wiki path yields `wiki/wiki not-a-directory`. Document path semantics in `--help`. (3) When a React-SPA WebFetch returns nothing (standard SPA outcome), the Lovable repo mirror at `<program>/site/src/pages/<Program>.tsx` is the fastest source — TSX files contain FAQS, SCHEDULE arrays, hero JSX, useEffect meta-tag setters as plain literals. **RULE:** when a Lovable / GPT-Engineer mirror exists, prefer reading the TSX directly over Chrome MCP for static copy / schedule / FAQ extraction. Use Chrome MCP only when verifying live DOM state (real-time Supabase counters, computed CSS, runtime-only behaviour).
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. Multi-program `_shared/` collapsed into client-root `_engine/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

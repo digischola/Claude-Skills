@@ -12,7 +12,7 @@ Produces bulk-import files for Google Ads Editor and Meta Ads Manager plus a ver
 Read these shared context files before starting:
 - `shared-context/analyst-profile.md` — workflow, client types, quality standards
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
-- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to `outputs/`, intermediate MD/JSON/CSV to `working/`
+- `shared-context/output-structure.md` — write the upload-ready `campaign-setup/` CSV bundle to the client/program folder root; intermediate MD/JSON to `_engine/working/`
 - `shared-context/client-shareability.md` — client-facing files must read like first copies; no correction trails / audit history / internal-process commentary. Validator: `python3 ~/.claude/scripts/check_client_shareability.py {client}`
 
 ## Process Overview
@@ -21,13 +21,23 @@ Read these shared context files before starting:
 
 Verify the client has the required prior deliverables. This skill is designed to consume structured output from prior skills, not to run standalone. Standalone mode is supported but will require manual input for everything.
 
-Required inputs:
-- `{client}/wiki/strategy.md` — market research context
-- `{client}/deliverables/{client}-paid-media-strategy.md` — platform strategy, campaign architecture
-- `{client}/deliverables/{client}-media-plan.csv` — campaigns, budgets, targeting
-- `{client}/deliverables/{client}-google-ads.csv` — RSAs, headlines, descriptions (if Google in scope)
-- `{client}/deliverables/{client}-meta-ads.csv` — ad variants, primary text, headlines (if Meta in scope)
-- `{client}/deliverables/{client}-*-page-spec.json` — landing page URLs (or direct URL from user)
+Required inputs (preferred new short-name forms; backwards-compat fallback to legacy `{client}-`prefixed glob):
+- `{client}/_engine/wiki/strategy.md` — market research context
+- `{client}/_engine/working/paid-media-strategy.md` (fallback `{client}/_engine/working/*-paid-media-strategy.md`) — platform strategy, campaign architecture
+- `{client}/_engine/working/media-plan.csv` (fallback `{client}/_engine/working/*-media-plan.csv`) — campaigns, budgets, targeting (intermediate CSV)
+- `{client}/_engine/working/google-ads.csv` (fallback `{client}/_engine/working/*-google-ads.csv`) — RSAs, headlines, descriptions (if Google in scope; intermediate CSV from ad-copywriter)
+- `{client}/_engine/working/meta-ads.csv` (fallback `{client}/_engine/working/*-meta-ads.csv`) — ad variants, primary text, headlines (if Meta in scope; intermediate CSV from ad-copywriter)
+- `{client}/_engine/working/page-spec.json` (fallback `{client}/_engine/working/*-page-spec.json`) — landing page URLs (or direct URL from user)
+
+**Reader pattern:** try the short name first, then fall back to the glob. Example:
+```python
+candidate = engine_working / 'paid-media-strategy.md'
+if not candidate.exists():
+    candidates = list(engine_working.glob('*-paid-media-strategy.md'))
+    if candidates:
+        candidate = candidates[0]
+```
+This keeps un-migrated client folders working while new ones get clean names.
 
 Missing inputs → fall back to standalone mode with guided questions.
 
@@ -64,7 +74,7 @@ Load `references/google-ads-editor-schema.md` for exact column specs.
 Produce separate CSV files (one entity type per file — matches Ads Editor's "Make multiple changes" paste workflow):
 
 ```
-deliverables/campaign-setup/google-ads/
+{client}/campaign-setup/google-ads/
   01-campaigns.csv              Campaigns + budgets + bidding + targeting
   02-ad-groups.csv              Ad groups per campaign
   03-keywords.csv               Keywords with match types + final URLs
@@ -75,6 +85,8 @@ deliverables/campaign-setup/google-ads/
   08-negative-keywords.csv      Campaign/ad group level negatives
   README.md                     Import order, paste instructions, troubleshooting
 ```
+
+(The `campaign-setup/` bundle sits at the client/program folder root — it's the upload-ready presentable, not a skill internal.)
 
 Character limit enforcement (CRITICAL — will cause import errors otherwise):
 - RSA headlines: 30 chars
@@ -92,7 +104,7 @@ Load `references/meta-bulk-import-schema.md` for exact column specs.
 Meta's bulk import is less mature than Google's — produce both machine-readable and human-guided outputs:
 
 ```
-deliverables/campaign-setup/meta-ads/
+{client}/campaign-setup/meta-ads/
   meta-bulk-import.csv          Single CSV with campaigns, ad sets, ads rows
   creative-upload-manifest.md   List of all image/video assets to upload to Asset Library BEFORE bulk import
   campaign-blueprint.md         Step-by-step manual build guide (fallback if bulk import fails)
@@ -114,7 +126,7 @@ Creative upload manifest format:
 
 Load `references/pre-launch-checklist-template.md`.
 
-Produces `deliverables/campaign-setup/pre-launch-checklist.md` with sections:
+Produces `{client}/campaign-setup/pre-launch-checklist.md` (lives inside the bundle at the client/program folder root) with sections:
 1. Tracking infrastructure (conversion actions, pixel, CAPI, GA4, UTM)
 2. Account settings (billing, time zone, currency, attribution)
 3. Campaign-level verification (budgets, bid strategy, locations, languages, schedules)
@@ -128,7 +140,7 @@ Produces `deliverables/campaign-setup/pre-launch-checklist.md` with sections:
 
 Load `references/launch-runbook-template.md`.
 
-Produces `deliverables/campaign-setup/launch-runbook.md` with:
+Produces `{client}/campaign-setup/launch-runbook.md` (lives inside the bundle at the client/program folder root) with:
 1. Pre-upload prep (download Ads Editor, export current account, back up)
 2. Google Ads Editor upload sequence (import each CSV in order, review, post changes)
 3. Meta Ads Manager upload sequence (upload creative first, then bulk import, then review)
@@ -147,7 +159,7 @@ Run `scripts/validate_output.py` against generated CSVs. Fixes any CRITICAL fail
 
 ### Step 9: Update Wiki & Close
 
-- Add `CAMPAIGN-SETUP COMPLETE` entry to `{client}/wiki/log.md` with platform(s), campaign count, total ad count, placeholder token count
+- Add `CAMPAIGN-SETUP COMPLETE` entry to `{client}/_engine/wiki/log.md` with platform(s), campaign count, total ad count, placeholder token count
 - Flag downstream: `post-launch-optimization` will track this campaign family once live
 - Run feedback loop per `references/feedback-loop.md`
 - If battle-test mode: add learnings to SKILL.md
@@ -175,4 +187,6 @@ Run `scripts/validate_output.py` against generated CSVs. Fixes any CRITICAL fail
 - **[2026-04-16] [Validator hardening] Meta Optimization Goal × Objective enum validation** → Finding: Meta silently rejects ad-set imports when Optimization Goal doesn't match the parent campaign's Objective (e.g. `OUTCOME_LEADS` + `LINK_CLICKS` → bulk import fails with vague error). Validator only checked char limits, required fields, status/creative-type enums — never this pairing. Rule: at AD_SET level, Optimization Goal must be in the valid set for the parent campaign's Objective. Action: added a 6-objective → valid-goals map (`OUTCOME_AWARENESS` / `_TRAFFIC` / `_ENGAGEMENT` / `_LEADS` / `_APP_PROMOTION` / `_SALES`) covering Marketing API 2024+ ODAX values. Two-pass implementation: first pass builds Campaign Name → Objective map from CAMPAIGN-level rows; second pass looks up the parent campaign for each AD_SET row and validates. Flags CRITICAL on mismatch with the valid-goal list in the error message, WARNING on unrecognized Objective (future-proofs the check against Meta adding new objectives).
 - **[2026-04-26] [Google Ads Editor — Living Flow Yoga] Structured Snippet CSV format mismatch** → Finding: per-column format (`Value 1`, `Value 2`, ...) from `references/google-ads-editor-schema.md` failed import with "There are too few values for a structured snippet. Create at least 3" — Editor's current parser couldn't read the per-column values. Switched to single `Snippet Values` column with semicolon-delimited values (`Vinyasa Flow;Yin Yoga;Beginners Yoga;Yang to Yin`) — imported clean. → **Rule:** structured snippet CSVs should use `Snippet Values` (single column, `;`-delimited) NOT `Value 1`/`Value 2`/... per-column. Schema reference doc in this skill currently lists the per-column format — needs updating. Action: patch `references/google-ads-editor-schema.md` Section 7 + the campaign-setup skill's snippet-writer to emit the semicolon-delimited format by default.
 - **[2026-04-26] [Google Ads policy — Wellness/Yoga clients] Health-condition keywords auto-rejected by Personalized Advertising Restrictions** → Finding: keyword `yoga for back pain sydney` rejected at Editor import with "health category not accepted." Google's restricted-categories policy auto-rejects keywords implying medical conditions, pain, mental-health diagnoses, fertility, weight loss, addiction. Affects every wellness/yoga/fitness/therapy/healthcare client. Other terms in this trap to pre-filter: `yoga for back pain`, `yoga for anxiety`, `yoga for depression`, `yoga for arthritis`, `yoga for fibromyalgia`, `yoga for weight loss`, `yoga for fertility`, `yoga for migraines`, `yoga for sciatica`, `yoga for insomnia`, `yoga for adhd`, `yoga for ptsd`. → **Rule:** when generating keyword sets for wellness / yoga / fitness / therapy / healthcare clients, pre-filter against Google's restricted-health-condition list. Reframe symptom-keywords into structural alternatives: "yoga for back pain" → "yoga for desk workers" / "mobility yoga"; "yoga for anxiety" → "yoga for stress" / "calming yoga"; "yoga for weight loss" → "yoga for fitness" / "body composition yoga". Generation-time fix is cheaper than post-import fix because rejected keyword propagates through ad-copy report + media plan + dashboard + creative brief CSV. Action candidate: add `references/restricted-keyword-categories.md` listing Google's sensitive categories with sector-specific reframing recipes; integrate as a Step 4 pre-filter in keyword CSV generation; could share the reference file with ad-copywriter + market-research skills since they generate keyword universes too.
-- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `wiki/log.md` (by-design change log) and `wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** outputs/campaign-setup/google-ads/*.csv, outputs/campaign-setup/meta-ads/*.csv, outputs/campaign-setup/pre-launch-checklist.md, outputs/campaign-setup/launch-runbook.md — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
+- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** {client}/campaign-setup/google-ads/*.csv, {client}/campaign-setup/meta-ads/*.csv, {client}/campaign-setup/pre-launch-checklist.md, {client}/campaign-setup/launch-runbook.md — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. The upload-ready `campaign-setup/` CSV bundle is a presentable folder bundle, so it sits at the client/program folder root (not inside `_engine/`). → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Upstream input filename templates dropped the `{client}-` prefix. Step 1 now reads `paid-media-strategy.md`, `media-plan.csv`, `google-ads.csv`, `meta-ads.csv`, `page-spec.json` (short forms) from `_engine/working/`, falling back to legacy `*-`prefixed glob if the short form doesn't exist. Reader pattern documented inline. The `campaign-setup/` bundle's INTERNAL filenames (e.g. `01-campaigns.csv`, `meta-bulk-import.csv`) were already non-prefixed and unchanged. → Updated SKILL.md Step 1, references/skill-coordination.md.

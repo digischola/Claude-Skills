@@ -165,7 +165,7 @@ def generate_suggestions(pattern_scores, mode):
                 "priority": "P2",
                 "type": "reinforce",
                 "pattern": f"Pillar: {name}",
-                "target": "brand/channel-playbook.md",
+                "target": "brand/_engine/wiki/channel-playbook.md",
                 "edit": "Consider increasing this pillar's cadence share",
                 "evidence": f"Net +{pts} over {n} posts",
             })

@@ -82,4 +82,4 @@ Apply accuracy protocol strictly during crawl:
 
 ## Output Format
 
-Crawl results go to `sources/website-crawl-{date}.json` as raw data. The structured findings get written into wiki pages (business.md, offerings.md, digital-presence.md) during Steps 2-6 of the skill flow.
+Crawl results go to `_engine/sources/website-crawl-{date}.json` as raw data. The structured findings get written into wiki pages (business.md, offerings.md, digital-presence.md) during Steps 2-6 of the skill flow.

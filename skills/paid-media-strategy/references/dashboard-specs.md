@@ -6,7 +6,7 @@ The strategy dashboard is the client-facing presentation of the paid media plan.
 
 ## Brand-Config Priority (Read First)
 
-Before any design decisions, read `{client-folder}/deliverables/brand-config.json`. This overrides ALL defaults below.
+Before any design decisions, read `{client-folder}/_engine/brand-config.json` (single-program) or `{client-root}/_engine/brand-config.json` (multi-program). This overrides ALL defaults below.
 
 1. **Existing dashboard match.** If the client already has a dashboard (e.g., `*-research-dashboard.html`), match its design language — mode (light/dark), section pattern, color palette, font stack. Cross-deliverable consistency is mandatory.
 2. **Monochromatic brands** (primary = #000000 or #ffffff): Do NOT use generic tech colors. Derive accent tones from product photography or `manual_override` notes in brand-config. Use muted, natural palette.
@@ -182,7 +182,7 @@ Section description (one line)
 
 ## Source Indicators
 
-- **[EXTRACTED]** data (from wiki/research): displayed normally
+- **[EXTRACTED]** data (from `_engine/wiki/`): displayed normally
 - **[INFERRED]** data (strategy logic): tooltip with inference explanation
 - **BLANK** data: displayed as "To be determined" with dashed border
 - **data-supported** recommendations: solid border accent

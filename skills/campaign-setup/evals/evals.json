@@ -7,43 +7,43 @@
       "assertions": [
         {
           "name": "file_01_campaigns",
-          "description": "file `deliverables/campaign-setup/google-ads/01-campaigns.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/01-campaigns.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_02_ad_groups",
-          "description": "file `deliverables/campaign-setup/google-ads/02-ad-groups.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/02-ad-groups.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_03_keywords",
-          "description": "file `deliverables/campaign-setup/google-ads/03-keywords.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/03-keywords.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_04_responsive_search_ads",
-          "description": "file `deliverables/campaign-setup/google-ads/04-responsive-search-ads.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/04-responsive-search-ads.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_05_sitelink_extensions",
-          "description": "file `deliverables/campaign-setup/google-ads/05-sitelink-extensions.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/05-sitelink-extensions.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_06_callout_extensions",
-          "description": "file `deliverables/campaign-setup/google-ads/06-callout-extensions.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/06-callout-extensions.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_08_negative_keywords",
-          "description": "file `deliverables/campaign-setup/google-ads/08-negative-keywords.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/08-negative-keywords.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_README",
-          "description": "file `deliverables/campaign-setup/google-ads/README.md` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/README.md` is present in the bundle at the client folder root"
         },
         {
           "name": "file_pre_launch_checklist",
-          "description": "file `deliverables/campaign-setup/pre-launch-checklist.md` is present in deliverables"
+          "description": "file `campaign-setup/pre-launch-checklist.md` is present in the bundle at the client folder root"
         },
         {
           "name": "file_launch_runbook",
-          "description": "file `deliverables/campaign-setup/launch-runbook.md` is present in deliverables"
+          "description": "file `campaign-setup/launch-runbook.md` is present in the bundle at the client folder root"
         },
         {
           "name": "validator_critical_count",
@@ -64,16 +64,16 @@
       },
       "_original_expected_outputs": {
         "files_present": [
-          "deliverables/campaign-setup/google-ads/01-campaigns.csv",
-          "deliverables/campaign-setup/google-ads/02-ad-groups.csv",
-          "deliverables/campaign-setup/google-ads/03-keywords.csv",
-          "deliverables/campaign-setup/google-ads/04-responsive-search-ads.csv",
-          "deliverables/campaign-setup/google-ads/05-sitelink-extensions.csv",
-          "deliverables/campaign-setup/google-ads/06-callout-extensions.csv",
-          "deliverables/campaign-setup/google-ads/08-negative-keywords.csv",
-          "deliverables/campaign-setup/google-ads/README.md",
-          "deliverables/campaign-setup/pre-launch-checklist.md",
-          "deliverables/campaign-setup/launch-runbook.md"
+          "campaign-setup/google-ads/01-campaigns.csv",
+          "campaign-setup/google-ads/02-ad-groups.csv",
+          "campaign-setup/google-ads/03-keywords.csv",
+          "campaign-setup/google-ads/04-responsive-search-ads.csv",
+          "campaign-setup/google-ads/05-sitelink-extensions.csv",
+          "campaign-setup/google-ads/06-callout-extensions.csv",
+          "campaign-setup/google-ads/08-negative-keywords.csv",
+          "campaign-setup/google-ads/README.md",
+          "campaign-setup/pre-launch-checklist.md",
+          "campaign-setup/launch-runbook.md"
         ],
         "validator_critical": 0,
         "placeholder_tokens_expected": ">= 1 (account ID + conversion action names at minimum)"
@@ -85,15 +85,15 @@
       "assertions": [
         {
           "name": "file_01_campaigns",
-          "description": "file `deliverables/campaign-setup/google-ads/01-campaigns.csv` is present in deliverables"
+          "description": "file `campaign-setup/google-ads/01-campaigns.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_meta_bulk_import",
-          "description": "file `deliverables/campaign-setup/meta-ads/meta-bulk-import.csv` is present in deliverables"
+          "description": "file `campaign-setup/meta-ads/meta-bulk-import.csv` is present in the bundle at the client folder root"
         },
         {
           "name": "file_pre_launch_checklist",
-          "description": "file `deliverables/campaign-setup/pre-launch-checklist.md` is present in deliverables"
+          "description": "file `campaign-setup/pre-launch-checklist.md` is present in the bundle at the client folder root"
         },
         {
           "name": "validator_critical_count",
@@ -118,9 +118,9 @@
       },
       "_original_expected_outputs": {
         "files_present": [
-          "deliverables/campaign-setup/google-ads/01-campaigns.csv",
-          "deliverables/campaign-setup/meta-ads/meta-bulk-import.csv",
-          "deliverables/campaign-setup/pre-launch-checklist.md"
+          "campaign-setup/google-ads/01-campaigns.csv",
+          "campaign-setup/meta-ads/meta-bulk-import.csv",
+          "campaign-setup/pre-launch-checklist.md"
         ],
         "validator_critical": 0,
         "placeholder_tokens_expected": ">= 10",

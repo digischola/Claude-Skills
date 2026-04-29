@@ -53,10 +53,10 @@ ALLOWED_STATUSES = {"raw", "shaped", "drafted", "scheduled", "posted", "killed"}
 def check_pillars_locked(brand_folder: Path):
     """
     Enforce the pillar-approval gate before any entry can be captured.
-    Reads brand/pillars.md, scans the first 20 lines for a 'Status:' marker.
+    Reads brand/_engine/wiki/pillars.md, scans the first 20 lines for a 'Status:' marker.
     Allowed value: LOCKED. Blocked: AWAITING APPROVAL, DRAFT, or anything else.
     """
-    pillars_path = brand_folder / "brand" / "pillars.md"
+    pillars_path = brand_folder / "brand" / "_engine" / "wiki" / "pillars.md"
     if not pillars_path.exists():
         return False, f"pillars.md not found at {pillars_path}. Run personal-brand-dna first."
 
@@ -149,7 +149,7 @@ def main():
             print(f"  ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
-    idea_bank_path = args.brand_folder / "brand" / "idea-bank.json"
+    idea_bank_path = args.brand_folder / "brand" / "_engine" / "idea-bank.json"
     if not idea_bank_path.exists():
         sys.exit(f"idea-bank.json not found at {idea_bank_path}. Run personal-brand-dna first.")
 

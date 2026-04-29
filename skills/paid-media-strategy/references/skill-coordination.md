@@ -8,10 +8,10 @@ How this skill connects to the pipeline.
 
 ### market-research skill → this skill
 **Consumes:**
-- `{client-folder}/wiki/` — all wiki pages (strategy.md, offerings.md, competitors.md, audiences.md)
-- `{client-folder}/deliverables/brand-config.json` — for dashboard branding
-- `{client-folder}/deliverables/{name}-market-research.md` — full research report
-- `{client-folder}/sources/` — keyword CSVs, Perplexity raw output
+- `{client-folder}/_engine/wiki/` — all wiki pages (strategy.md, offerings.md, competitors.md, audiences.md)
+- `{client-folder}/_engine/brand-config.json` (single-program) or `{client-root}/_engine/brand-config.json` (multi-program) — for dashboard branding
+- `{client-folder}/_engine/working/market-research.md` (default short name; legacy fallback `{client-folder}/_engine/working/*-market-research.md`) — full research report (intermediate)
+- `{client-folder}/_engine/sources/` — keyword CSVs, Perplexity raw output
 
 **Key data points used:**
 - Market size and growth rate → informs budget ambition
@@ -59,17 +59,18 @@ How this skill connects to the pipeline.
 
 ```
 market-research
-    ├── wiki/ (all pages)
-    ├── brand-config.json
-    ├── keyword CSVs
-    └── research report
+    ├── _engine/wiki/ (all pages)
+    ├── _engine/brand-config.json
+    ├── _engine/sources/ (keyword CSVs, Perplexity raw)
+    └── research-dashboard.html (folder root, presentable; legacy `*-research-dashboard.html`) + _engine/working/market-research.md (legacy `*-market-research.md`)
          │
          ▼
 paid-media-strategy (this skill)
-    ├── strategy report (.md)
-    ├── strategy dashboard (.html)
-    ├── media plan (.csv)
-    └── wiki/strategy.md (updated)
+    ├── _engine/working/paid-media-strategy.md (report)
+    ├── strategy-dashboard.html (folder root, presentable)
+    ├── _engine/working/media-plan.csv (intermediate)
+    ├── _engine/working/creative-brief.json (handoff)
+    └── _engine/wiki/strategy.md (updated)
          │
          ├──▶ ad-copywriter (creative direction, messaging angles)
          ├──▶ campaign-setup (campaign architecture, CSV media plan)
@@ -78,12 +79,12 @@ paid-media-strategy (this skill)
 
 ## Wiki Updates
 
-This skill updates these wiki pages:
-- `wiki/strategy.md` — full strategy summary (create or update)
-- `wiki/log.md` — add STRATEGY entry with date and scope
-- `wiki/index.md` — add strategy page if new
+This skill updates these wiki pages (under `{client-folder}/_engine/wiki/`):
+- `strategy.md` — full strategy summary (create or update)
+- `log.md` — add STRATEGY entry with date and scope
+- `index.md` — add strategy page if new
 
 Does NOT modify:
-- `wiki/offerings.md` — market-research owns this
-- `wiki/competitors.md` — market-research owns this
-- `wiki/audiences.md` — market-research owns this (but strategy may reference and enrich)
+- `offerings.md` — market-research owns this
+- `competitors.md` — market-research owns this
+- `audiences.md` — market-research owns this (but strategy may reference and enrich)

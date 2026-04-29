@@ -1,6 +1,6 @@
 # HTML Dashboard Specifications
 
-The dashboard is the client-facing presentation of research findings. It should look like a premium strategy presentation — not a report displayed as a webpage. The reference standard is the CrownTech dashboard (see `deliverables/CrownTech_Market_Research_Presentation.html` for the benchmark).
+The dashboard is the client-facing presentation of research findings. It should look like a premium strategy presentation — not a report displayed as a webpage. The reference standard is the CrownTech dashboard (see `CrownTech_Market_Research_Presentation.html` at the client folder root for the benchmark).
 
 ---
 

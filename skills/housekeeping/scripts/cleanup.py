@@ -87,12 +87,17 @@ def size_of(p: Path) -> int:
         return 0
 
 
-# Defense in depth — even if scan.py sent something PROTECTED, catch it here
+# Defense in depth — even if scan.py sent something PROTECTED, catch it here.
+# Files matched anywhere by basename — these names always identify protected resources
+# regardless of folder location (post-2026-04-29 _engine/ convention moved most into
+# brand/_engine/wiki/ and {Client}/{Project}/_engine/, but the file basenames are unchanged).
 PROTECTED_NAMES = {
     "SKILL.md", "CLAUDE.md",
     "pillars.md", "voice-guide.md", "brand-identity.md", "credentials.md",
-    "channel-playbook.md", "icp.md", "brand-wiki.md", "wiki-config.json",
-    "idea-bank.json", "credential-usage-log.json", "weekly-ritual.state.json",
+    "channel-playbook.md", "icp.md", "brand-wiki.md",
+    "voice-flavor.md", "voice-lock.md",
+    "wiki-config.json", "idea-bank.json", "credential-usage-log.json",
+    "weekly-ritual.state.json",
     "housekeeping.state.json", "scheduler.log", "scheduler-failures.log",
     "housekeeping.log", "analyst-profile.md", "accuracy-protocol.md",
     "skill-architecture-standards.md", "strategic-context.md",
@@ -126,12 +131,28 @@ def is_protected(p: Path, allow_deliverable: bool = False) -> tuple[bool, str]:
         # .../Claude Skills/skills/{skill}/{sub}/... — protect if sub in {references, scripts, assets, evals}
         if len(parts) > idx + 2 and parts[idx + 2] in ("references", "scripts", "assets", "evals"):
             return True, f"skill architecture: .../{parts[idx+1]}/{parts[idx+2]}/"
-    # Client wiki
-    if "wiki" in parts and "Desktop" in parts:
+    # Client wiki — under _engine/wiki/ post-2026-04-29.
+    if "_engine" in parts and "wiki" in parts and "Desktop" in parts:
         return True, "client wiki"
-    # Client deliverables (preserve all .md/.html/.json/.csv/.pdf)
-    if "deliverables" in parts and "Desktop" in parts and not p.is_dir():
-        if p.suffix.lower() in (".md", ".html", ".json", ".csv", ".pdf"):
+    # Client deliverables — post-2026-04-29 _engine/ convention:
+    #   - presentables (HTML/MP4/PDF) at top of program folder
+    #   - intermediate working files (md/json/csv) in _engine/working/
+    if "Desktop" in parts and not p.is_dir():
+        ext = p.suffix.lower()
+        is_top_presentable = (
+            ext in (".html", ".mp4", ".mov", ".webm", ".pdf")
+            and "_engine" not in parts
+            and ".claude" not in parts
+            and "Digischola" not in parts
+        )
+        is_engine_working = (
+            "_engine" in parts and "working" in parts
+            and ext in (".md", ".json", ".csv")
+        )
+        is_engine_root_config = (
+            "_engine" in parts and name in ("brand-config.json", "wiki-config.json")
+        )
+        if is_top_presentable or is_engine_working or is_engine_root_config:
             if allow_deliverable:
                 # Scan tier explicitly flagged this deliverable for user review
                 # (e.g., superseded-deliverable) AND the user approved via AskUserQuestion.

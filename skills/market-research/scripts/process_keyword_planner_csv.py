@@ -7,9 +7,9 @@ Merges multiple CSV files (from batched seed keyword runs), deduplicates, and ou
 a unified keyword dataset for strategy.md and dashboard integration.
 
 Usage:
-    python process_keyword_planner_csv.py /path/to/csv1.csv /path/to/csv2.csv --output /path/to/sources/
-    python process_keyword_planner_csv.py /path/to/sources/*.csv --output /path/to/sources/ --country AU
-    python process_keyword_planner_csv.py /path/to/csv1.csv --clusters /path/to/clusters.json --output /path/to/sources/
+    python process_keyword_planner_csv.py /path/to/csv1.csv /path/to/csv2.csv --output /path/to/_engine/sources/
+    python process_keyword_planner_csv.py /path/to/_engine/sources/*.csv --output /path/to/_engine/sources/ --country AU
+    python process_keyword_planner_csv.py /path/to/csv1.csv --clusters /path/to/clusters.json --output /path/to/_engine/sources/
 
 Output:
     - {output_dir}/keyword_data_{timestamp}.json  (structured, for dashboard/skill consumption)

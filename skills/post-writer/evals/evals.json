@@ -34,7 +34,7 @@
         {"name": "one_credential_only", "description": "Only one credential mentioned in post body (not a stack)"},
         {"name": "lesson_anchor_pattern", "description": "Post structure follows: credential context → specific lesson → current application"},
         {"name": "no_arrogance", "description": "Opener does not lead with the credential dismissively (e.g., no 'As an Ex-Google marketer, I can tell you...')"},
-        {"name": "credential_log_updated", "description": "credential-usage-log.json gains an entry for today's use"}
+        {"name": "credential_log_updated", "description": "_engine/credential-usage-log.json gains an entry for today's use"}
       ]
     },
     {

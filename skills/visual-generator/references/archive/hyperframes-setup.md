@@ -2,7 +2,7 @@
 
 > ⚠ **ARCHIVED 2026-04-22.** This file documents the v6 Hyperframes install procedure (pre-v7 rebuild). It is kept for historical reference only.
 >
-> **Current (v7.4) Hyperframes wiring:** see `SKILL.md` + `references/v7-pipeline-architecture.md` + `references/engine-selection.md`. The live Hyperframes project now lives at `brand/hyperframes-scenes/` (not the old `brand/hyperframes-studio/`), is driven by `bunx hyperframes` (not a custom install), and renders social-platform overlay scenes only. UI-mockup teardown scenes render via Remotion.
+> **Current (v7.4) Hyperframes wiring:** see `SKILL.md` + `references/v7-pipeline-architecture.md` + `references/engine-selection.md`. The live Hyperframes project now lives at `brand/_engine/hyperframes-scenes/` (post-2026-04-29 `_engine/` convention; not the old `brand/hyperframes-studio/` or `brand/hyperframes-scenes/`), is driven by `bunx hyperframes` (not a custom install), and renders social-platform overlay scenes only. UI-mockup teardown scenes render via Remotion.
 >
 > Do NOT follow the setup instructions below. They are outdated.
 
@@ -60,7 +60,7 @@ Add a `BRAND.md` or `CLAUDE.md` at the root of `hyperframes-studio/` that points
 # Brand context for this Hyperframes project
 
 Read brand specs from:
-/Users/digischola/Desktop/Digischola/brand/brand-identity.md
+/Users/digischola/Desktop/Digischola/brand/_engine/wiki/brand-identity.md
 
 Core rules:
 - Background: #000000

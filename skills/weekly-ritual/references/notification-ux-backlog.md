@@ -26,7 +26,7 @@ All 7 items shipped in a single batch. Option C + terminal-notifier landed:
 
 - **push_notify.py:** already click-capable via ntfy / Slack / Telegram URL fields. No change needed — flagged complete.
 
-- **weekly_ritual.py (cron):** generates `brand/weekly-ritual/launcher-<day>.html` on each fire — Chrome page with the ritual prompt (copy button), what-happens-next, current queue state, last-run timestamps. Banner click opens this page via file:// URL.
+- **weekly_ritual.py (cron):** generates `brand/_engine/weekly-ritual/launcher-<day>.html` on each fire — Chrome page with the ritual prompt (copy button), what-happens-next, current queue state, last-run timestamps. Banner click opens this page via file:// URL.
 
 - **performance-review weekly_review.py:** adds click-to-open banner pointing at the freshly-written `brand/performance/YYYY-WXX.md`.
 

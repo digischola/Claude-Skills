@@ -26,7 +26,7 @@ SUGGESTION [{type}]:
 | Voice framework underperformer | same | Add review note (e.g., "Performance note 2026-WXX: net -3 — review content-framework fit") |
 | Transformation recipe win | `repurpose/references/transformation-recipes.md` | Add "Tier 1 (verified by performance-review)" to the recipe header |
 | Calendar slot win | `content-calendar/references/rotation-rules.md` | Add performance note under the relevant slot |
-| Pillar imbalance | `brand/channel-playbook.md` | Suggest cadence adjustment (more / less / redistribute) |
+| Pillar imbalance | `brand/_engine/wiki/channel-playbook.md` | Suggest cadence adjustment (more / less / redistribute) |
 
 ## Cross-skill updates always use the 7+3 rule
 

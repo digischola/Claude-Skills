@@ -55,14 +55,14 @@ def now_ist_iso() -> str:
 
 
 def read_idea_bank(brand_folder: Path) -> dict:
-    p = brand_folder / "brand" / "idea-bank.json"
+    p = brand_folder / "brand" / "_engine" / "idea-bank.json"
     if not p.exists():
         return {"schema_version": "1.0", "description": "...", "entries": []}
     return json.loads(p.read_text())
 
 
 def write_idea_bank_atomic(brand_folder: Path, data: dict) -> None:
-    p = brand_folder / "brand" / "idea-bank.json"
+    p = brand_folder / "brand" / "_engine" / "idea-bank.json"
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False))
     tmp.replace(p)
@@ -230,7 +230,7 @@ def ingest_one(brand_folder: Path, candidate: dict, dry_run: bool) -> tuple[str,
 
 
 def generate_perplexity_prompts(brand_folder: Path, week: str) -> list[Path]:
-    """Write the 3 pillar prompts to brand/_research/trends/<week>/<pillar>-prompt.md."""
+    """Write the 3 pillar prompts to brand/_engine/_research/trends/<week>/<pillar>-prompt.md."""
     template_path = SKILL_DIR / "references" / "perplexity-prompt-templates.md"
     if not template_path.exists():
         sys.exit(f"Template file missing: {template_path}")
@@ -246,7 +246,7 @@ def generate_perplexity_prompts(brand_folder: Path, week: str) -> list[Path]:
         "Small-Budget Paid Media": "paid-media",
     }
 
-    out_dir = brand_folder / "brand" / "_research" / "trends" / week
+    out_dir = brand_folder / "brand" / "_engine" / "_research" / "trends" / week
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
     for i in range(1, len(blocks), 2):
@@ -324,7 +324,7 @@ def parse_perplexity_response(text: str, pillar_slug: str) -> list[dict]:
 
 
 def append_scan_log(brand_folder: Path, week: str, lines: list[str]) -> Path:
-    log_dir = brand_folder / "brand" / "_research" / "trends" / week
+    log_dir = brand_folder / "brand" / "_engine" / "_research" / "trends" / week
     log_dir.mkdir(parents=True, exist_ok=True)
     log = log_dir / "scan-log.md"
     header = f"# Trend Scan — {week}\n\nRun at: {now_ist_iso()}\n\n"
@@ -381,7 +381,7 @@ def cmd_dedupe_check(args):
 
 def cmd_ingest_perplexity(args):
     response_path = args.response or (
-        args.brand_folder / "brand" / "_research" / "trends" / args.week / f"{args.pillar}-response.md"
+        args.brand_folder / "brand" / "_engine" / "_research" / "trends" / args.week / f"{args.pillar}-response.md"
     )
     if not response_path.exists():
         sys.exit(f"Response file not found: {response_path}")
@@ -434,7 +434,7 @@ def cmd_stats(args):
 
 
 def cmd_scan_log(args):
-    log = args.brand_folder / "brand" / "_research" / "trends" / args.week / "scan-log.md"
+    log = args.brand_folder / "brand" / "_engine" / "_research" / "trends" / args.week / "scan-log.md"
     if not log.exists():
         print(f"No scan log for {args.week}")
         return

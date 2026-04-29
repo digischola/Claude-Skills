@@ -14,9 +14,10 @@ None yet. Unlike paid-media-strategy (which has HTML dashboard templates), ad-co
 
 ## Output Files (Generated, Not Templated)
 
-All outputs are generated fresh per client using specs from `references/output-format-spec.md`:
-- `{business-name}-ad-copy-report.md` — main deliverable
-- `{business-name}-google-ads.csv` — Google Ads Editor import
-- `{business-name}-meta-ads.csv` — Meta bulk upload
-- `{business-name}-image-prompts.md` — Gemini image generation prompts
-- `{business-name}-video-storyboards.md` — frame-by-frame video storyboards with VO
+All outputs are generated fresh per client using specs from `references/output-format-spec.md`. Files are written to `_engine/working/` (folder location encodes client + program — no client/business name prefix in the filename):
+- `ad-copy-report.md` — main deliverable
+- `google-ads.csv` — Google Ads Editor import
+- `meta-ads.csv` — Meta bulk upload
+- `image-prompts.md` — Gemini image generation prompts
+- `video-storyboards.md` — frame-by-frame video storyboards with VO
+- `prompt-library.html` — at the client/program folder root (presentable)

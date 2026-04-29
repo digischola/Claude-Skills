@@ -1,6 +1,6 @@
 # Idea-Bank Entry Schema
 
-Every entry in `idea-bank.json` conforms to this schema. `scripts/append_to_idea_bank.py` enforces it.
+Every entry in `_engine/idea-bank.json` conforms to this schema. `scripts/append_to_idea_bank.py` enforces it.
 
 ## Schema
 
@@ -10,7 +10,7 @@ Every entry in `idea-bank.json` conforms to this schema. `scripts/append_to_idea
   "captured_at": "ISO timestamp (auto-assigned)",
   "type": "one of: client-win | insight | experiment | failure | build-log | client-comm | observation",
   "raw_note": "user's raw input — preserve specifics (numbers, tools, client names, timestamps)",
-  "suggested_pillar": "pillar ID from brand/pillars.md",
+  "suggested_pillar": "pillar ID from brand/_engine/wiki/pillars.md",
   "channel_fit": ["LinkedIn", "Instagram", "X", "Facebook", "WA-Status", "WA-Channel"],
   "format_candidates": ["LI-post", "LI-carousel", "IG-carousel", "IG-reel", "X-tweet", "X-thread", "WA-status", "WA-channel-post", "FB-post"],
   "tags": ["freeform strings — client name, tool, vertical, topic"],
@@ -32,7 +32,7 @@ Every entry in `idea-bank.json` conforms to this schema. `scripts/append_to_idea
 
 ## Pillar assignment rules
 
-`suggested_pillar` must match an approved pillar ID from `brand/pillars.md`. If uncertain:
+`suggested_pillar` must match an approved pillar ID from `brand/_engine/wiki/pillars.md`. If uncertain:
 - Use `uncertain` as the value and set `status: raw`
 - The skill will flag for user review on next surface
 
@@ -75,4 +75,4 @@ Skill can override these based on voice-guide register and current brand phase.
 - Purely personal moments unrelated to work
 - Client information that isn't already public on digischola.in
 - Generic statements ("AI is changing marketing") without specifics
-- Duplicate entries (check idea-bank.json for similar raw_notes from last 7 days)
+- Duplicate entries (check `_engine/idea-bank.json` for similar raw_notes from last 7 days)

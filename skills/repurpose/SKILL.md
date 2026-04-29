@@ -12,9 +12,9 @@ Take a drafted or already-published post on one channel and adapt it to fit othe
 Read before starting:
 
 **Brand wiki (required):**
-- `Desktop/Digischola/brand/pillars.md` — Status MUST be LOCKED
-- `Desktop/Digischola/brand/voice-guide.md` — registers per channel + Conservative client-naming + Restrained emoji policy
-- `Desktop/Digischola/brand/brand-identity.md` — visual rules for carousels and Reels
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — Status MUST be LOCKED
+- `Desktop/Digischola/brand/_engine/wiki/voice-guide.md` — registers per channel + Conservative client-naming + Restrained emoji policy
+- `Desktop/Digischola/brand/_engine/wiki/brand-identity.md` — visual rules for carousels and Reels
 
 **Skill references (this skill):**
 - `references/transformation-recipes.md` — the 9 source→target recipes
@@ -46,7 +46,7 @@ If source file does not exist OR lacks YAML frontmatter OR lacks `entry_id` / `p
 
 If user specified targets, use those. Else use `default_targets` from inspect.
 
-**Phase gate:** if target includes `whatsapp-status` or `whatsapp-channel` AND `channel-playbook.md` shows WA still in "dark" Phase 1, warn but proceed only if user confirms. Default Phase 1 (weeks 1-6): skip WA targets silently unless explicitly requested.
+**Phase gate:** if target includes `whatsapp-status` or `whatsapp-channel` AND `_engine/wiki/channel-playbook.md` shows WA still in "dark" Phase 1, warn but proceed only if user confirms. Default Phase 1 (weeks 1-6): skip WA targets silently unless explicitly requested.
 
 ### Step 3: Apply transformation recipe per target
 
@@ -146,3 +146,4 @@ See references/feedback-loop.md for protocol + context tags.
 - [2026-04-18] [Initial build] 9 recipes seeded: LI-text→X-thread, LI-text→IG-carousel, LI-text→IG-reel, LI-text→WA-status, LI-text→FB, LI-carousel→X-thread, LI-carousel→IG-carousel, X-thread→LI-text, X-single→LI-text. Hook preservation is default. Validator reused from post-writer (no duplicate). Phase gate blocks WA targets in Phase 1 by default.
 - [2026-04-18] [Scope decision] Source input is queue-only (not pasted text). v2 candidate: add pasted-text mode after 5+ queue-repurposes prove the core flow.
 - [2026-04-18] [Design decision] Repurpose auto-links source to children (`repurposed_into`). Enables performance-review to trace which source posts spawn which variants, and later attribute engagement to transformation recipes.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top of `Digischola/brand/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

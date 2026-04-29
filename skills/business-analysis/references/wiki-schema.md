@@ -9,28 +9,30 @@ Every client gets a persistent wiki — a living knowledge base that compounds a
 ```
 {Client Name}/
 ├── {Business Name}/
-│   ├── sources/                    ← Raw, immutable inputs
-│   │   ├── website-crawl-YYYY-MM-DD.json
-│   │   ├── client-brief.md
-│   │   ├── perplexity-YYYY-MM-DD.md
-│   │   └── ...
-│   ├── wiki/                       ← LLM-maintained, compounds over time
-│   │   ├── index.md                ← Content catalog with page registry
-│   │   ├── log.md                  ← Append-only chronological record
-│   │   ├── business.md             ← Business fundamentals (owner: business-analysis)
-│   │   ├── brand-identity.md       ← Brand colors, fonts, voice (owner: business-analysis)
-│   │   ├── digital-presence.md     ← Digital audit (owner: business-analysis)
-│   │   ├── offerings.md            ← All offerings documented (owner: business-analysis)
-│   │   ├── market.md               ← Added by market-research skill
-│   │   ├── competitors.md          ← Added by market-research skill
-│   │   ├── audience.md             ← Added by market-research skill
-│   │   ├── benchmarks.md           ← Added by market-research skill
-│   │   ├── strategy-implications.md ← Added by market-research skill
-│   │   └── {any-new-page}.md       ← Added by any skill as needed
-│   ├── deliverables/               ← Final outputs for client/team
-│   │   ├── brand-config.json
-│   │   └── ...
-│   └── wiki-config.json            ← Wiki metadata with dynamic page registry
+│   ├── {presentable}.html          ← Final outputs for client/team (HTML/PDF/MP4 at folder root)
+│   ├── {presentable}.pdf
+│   └── _engine/                    ← Skill internals (everything Mayank doesn't double-click)
+│       ├── sources/                ← Raw, immutable inputs
+│       │   ├── website-crawl-YYYY-MM-DD.json
+│       │   ├── client-brief.md
+│       │   ├── perplexity-YYYY-MM-DD.md
+│       │   └── ...
+│       ├── wiki/                   ← LLM-maintained, compounds over time
+│       │   ├── index.md            ← Content catalog with page registry
+│       │   ├── log.md              ← Append-only chronological record
+│       │   ├── business.md         ← Business fundamentals (owner: business-analysis)
+│       │   ├── brand-identity.md   ← Brand colors, fonts, voice (owner: business-analysis)
+│       │   ├── digital-presence.md ← Digital audit (owner: business-analysis)
+│       │   ├── offerings.md        ← All offerings documented (owner: business-analysis)
+│       │   ├── market.md           ← Added by market-research skill
+│       │   ├── competitors.md      ← Added by market-research skill
+│       │   ├── audience.md         ← Added by market-research skill
+│       │   ├── benchmarks.md       ← Added by market-research skill
+│       │   ├── strategy-implications.md ← Added by market-research skill
+│       │   └── {any-new-page}.md   ← Added by any skill as needed
+│       ├── working/                ← Intermediate skill output (md reports, json briefs)
+│       ├── brand-config.json       ← Skill-managed config files
+│       └── wiki-config.json        ← Wiki metadata with dynamic page registry
 ```
 
 ---
@@ -40,17 +42,17 @@ Every client gets a persistent wiki — a living knowledge base that compounds a
 ### How It Works
 - Business analysis creates base pages during init (business, brand-identity, digital-presence, offerings)
 - Any skill can add new pages by:
-  1. Creating the .md file in wiki/
-  2. Registering it in wiki-config.json under "pages"
+  1. Creating the .md file in `_engine/wiki/`
+  2. Registering it in `_engine/wiki-config.json` under "pages"
   3. Adding an entry to index.md under "Dynamic Pages"
   4. Logging the creation in log.md
 
 ### Adding a Page (for any skill)
 ```python
 # 1. Create the page file
-wiki_dir / "new-page.md"  # with standard template
+wiki_dir / "new-page.md"  # with standard template (wiki_dir = _engine/wiki/)
 
-# 2. Register in wiki-config.json
+# 2. Register in _engine/wiki-config.json
 config["pages"]["new-page"] = {
     "title": "Page Title",
     "owner": "skill-name",
@@ -100,7 +102,7 @@ config["pages"]["new-page"] = {
 
 ## Key Principles
 
-1. **Sources are immutable.** Raw inputs in sources/ never get modified.
+1. **Sources are immutable.** Raw inputs in `_engine/sources/` never get modified.
 2. **Wiki pages compound.** New data updates existing pages — doesn't replace them.
 3. **Gaps carry forward.** BLANK fields stay visible until filled by new data.
 4. **Cross-references.** Pages link to each other when findings overlap.

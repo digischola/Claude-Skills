@@ -14,7 +14,7 @@ Read these shared-context files before starting:
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
 - `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
-If a personal-brand wiki already exists at `Desktop/{Brand}/brand/`, read `brand-wiki.md` first. This may be a refresh, not a fresh build.
+If a personal-brand wiki already exists at `Desktop/{Brand}/brand/_engine/wiki/`, read `brand-wiki.md` first. This may be a refresh, not a fresh build.
 
 ## Inputs (5 sources — missing any is allowed but flagged)
 
@@ -28,11 +28,11 @@ If a personal-brand wiki already exists at `Desktop/{Brand}/brand/`, read `brand
 
 ### Step 1: Wiki Folder Setup
 
-Create `Desktop/{Brand Name}/brand/` and `Desktop/{Brand Name}/brand/_mining/`.
+Create `Desktop/{Brand Name}/brand/_engine/wiki/` and `Desktop/{Brand Name}/brand/_engine/_mining/`.
 
 ### Step 2: Mine CLI Transcripts
 
-Run `scripts/mine_transcripts.py`. Customize `KNOWN_ENTITIES` for the brand's client/project list before running (seed from analyst profile + memory files). Outputs to `_mining/`:
+Run `scripts/mine_transcripts.py`. Customize `KNOWN_ENTITIES` for the brand's client/project list before running (seed from analyst profile + memory files). Outputs to `_engine/_mining/`:
 - `voice-samples.txt` — up to 120 representative user utterances
 - `work-topics.json` — entity + keyword frequencies (highest-frequency terms = strongest pillar candidates)
 - `session-summaries.json` — per-session first/last snippets
@@ -49,7 +49,7 @@ Extract: positioning taglines, navigation structure, service list, testimonials,
 
 ### Step 4: Voice Extraction
 
-Read `_mining/voice-samples.txt`. Identify:
+Read `_engine/_mining/voice-samples.txt`. Identify:
 - **Universal rules** — scan for explicit user corrections ("don't", "stop", "no", "not") which become hard rules
 - **Sentence patterns per register** — Strategist / Operator / BTS
 - **Signature moves** — specific vocabulary, framing choices, credential anchoring
@@ -67,7 +67,7 @@ These are public-source, no approval gate needed.
 ### Step 6: Pillar Candidate Generation
 
 Follow `references/pillar-generation-framework.md`:
-1. Cluster high-frequency entities + keywords from `work-topics.json` into 3-5 rough themes
+1. Cluster high-frequency entities + keywords from `_engine/_mining/work-topics.json` into 3-5 rough themes
 2. Overlay trends: light WebSearch for "rising in {niche}" + "saturated in {niche}" + "underserved in {niche}"
 3. Produce 5-7 candidate pillars, each with: thesis, why-it-wins (data-backed), content types, audience fit
 4. Mark the 3 strongest as "Strong yes"; flag 1-2 as "pick one for variety"; flag any as "skip for now" with rationale
@@ -88,7 +88,7 @@ Include a "Bio & Link Hygiene" checklist for Week 1.
 
 ### Step 8: Wiki Index + Config
 
-Write `brand-wiki.md` (master index, file status table) and `wiki-config.json` (metadata for validators, downstream reader list, approval gates). Seed `idea-bank.json` as empty for `work-capture`.
+Write `_engine/wiki/brand-wiki.md` (master index, file status table) and `_engine/wiki-config.json` (metadata for validators, downstream reader list, approval gates). Seed `_engine/idea-bank.json` as empty for `work-capture`.
 
 ### Step 9: Present Approval Gate
 
@@ -106,14 +106,14 @@ Read `references/feedback-loop.md`. Capture what worked/didn't. Add dated learni
 
 ## Output Checklist
 
-- [ ] `Desktop/{Brand}/brand/` created with 9 files
+- [ ] `Desktop/{Brand}/brand/_engine/wiki/` created with 9 files
 - [ ] Every data point tagged `[EXTRACTED]`, `[INFERRED]`, or `[INTAKE]` per accuracy protocol
 - [ ] Missing data shows `BLANK — reason` (never guessed)
-- [ ] `brand-identity.md` and `credentials.md` LOCKED (public-source only)
-- [ ] `voice-guide.md` has a Universal Rules section with explicit user corrections quoted
-- [ ] `pillars.md` has 5-7 candidates with recommendation flagged and positioning tension (if any) called out
-- [ ] `channel-playbook.md` reflects actual follower counts per channel (not assumptions)
-- [ ] `wiki-config.json` lists all downstream readers
+- [ ] `_engine/wiki/brand-identity.md` and `_engine/wiki/credentials.md` LOCKED (public-source only)
+- [ ] `_engine/wiki/voice-guide.md` has a Universal Rules section with explicit user corrections quoted
+- [ ] `_engine/wiki/pillars.md` has 5-7 candidates with recommendation flagged and positioning tension (if any) called out
+- [ ] `_engine/wiki/channel-playbook.md` reflects actual follower counts per channel (not assumptions)
+- [ ] `_engine/wiki-config.json` lists all downstream readers
 - [ ] User explicitly approves pillars before lock (Step 9 gate)
 
 ## Learnings & Rules
@@ -127,3 +127,4 @@ See references/feedback-loop.md for protocol.
 - [2026-04-18] [Initial build — Digischola] Universal voice rule extracted from a single explicit user correction ("no em dashes, make it human", CLI sample #54). → Rule: scan transcripts specifically for "don't", "stop", "no", "not" directives addressed to Claude. These convert to universal rules faster than pattern analysis across 100 samples.
 - [2026-04-18] [Initial build — Digischola] Wiki files I generated contained 71 em dashes despite the universal rule they documented. Stripped via sed " — " → ". " + manual touch-ups for rule-demonstration lines and table cells. → Rule: the skill must scan its own wiki outputs for forbidden characters before handing off for approval. Added to Step 8 responsibility (wiki-config validators).
 - [2026-04-18] [Location — verified empirically] Tried nesting at `.claude/skills/personal-brand/personal-brand-dna/` for visual grouping with work-capture. Claude Code skill discovery is strictly one level deep under `.claude/skills/`: the skill list did NOT pick up the nested skills. Flattened back to `.claude/skills/personal-brand-dna/` (which resolves via symlink to the `Claude Skills` Git repo). Grouping option kept: rename `work-capture` → `personal-brand-work-capture` for alphabetical clustering with `personal-brand-dna`. → Rule: never nest skills inside subfolders under `.claude/skills/`; use naming prefixes for visual grouping instead.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top of `Digischola/brand/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

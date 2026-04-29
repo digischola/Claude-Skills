@@ -77,9 +77,9 @@ Questions are grouped by priority. **Essential** questions block downstream work
 
 ## Recording Answers
 
-All intake data goes into `wiki/business.md` under appropriate sections. Tag each answer:
+All intake data goes into `_engine/wiki/business.md` under appropriate sections. Tag each answer:
 - [EXTRACTED] if directly stated by client (quote or paraphrase from brief/call)
 - [INFERRED] if interpreted from context (e.g., "client mentioned high-end clientele, inferring premium positioning")
 - BLANK with reason if not discussed yet
 
-Update `wiki/offerings.md` with any offering-specific intake data (campaign priority, budget allocation per offering, etc.).
+Update `_engine/wiki/offerings.md` with any offering-specific intake data (campaign priority, budget allocation per offering, etc.).

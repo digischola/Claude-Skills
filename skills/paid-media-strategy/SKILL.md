@@ -12,20 +12,20 @@ Senior media buyer-level campaign strategy for Google Ads, Meta Ads, or both pla
 Read these shared context files before starting:
 - `shared-context/analyst-profile.md` — workflow, client types, quality standards
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
-- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to `outputs/`, intermediate MD/JSON/CSV to `working/`
+- `shared-context/output-structure.md` — write final HTML dashboards/PDFs to the client/program folder root; intermediate MD/JSON/CSV to `_engine/working/`
 - `shared-context/client-shareability.md` — client-facing files must read like first copies; no correction trails / audit history / internal-process commentary. Validator: `python3 ~/.claude/scripts/check_client_shareability.py {client}`
 
-If a client wiki exists (`{client-folder}/wiki/`), read it first — strategy.md, offerings.md, competitors.md, audiences.md. The wiki is the primary input.
+If a client wiki exists (`{client-folder}/_engine/wiki/`), read it first — strategy.md, offerings.md, competitors.md, audiences.md. The wiki is the primary input.
 
 ## Process Overview
 
 ### Step 1: Client Intake, Wiki Check & Brief Anchor
 
-**Check for existing research.** Look for `{client-folder}/wiki/` from a prior market-research session. If it exists, read all wiki pages — this is the foundation. If no wiki exists, flag that market research should run first (this skill depends on it).
+**Check for existing research.** Look for `{client-folder}/_engine/wiki/` from a prior market-research session. If it exists, read all wiki pages — this is the foundation. If no wiki exists, flag that market research should run first (this skill depends on it).
 
-**Read the active brief (MANDATORY when wiki/briefs.md exists).** Open `{client-folder}/wiki/briefs.md` (or per-program `{Program}/wiki/briefs.md` for multi-program clients). Identify all `[ACTIVE]` entries. The verbatim client text + parsed fields are the **strategy North Star**. Every campaign, budget allocation, and tactic in this strategy must trace to a brief entry, OR be flagged as `[INFERRED — extending the brief]` with one-line rationale. Do not invent campaigns, products, or infrastructure not in the brief without flagging.
+**Read the active brief (MANDATORY when _engine/wiki/briefs.md exists).** Open `{client-folder}/_engine/wiki/briefs.md` (or per-program `{Program}/_engine/wiki/briefs.md` for multi-program clients). Identify all `[ACTIVE]` entries. The verbatim client text + parsed fields are the **strategy North Star**. Every campaign, budget allocation, and tactic in this strategy must trace to a brief entry, OR be flagged as `[INFERRED — extending the brief]` with one-line rationale. Do not invent campaigns, products, or infrastructure not in the brief without flagging.
 
-**Read all offerings.** Open `{client-folder}/_shared/wiki/offerings.json` (or `wiki/offerings.json`). The strategy must explicitly address every product: DEPLOYED in which campaign, or OMITTED with a one-line reason. No silent omissions — that's how the $39 Midday Recharge Pass got dropped from Living Flow's Live-stream strategy in 2026-04-25.
+**Read all offerings.** Open `{client-folder}/_engine/wiki/offerings.json` (single-program) or `{client-root}/_engine/wiki/offerings.json` (multi-program — `_engine/` at the client root, formerly `_shared/`). The strategy must explicitly address every product: DEPLOYED in which campaign, or OMITTED with a one-line reason. No silent omissions — that's how the $39 Midday Recharge Pass got dropped from Living Flow's Live-stream strategy in 2026-04-25.
 
 **Gather any missing info** ONLY for fields the brief left blank: business name, URL, platform focus, monthly budget range, primary conversion action, geographic targeting, ad-account history.
 
@@ -85,9 +85,9 @@ Write the strategy report covering all 8 dimensions. Each section includes: rati
 
 **Brief Alignment Check (mandatory final pass before saving the report):**
 
-1. **North-Star match.** For each `[ACTIVE]` brief in `wiki/briefs.md`, verify the strategy's primary recommendations match the brief's verbatim ask. Budget matches? Featured products match? Audience matches? Geography matches? Any mismatch must be flagged in the report's "Brief Alignment" section with `[INFERRED — extending brief]` rationale.
+1. **North-Star match.** For each `[ACTIVE]` brief in `_engine/wiki/briefs.md`, verify the strategy's primary recommendations match the brief's verbatim ask. Budget matches? Featured products match? Audience matches? Geography matches? Any mismatch must be flagged in the report's "Brief Alignment" section with `[INFERRED — extending brief]` rationale.
 
-2. **Offering coverage matrix.** Render a table at the bottom of the strategy: for every product in `wiki/offerings.json`, mark `DEPLOYED IN: <campaign>` or `OMITTED — <one-line reason>`. No silent omissions. Template:
+2. **Offering coverage matrix.** Render a table at the bottom of the strategy: for every product in `_engine/wiki/offerings.json`, mark `DEPLOYED IN: <campaign>` or `OMITTED — <one-line reason>`. No silent omissions. Template:
 
    ```
    | Offering | Status | Where / Why |
@@ -99,13 +99,13 @@ Write the strategy report covering all 8 dimensions. Each section includes: rati
 
 3. **Anti-over-architecting check.** For each Phase 0 / prerequisite / new-product / new-LP recommendation in the strategy, verify the brief actually requested it. If the brief said "test campaign with existing intro passes" and the strategy proposes a dedicated landing page + new digital SKU + 7-day free trial, that's scope drift. Move those to a clearly-labeled "Phase 2 — Optimizations Beyond Brief" section, NOT pre-launch blockers. Default for unflagged drift: demote to Phase 2.
 
-Save as `{client-folder}/deliverables/{business-name}-paid-media-strategy.md`.
+Save as `{client-folder}/_engine/working/paid-media-strategy.md`.
 
 ### Step 5: Generate HTML Strategy Dashboard
 
 **Brand-config gate (mandatory, do first):**
-1. Read `{client-folder}/deliverables/brand-config.json` — extract colors, fonts, anomalies, manual_override notes.
-2. Check for existing client dashboards (e.g., `*-research-dashboard.html`) — if one exists, match its design language (light/dark mode, section pattern, color palette, font stack). Consistency across deliverables is non-negotiable.
+1. Read `{client-folder}/_engine/brand-config.json` (single-program) or `{client-root}/_engine/brand-config.json` (multi-program — `_engine/` at the client root) — extract colors, fonts, anomalies, manual_override notes.
+2. Check for existing client dashboards (e.g., `research-dashboard.html` at folder root, or legacy `*-research-dashboard.html`) — if one exists, match its design language (light/dark mode, section pattern, color palette, font stack). Consistency across deliverables is non-negotiable.
 3. For monochromatic brands (primary = black/white): derive accent tones from product photography or manual_override guidance — never use generic tech colors.
 4. Map brand fonts to web-safe fallbacks (e.g., IvyPresto Display → Georgia serif, FH Oscar → Helvetica Neue).
 
@@ -118,11 +118,11 @@ Adapt template to match brand-config — override default dark mode if brand/exi
 
 Read `references/dashboard-specs.md` for the full specification. Populate all `{{PLACEHOLDER}}` variables with strategy data and brand-derived colors/fonts.
 
-Save as `{client-folder}/deliverables/{business-name}-strategy-dashboard.html`.
+Save as `{client-folder}/strategy-dashboard.html` (folder root — it's a presentable).
 
 ### Step 5.5: Generate Creative Brief JSON
 
-Generate a structured creative brief for the ad-copywriter skill. Read `references/creative-brief-spec.md` for schema and field source labels. Populate from strategy report (campaigns, formats, hooks) + wiki (personas, pain points, brand voice). Save as `{client-folder}/deliverables/{business-name}-creative-brief.json`.
+Generate a structured creative brief for the ad-copywriter skill. Read `references/creative-brief-spec.md` for schema and field source labels. Populate from strategy report (campaigns, formats, hooks) + wiki (personas, pain points, brand voice). Save as `{client-folder}/_engine/working/creative-brief.json`.
 
 ### Step 6: Generate CSV Media Plan
 
@@ -134,11 +134,11 @@ Create a structured CSV/spreadsheet with:
 - Monthly budget projection: spend by month across phases
 - KPI targets: expected CPC, CTR, conversion rate, CPA/ROAS by campaign
 
-Save as `{client-folder}/deliverables/{business-name}-media-plan.csv`.
+Save as `{client-folder}/_engine/working/media-plan.csv` (intermediate CSV consumed by campaign-setup; the upload-ready bundle is what campaign-setup produces at folder root).
 
 ### Step 7: Update Wiki & Flag Downstream
 
-Write strategy decisions into `{client-folder}/wiki/strategy.md` (update if exists from market-research).
+Write strategy decisions into `{client-folder}/_engine/wiki/strategy.md` (update if exists from market-research).
 
 Flag downstream connections:
 - Campaign names + ad group structure → ready for campaign-setup skill
@@ -146,7 +146,7 @@ Flag downstream connections:
 - Keyword clusters + match types → ready for campaign-setup skill (Google)
 - Audience definitions → ready for campaign-setup skill (Meta)
 
-Update wiki/log.md and wiki/index.md.
+Update `_engine/wiki/log.md` and `_engine/wiki/index.md`.
 
 ### Step 8: Validate & Evolve (Mandatory — Never Skip)
 
@@ -196,5 +196,7 @@ Keep under 30 lines. Prune quarterly. See references/feedback-loop.md for protoc
 - [2026-04-12] [General] Finding: Strategy report creative direction (Section 5) and wiki personas contain all data needed for a structured creative brief, but ad-copywriter skill had no machine-readable input — only prose. Manual translation from report to ad copy is error-prone and loses persona-specific hooks. → Action: Added Step 5.5 to generate a creative-brief.json with per-campaign persona mappings, hooks, formats, brand voice, and competitor angles. Schema defined in references/creative-brief-spec.md with [EXTRACTED]/[INFERRED] source labels per field.
 - [2026-04-12] [General] Finding: Retreat House dashboard required heavy manual modifications to template-dual-platform.html because the simultaneous template has no concept of phased platform launches. → Action: Created template-dual-phased.html with phased split bars, phase-tagged campaigns, monthly budget progression, and platform-agnostic placeholders. Supports light/dark mode via body class.
 - [2026-04-12] [General] Finding: Creative brief JSON lacked visual direction, landing page mapping, A/B testing plan, and proof element hierarchy. Brief was ~75% complete for ad-copywriter and ~50% for creative production. → Action: Added 4 new field groups to creative-brief-spec.md: visual_direction (with image_gen_prompt_prefix for AI image tools), landing_page (url + page_type + message match), ab_testing (priority variable + test pairs), proof_elements (media mentions, certifications, stats with campaign mapping). 5 new validation rules.
-- [2026-04-16] [Validator hardening] Finding: two validator blind spots. (a) Step 5.5 produces `creative-brief.json` — the pipeline's spine contract — but the validator never checked that it existed or parsed. A paid-media-strategy session could "pass" with no brief at all, then silently break ad-copywriter, landing-page-builder, and campaign-setup 30 minutes later. (b) Cross-file campaign-name match used pure substring containment (`cn in rn or rn in cn`), so "Summer" wrongly matched "Summer Sale Campaign" — real drift could pass. → Action: (a) added `validate_creative_brief_presence()` step that globs for `*-creative-brief.json` in the deliverables folder, parses it, requires `business_name` + `campaigns[]`, and warns if no campaign has `visual_direction.image_gen_prompt_prefix`; (b) replaced substring match with `_is_structured_variant()` — accepts exact equality OR structured separator variants (`" — "`, `" – "`, `": "`, `" | "`, `" / "`) with a 60% minimum length-overlap guard. Eliminates false matches on short names inside longer ones.
-- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `wiki/log.md` (by-design change log) and `wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** working/CLIENT-paid-media-strategy.md, outputs/CLIENT-strategy-dashboard.html, working/CLIENT-media-plan.csv, working/CLIENT-creative-brief.json — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
+- [2026-04-16] [Validator hardening] Finding: two validator blind spots. (a) Step 5.5 produces `creative-brief.json` — the pipeline's spine contract — but the validator never checked that it existed or parsed. A paid-media-strategy session could "pass" with no brief at all, then silently break ad-copywriter, landing-page-builder, and campaign-setup 30 minutes later. (b) Cross-file campaign-name match used pure substring containment (`cn in rn or rn in cn`), so "Summer" wrongly matched "Summer Sale Campaign" — real drift could pass. → Action: (a) added `validate_creative_brief_presence()` step that globs for `*-creative-brief.json` in `_engine/working/`, parses it, requires `business_name` + `campaigns[]`, and warns if no campaign has `visual_direction.image_gen_prompt_prefix`; (b) replaced substring match with `_is_structured_variant()` — accepts exact equality OR structured separator variants (`" — "`, `" – "`, `": "`, `" | "`, `" / "`) with a 60% minimum length-overlap guard. Eliminates false matches on short names inside longer ones.
+- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** _engine/working/CLIENT-paid-media-strategy.md, CLIENT-strategy-dashboard.html (folder root), _engine/working/CLIENT-media-plan.csv, _engine/working/CLIENT-creative-brief.json — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. Strategy dashboard HTML stays at folder root (presentable); strategy report MD, media-plan CSV (intermediate), and creative-brief JSON go to `_engine/working/`; brand-config moves to `_engine/brand-config.json`. → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Output filename templates dropped redundant client/business-name prefix. Filename = deliverable type only: `paid-media-strategy.md`, `strategy-dashboard.html`, `media-plan.csv`, `creative-brief.json` — folder location already encodes client + program. Validator's `validate_creative_brief_presence()` now prefers the new short name and falls back to legacy `*-creative-brief.json` for backwards-compat. → Updated SKILL.md Step 4 + Step 5 + Step 5.5 + Step 6, references/skill-coordination.md, scripts/validate_output.py.

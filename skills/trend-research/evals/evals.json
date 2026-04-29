@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Run a Mode 1 autonomous trend scan for the upcoming week: `python3 scripts/trend_research.py scan --week 2026-W18`",
-      "expected_output": "Claude runs 6 WebSearches (2 per pillar across LP Craft, Solo Ops, Paid Media). Synthesizes 3-6 candidates per pillar. Dedupes against existing idea-bank entries (70% text-overlap threshold). Drops candidates with relevance_score <3 or anti-pattern words. Appends survivors to idea-bank.json with type: trend.",
+      "expected_output": "Claude runs 6 WebSearches (2 per pillar across LP Craft, Solo Ops, Paid Media). Synthesizes 3-6 candidates per pillar. Dedupes against existing idea-bank entries (70% text-overlap threshold). Drops candidates with relevance_score <3 or anti-pattern words. Appends survivors to _engine/idea-bank.json with type: trend.",
       "assertions": [
         {
           "name": "three_pillars_covered",
@@ -31,11 +31,11 @@
     {
       "id": 2,
       "prompt": "Run trend ingest with a candidate whose seed text overlaps 90% with an existing idea-bank entry.",
-      "expected_output": "Dedupe logic identifies the overlap and skips the candidate. Logs 'skipped: duplicate of <existing_id>' to scan log. Does NOT append duplicate to idea-bank.json.",
+      "expected_output": "Dedupe logic identifies the overlap and skips the candidate. Logs 'skipped: duplicate of <existing_id>' to scan log. Does NOT append duplicate to _engine/idea-bank.json.",
       "assertions": [
         {
           "name": "duplicate_skipped",
-          "description": "Candidate with >70% seed overlap is not appended to idea-bank.json"
+          "description": "Candidate with >70% seed overlap is not appended to _engine/idea-bank.json"
         },
         {
           "name": "skip_reason_logged",

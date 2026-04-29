@@ -14,10 +14,10 @@ content-calendar pulls from idea-bank. If work-capture has been quiet for a week
 ## Context Loading
 
 **Brand wiki:**
-- `Desktop/Digischola/brand/pillars.md` — must be LOCKED
-- `Desktop/Digischola/brand/idea-bank.json` — appends here (matches work-capture schema; type: `trend`)
-- `Desktop/Digischola/brand/voice-guide.md` — relevance filter (skip trends that need em dashes / hype words)
-- `Desktop/Digischola/brand/icp.md` — relevance filter (skip trends irrelevant to wellness / spiritual / hospitality / B2B / freelancer / SMB ICPs)
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — must be LOCKED
+- `Desktop/Digischola/brand/_engine/idea-bank.json` — appends here (matches work-capture schema; type: `trend`)
+- `Desktop/Digischola/brand/_engine/wiki/voice-guide.md` — relevance filter (skip trends that need em dashes / hype words)
+- `Desktop/Digischola/brand/_engine/wiki/icp.md` — relevance filter (skip trends irrelevant to wellness / spiritual / hospitality / B2B / freelancer / SMB ICPs)
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md` — workflow, voice/quality standards used as relevance filter
@@ -45,10 +45,10 @@ Total time: ~3-5 min when invoked.
 ### Mode 2 — Deep (Perplexity offline)
 
 User runs `scripts/trend_research.py prompt --week 2026-W17` →
-- Writes 3 mega-prompts to `brand/_research/trends/2026-W17/<pillar>-prompt.md`
+- Writes 3 mega-prompts to `brand/_engine/_research/trends/2026-W17/<pillar>-prompt.md`
 - Copies first prompt to clipboard
 
-User opens Perplexity, pastes prompt, copies the response into `brand/_research/trends/2026-W17/<pillar>-response.md`. Then runs:
+User opens Perplexity, pastes prompt, copies the response into `brand/_engine/_research/trends/2026-W17/<pillar>-response.md`. Then runs:
 ```bash
 python3 scripts/trend_research.py ingest-perplexity --pillar lp-craft --week 2026-W17
 ```
@@ -61,7 +61,7 @@ Use Mode 2 when planning a content theme or before launching a new pillar focus 
 
 When invoked autonomously (or by user saying "scan trends"):
 
-1. **Pre-checks**: pillars LOCKED, idea-bank.json exists. Block if not.
+1. **Pre-checks**: `_engine/wiki/pillars.md` LOCKED, `_engine/idea-bank.json` exists. Block if not.
 2. **For each of 3 pillars**, do a WebSearch using the keyword strategy in `references/web-search-strategy.md`:
    - LP Craft: queries around "landing page conversion 2026", "CTA optimization tactics", "form length conversion"
    - Solo Ops: queries around "solo freelance marketing 2026", "AI marketing operator", "indie agency stack"
@@ -79,14 +79,14 @@ When invoked autonomously (or by user saying "scan trends"):
    - `status: raw`
 4. **Dedupe** each candidate via `dedupe-check`: skip if seed text overlaps >70% with an existing idea-bank entry's `seed` / `raw_note` / `hook_candidate`.
 5. **Apply quality filter**: drop candidates with relevance_score <3, or that contain anti-patterns (em dashes, hype words from voice-guide).
-6. **Append** survivors to idea-bank.json via `ingest`.
+6. **Append** survivors to `_engine/idea-bank.json` via `ingest`.
 7. **Report**: list what was added and what was skipped (with reason).
 
 ## Process — Mode 2 (Perplexity deep)
 
 ```bash
 python3 scripts/trend_research.py prompt --week 2026-W17
-# → writes prompts to brand/_research/trends/2026-W17/{lp-craft,solo-ops,paid-media}-prompt.md
+# → writes prompts to brand/_engine/_research/trends/2026-W17/{lp-craft,solo-ops,paid-media}-prompt.md
 # → first prompt copied to clipboard
 ```
 
@@ -95,7 +95,7 @@ User does Perplexity round-trip per pillar, saves response file. Then:
 ```bash
 python3 scripts/trend_research.py ingest-perplexity \
   --pillar lp-craft \
-  --response brand/_research/trends/2026-W17/lp-craft-response.md
+  --response brand/_engine/_research/trends/2026-W17/lp-craft-response.md
 ```
 
 ## Output Checklist
@@ -104,7 +104,7 @@ python3 scripts/trend_research.py ingest-perplexity \
 - [ ] No duplicates against existing idea-bank entries
 - [ ] Each entry has source_urls (Claude WebSearch citations OR Perplexity citations)
 - [ ] Each entry passes voice-guide quality filter
-- [ ] Report logged to `brand/_research/trends/<week>/scan-log.md`
+- [ ] Report logged to `brand/_engine/_research/trends/<week>/scan-log.md`
 
 ## Anti-patterns
 
@@ -124,3 +124,4 @@ Format: [DATE] [CONTEXT] Finding → Action. Keep under 30 lines.
 - [2026-04-20] [Cross-skill] Activates weekly-ritual's Sunday Step 1 (was auto-skipped). The flow now: Sunday 09:00 → trend-research scans 3 pillars → 9-18 candidates added → content-calendar pulls fresher entries when assigning slots → post-writer drafts from cleaner pool. Closes the "what if work-capture has been quiet?" gap.
 - [2026-04-20] [Sources] WebSearch returns top results from major 2026 outlets (industry blogs, LinkedIn posts, X threads, Reddit r/marketing). For each pillar, pre-defined seed query lists in `references/web-search-strategy.md` to ensure consistent niche scanning. Re-evaluate seed queries quarterly as Mayank's pillars sharpen.
 - [2026-04-20] [Schema] Protocol gap caught during first live Sunday ritual test: `build_entry()` wrote trend entries WITHOUT an `id` field. content-calendar's `find_entry_for_pillar()` does `e["id"] not in used_ids` and KeyErrors. Fixed: added `import uuid` + `"id": candidate.get("id") or str(uuid.uuid4())` at top of entry dict in `build_entry()`. Backfilled existing 10 entries with UUIDs. Going forward all ingests will include an id. Takeaway: cross-skill schema contracts need tests — add a content-calendar compatibility check to evals next iteration.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top of `Digischola/brand/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

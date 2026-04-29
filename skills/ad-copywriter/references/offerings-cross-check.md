@@ -25,10 +25,10 @@ Two output files, not one:
 
 | File | Audience | Contents |
 |---|---|---|
-| `{name}-ad-copy-best-case.md` | Strategy / forward planning | Full creative brief realised, gated claims included, **prominent banner** at top: "BEST CASE — DO NOT IMPORT until Phase 0 complete" |
-| `{name}-ad-copy-current-state.md` | Production / campaign-setup | Gated claims **stripped**, ad groups reframed against verified offerings only, banner: "Current-state copy — safe for production import" |
+| `ad-copy-best-case.md` | Strategy / forward planning | Full creative brief realised, gated claims included, **prominent banner** at top: "BEST CASE — DO NOT IMPORT until Phase 0 complete" |
+| `ad-copy-current-state.md` | Production / campaign-setup | Gated claims **stripped**, ad groups reframed against verified offerings only, banner: "Current-state copy — safe for production import" |
 
-The CSV (`{name}-google-ads.csv` / `-meta-ads.csv`) is generated **only from the current-state file**. Never from best-case.
+The CSV (`google-ads.csv` / `meta-ads.csv`) is generated **only from the current-state file**. Never from best-case.
 
 ### Gated-claim phrases (auto-strip list)
 
@@ -50,9 +50,9 @@ If a phrase matches and the corresponding prerequisite is GATED, **strip from cu
 
 Gate B runs on **every** ad-copywriter session. Not gated by brief flags. Source of truth:
 
-1. `{client}/wiki/offerings.md` (single-program client)
-2. `{client}/_shared/wiki/offerings.md` (multi-program client)
-3. If neither exists, fall back to `{client}/_shared/wiki/business.md` Section "Offerings" / "Services"
+1. `{client}/_engine/wiki/offerings.md` (single-program client)
+2. `{client-root}/_engine/wiki/offerings.md` (multi-program client — `_engine/` at the client root, formerly `_shared/`)
+3. If neither exists, fall back to `{client-root}/_engine/wiki/business.md` Section "Offerings" / "Services"
 
 ### Cross-check protocol
 
@@ -96,13 +96,13 @@ The validator implements both gates programmatically:
 - If fired AND CSV contains gated-claim phrases from `phase_0_prerequisites[].claim_phrases`, CRITICAL fail per row
 
 **Gate B check:**
-- Loads offerings.md (or _shared/wiki/offerings.md)
+- Loads `_engine/wiki/offerings.md` (single-program) or `{client-root}/_engine/wiki/offerings.md` (multi-program)
 - Extracts canonical offering names (lemma-normalised)
 - Scans report + CSV for service-claim phrases
 - For each unmatched claim, CRITICAL fail with the specific phrase + offerings file path so the analyst can reconcile
 
 **Soft-fail conditions:**
-- offerings.md does not exist → WARNING ("Gate B unverified — no offerings.md found"). Do not block.
+- `_engine/wiki/offerings.md` does not exist → WARNING ("Gate B unverified — no offerings.md found"). Do not block.
 - creative-brief.json does not exist → INFO ("Gate A skipped — no brief"). Standalone-mode runs are exempt.
 
 ---

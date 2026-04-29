@@ -8,7 +8,7 @@ Fails loudly if destination exists (never overwrites — user must resolve manua
 Usage:
     python3 rollback.py --date 2026-04-27
     python3 rollback.py --date 2026-04-27 --pattern "*.csv"
-    python3 rollback.py --date 2026-04-27 --path "Desktop/Digischola/brand/_mining/voice-samples.txt"
+    python3 rollback.py --date 2026-04-27 --path "Desktop/Digischola/brand/_engine/_mining/voice-samples.txt"
     python3 rollback.py --date 2026-04-27 --dry-run
 """
 from __future__ import annotations

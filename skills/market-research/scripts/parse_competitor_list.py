@@ -4,7 +4,7 @@ Parse competitor names from strategy.md wiki page.
 Used by Meta Ad Library audit to get the list of competitors to check.
 
 Usage:
-    python parse_competitor_list.py /path/to/wiki/strategy.md
+    python parse_competitor_list.py /path/to/_engine/wiki/strategy.md
 
 Output:
     JSON array of competitor objects to stdout:

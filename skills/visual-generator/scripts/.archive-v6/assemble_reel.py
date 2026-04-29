@@ -80,7 +80,7 @@ def collect_scene_assets(assets_dir: Path, num_scenes: int, scene_meta: list[dic
 
     DEPRECATED PATHS (removed 2026-04-21):
       - scene-N-veo.mp4 auto-alignment to ChatterBox (v5 Veo path — dropped due to drift)
-      - SadTalker fallback via brand/_lipsync/sadtalker-venv/ (too slow on Apple Silicon)
+      - SadTalker fallback via brand/_engine/_lipsync/sadtalker-venv/ (too slow on Apple Silicon)
     """
     meta_by_n = {m["n"]: m for m in (scene_meta or [])}
     assets = []
@@ -612,17 +612,18 @@ BGM_PILLAR_MAP = {
 
 
 def resolve_bgm(brand_folder: Path, pillar_hint: str | None = None) -> Path | None:
-    """Pick a BGM track from brand/music/ for audio ducking.
+    """Pick a BGM track from brand/_engine/music/ for audio ducking.
 
     Priority:
-      1. brand/music/<pillar_hint>.mp3 (if pillar_hint maps to a file)
-      2. brand/music/default.mp3
-      3. First *.mp3 found in brand/music/
+      1. brand/_engine/music/<pillar_hint>.mp3 (if pillar_hint maps to a file)
+      2. brand/_engine/music/default.mp3
+      3. First *.mp3 found in brand/_engine/music/
       4. None → no BGM (caller will skip ducking)
 
     Tracks must be license-free (Pixabay / Mixkit / Uppbeat free tier).
+    Post-2026-04-29 _engine/ convention: media build dirs live under brand/_engine/.
     """
-    music_dir = brand_folder / "brand" / "music"
+    music_dir = brand_folder / "brand" / "_engine" / "music"
     if not music_dir.exists():
         return None
     if pillar_hint:
@@ -930,7 +931,7 @@ def main():
             if bgm_path:
                 print(f"  🎵 Auto-resolved BGM: {bgm_path.name} (pillar={pillar_hint or 'n/a'})")
             elif (args.brand_folder / "brand" / "music").exists():
-                print(f"  ℹ No BGM track matched — drop MP3s in brand/music/ to enable")
+                print(f"  ℹ No BGM track matched — drop MP3s in brand/_engine/music/ to enable")
 
     ok = assemble(scenes, voiceover, out,
                   trim_to_vo=not args.no_trim,

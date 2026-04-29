@@ -336,16 +336,53 @@ def validate_dashboard(html_path: str) -> dict:
                 results["PASS"].append("Content-missing CRITICAL includes DOM-verification acknowledgment")
 
     # 15. Companion markdown findings report must exist (SKILL.md Step 5b)
-    # Pattern: {page-name}-landing-page-audit.html → {page-name}-audit-findings.md
-    md_path = re.sub(r'-landing-page-audit\.html$', '-audit-findings.md', html_path)
-    if md_path == html_path:
-        # Filename didn't follow the expected pattern; try a looser fallback.
-        md_path = os.path.splitext(html_path)[0] + '-findings.md'
-    if os.path.exists(md_path):
-        results["PASS"].append(f"Markdown findings report present: {os.path.basename(md_path)}")
+    #
+    # Filename conventions (post-2026-04-29 short-name refactor):
+    #   Default (single-page program): landing-page-audit.html → audit-findings.md
+    #   Multi-page collision fallback: {page-name}-landing-page-audit.html → {page-name}-audit-findings.md
+    #   Legacy / pre-refactor:         {page-name}-landing-page-audit.html → {page-name}-audit-findings.md
+    #     (warn but accept — same path shape as the collision fallback)
+    #
+    # The companion markdown sits in the program folder's `_engine/working/` directory,
+    # NOT next to the HTML at folder root. Resolve that path explicitly.
+    html_dir = os.path.dirname(os.path.abspath(html_path))
+    html_name = os.path.basename(html_path)
+    engine_working = os.path.join(html_dir, '_engine', 'working')
+
+    md_candidates = []
+    is_legacy_named = False
+    if html_name == 'landing-page-audit.html':
+        # New short-name default — companion is the short markdown.
+        md_candidates.append(os.path.join(engine_working, 'audit-findings.md'))
+        # Pre-engine-refactor sibling-of-HTML location (legacy fallback).
+        md_candidates.append(os.path.join(html_dir, 'audit-findings.md'))
+    elif html_name.endswith('-landing-page-audit.html'):
+        # Either collision-fallback or legacy client/page-prefixed naming.
+        page_slug = html_name[:-len('-landing-page-audit.html')]
+        md_candidates.append(os.path.join(engine_working, f'{page_slug}-audit-findings.md'))
+        # Pre-engine-refactor sibling-of-HTML location (legacy fallback).
+        md_candidates.append(os.path.join(html_dir, f'{page_slug}-audit-findings.md'))
+        # Also accept the new short name in case the writer migrated only the HTML.
+        md_candidates.append(os.path.join(engine_working, 'audit-findings.md'))
+        is_legacy_named = True
     else:
+        # Filename didn't follow either pattern; try a looser fallback alongside the HTML.
+        md_candidates.append(os.path.splitext(html_path)[0] + '-findings.md')
+
+    found_md = next((p for p in md_candidates if os.path.exists(p)), None)
+    if found_md:
+        results["PASS"].append(f"Markdown findings report present: {os.path.relpath(found_md, html_dir)}")
+        if is_legacy_named:
+            results["WARNING"].append(
+                f"HTML uses legacy `{html_name}` naming. New convention is "
+                "`landing-page-audit.html` (folder location already encodes client + program). "
+                "Page-name prefix is only required when multiple landing-page audits live in "
+                "the same program folder (collision fallback)."
+            )
+    else:
+        expected = os.path.relpath(md_candidates[0], html_dir) if md_candidates else 'audit-findings.md'
         results["CRITICAL"].append(
-            f"Markdown findings report missing: expected {os.path.basename(md_path)} "
+            f"Markdown findings report missing: expected `{expected}` "
             "alongside HTML dashboard (required by SKILL.md Step 5b)"
         )
 

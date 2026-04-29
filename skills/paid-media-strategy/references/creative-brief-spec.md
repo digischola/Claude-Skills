@@ -6,7 +6,7 @@ Machine-readable handoff from paid-media-strategy to ad-copywriter skill. Genera
 
 ```json
 {
-  "business_name": "string — from wiki/business.md",
+  "business_name": "string — from _engine/wiki/business.md",
   "date": "ISO 8601 date (YYYY-MM-DD)",
   "campaigns": [
     {
@@ -70,7 +70,7 @@ Machine-readable handoff from paid-media-strategy to ad-copywriter skill. Genera
     }
   ],
   "brand_voice": {
-    "tone": "string — overall brand tone from wiki/brand analysis",
+    "tone": "string — overall brand tone from _engine/wiki/brand analysis",
     "do": ["string — messaging principles to follow"],
     "dont": ["string — messaging pitfalls to avoid"]
   },
@@ -82,35 +82,35 @@ Machine-readable handoff from paid-media-strategy to ad-copywriter skill. Genera
 
 | Field | Source | Notes |
 |---|---|---|
-| `business_name` | [EXTRACTED] wiki/business.md | Direct extraction |
+| `business_name` | [EXTRACTED] _engine/wiki/business.md | Direct extraction |
 | `date` | [EXTRACTED] session date | Auto-generated |
 | `campaigns[].campaign_name` | [EXTRACTED] strategy report | Must match report campaign names |
 | `campaigns[].platform` | [EXTRACTED] strategy report | Google or Meta |
 | `campaigns[].phase` | [EXTRACTED] strategy report | Phase 1, 2, or 3 |
 | `campaigns[].objective` | [EXTRACTED] strategy report | Platform-specific objective |
-| `campaigns[].personas[].persona_name` | [EXTRACTED] wiki/audiences.md or strategy.md | Must match wiki persona names |
+| `campaigns[].personas[].persona_name` | [EXTRACTED] _engine/wiki/audiences.md or _engine/wiki/strategy.md | Must match wiki persona names |
 | `campaigns[].personas[].messaging_angle` | [INFERRED] strategy synthesis | Derived from persona + campaign intersection |
 | `campaigns[].personas[].pain_points` | [EXTRACTED] wiki persona concerns | Direct from persona research |
 | `campaigns[].personas[].hooks` | [INFERRED] strategy creative direction | Synthesized from strategy report Section 5 |
 | `campaigns[].personas[].cta` | [INFERRED] strategy + conversion setup | Based on primary conversion action |
 | `campaigns[].personas[].tone` | [INFERRED] brand voice + persona match | Tone varies by persona |
 | `campaigns[].formats[]` | [EXTRACTED] strategy report creative direction | Format specs from platform references |
-| `brand_voice.tone` | [EXTRACTED] wiki/business.md or brand-config.json | Overall brand positioning |
+| `brand_voice.tone` | [EXTRACTED] _engine/wiki/business.md or brand-config.json | Overall brand positioning |
 | `brand_voice.do` | [INFERRED] wiki + strategy synthesis | Derived from brand strengths and positioning |
 | `brand_voice.dont` | [INFERRED] competitor analysis + brand positioning | Derived from competitive gaps and brand risks |
-| `competitor_angles` | [EXTRACTED] wiki/competitors.md + strategy report | What competitors emphasize in their messaging |
+| `competitor_angles` | [EXTRACTED] _engine/wiki/competitors.md + strategy report | What competitors emphasize in their messaging |
 | `campaigns[].visual_direction.style` | [INFERRED] brand + product type | Architectural for premium products, lifestyle for services |
 | `campaigns[].visual_direction.mood` | [INFERRED] brand-config.json | Derived from brand personality and visual identity |
 | `campaigns[].visual_direction.color_guidance` | [EXTRACTED] brand-config manual_override | Direct from brand-config color notes |
 | `campaigns[].visual_direction.references` | [EXTRACTED] wiki media/brand mentions | Publications, existing creative, competitor examples |
 | `campaigns[].visual_direction.avoid` | [INFERRED] competitor analysis + brand positioning | Counter-position against category defaults |
 | `campaigns[].visual_direction.image_gen_prompt_prefix` | [INFERRED] all visual direction fields | Synthesized into reusable AI prompt prefix |
-| `campaigns[].landing_page.url` | [EXTRACTED] wiki/business.md or offerings.md | Direct page URL |
+| `campaigns[].landing_page.url` | [EXTRACTED] _engine/wiki/business.md or _engine/wiki/offerings.md | Direct page URL |
 | `campaigns[].landing_page.page_type` | [INFERRED] strategy report | Based on conversion setup and platform |
 | `campaigns[].landing_page.message_match_notes` | [INFERRED] hook + LP alignment | Ad hook must echo on LP hero |
 | `campaigns[].landing_page.conversion_action` | [EXTRACTED] strategy report | From conversion setup section |
 | `campaigns[].ab_testing` | [INFERRED] strategy synthesis | Priority test variables per campaign phase |
-| `proof_elements[]` | [EXTRACTED] wiki/business.md + offerings.md | Media mentions, certifications, stats from wiki |
+| `proof_elements[]` | [EXTRACTED] _engine/wiki/business.md + _engine/wiki/offerings.md | Media mentions, certifications, stats from wiki |
 
 ## Validation Rules
 

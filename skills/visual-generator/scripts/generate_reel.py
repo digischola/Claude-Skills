@@ -40,8 +40,9 @@ except ImportError:
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 DEFAULT_BRAND = Path("/Users/digischola/Desktop/Digischola")
-REMOTION_STUDIO = DEFAULT_BRAND / "brand" / "remotion-studio"
-HYPERFRAMES_SCENES = DEFAULT_BRAND / "brand" / "hyperframes-scenes"
+# Post-2026-04-29 _engine/ convention: media build dirs live under brand/_engine/.
+REMOTION_STUDIO = DEFAULT_BRAND / "brand" / "_engine" / "remotion-studio"
+HYPERFRAMES_SCENES = DEFAULT_BRAND / "brand" / "_engine" / "hyperframes-scenes"
 SKILL_SCRIPTS = Path(__file__).resolve().parent
 NPX = shutil.which("npx") or "/opt/homebrew/bin/npx"
 BUNX = os.path.expanduser("~/.bun/bin/bunx")
@@ -347,7 +348,7 @@ def render_scene_remotion(scene: dict, out_mp4: Path, smoke_test: bool = True) -
 def render_scene_hyperframes(scene: dict, out_mp4: Path) -> bool:
     """Render a scene via `bunx hyperframes render`.
 
-    Uses a per-scene project under brand/hyperframes-scenes/runs/<entry>-<n>/.
+    Uses a per-scene project under brand/_engine/hyperframes-scenes/runs/<entry>-<n>/.
     Expected workflow:
       1. A catalog block (e.g. x-post.html) was pre-installed via `hyperframes add`
       2. A template index.html in hyperframes-scenes/templates/<scene_type>/ exists

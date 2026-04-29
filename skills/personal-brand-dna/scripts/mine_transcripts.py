@@ -20,7 +20,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 DEFAULT_TRANSCRIPTS = Path.home() / ".claude/projects/-Users-digischola-Desktop"
-DEFAULT_OUTPUT = Path("/Users/digischola/Desktop/Digischola/brand/_mining")
+DEFAULT_OUTPUT = Path("/Users/digischola/Desktop/Digischola/brand/_engine/_mining")
 
 MIN_LEN = 40
 MAX_LEN = 700

@@ -3,29 +3,29 @@
 ## Upstream Skills (reads from)
 
 ### business-analysis
-- `wiki/brand-identity.md` — tone of voice, brand personality
-- `deliverables/brand-config.json` — colors, fonts, logo URL
-- `wiki/offerings.md` — offering details, pricing, inclusions
+- `_engine/wiki/brand-identity.md` — tone of voice, brand personality
+- `_engine/brand-config.json` — colors, fonts, logo URL
+- `_engine/wiki/offerings.md` — offering details, pricing, inclusions
 
 ### market-research
-- `wiki/research.md` — buyer personas, competitor positioning
-- `deliverables/*-research-report.md` — keyword themes, audience insights
+- `_engine/wiki/research.md` — buyer personas, competitor positioning
+- `research-dashboard.html` at folder root (default short name; legacy fallback `*-research-dashboard.html`) — keyword themes, audience insights presentable; raw report at `_engine/working/market-research.md` (legacy fallback `_engine/working/*-market-research.md`)
 
 ### paid-media-strategy
-- `deliverables/*-creative-brief.json` — campaign architecture, visual direction, image_gen_prompt_prefix, landing page mapping, A/B testing plan, proof element hierarchy
-- `deliverables/*-strategy-report.md` — campaign goals, target audiences, budget context
+- `_engine/working/creative-brief.json` (default short name; legacy fallback `_engine/working/*-creative-brief.json`) — campaign architecture, visual direction, image_gen_prompt_prefix, landing page mapping, A/B testing plan, proof element hierarchy
+- `_engine/working/paid-media-strategy.md` (default short name; legacy fallback `_engine/working/*-paid-media-strategy.md` or `*-strategy-report.md`) — campaign goals, target audiences, budget context
 
 ### ad-copywriter
-- `deliverables/*-ad-copy-report.md` — headlines, CTAs, value propositions, primary text
-- `deliverables/*-meta-ads.csv` — Meta ad copy (primary text, headlines, descriptions)
-- `deliverables/*-google-ads.csv` — Google RSA copy (headlines, descriptions)
+- `_engine/working/ad-copy-report.md` (default short name; legacy fallback `_engine/working/*-ad-copy-report.md`) — headlines, CTAs, value propositions, primary text
+- `_engine/working/meta-ads.csv` (default short name; legacy fallback `_engine/working/*-meta-ads.csv`) — Meta ad copy (primary text, headlines, descriptions; intermediate CSV)
+- `_engine/working/google-ads.csv` (default short name; legacy fallback `_engine/working/*-google-ads.csv`) — Google RSA copy (headlines, descriptions; intermediate CSV)
 
 ### landing-page-audit
-- `deliverables/*-landing-page-audit.md` — scored issues, fix recommendations, mockup-level suggestions
+- `landing-page-audit.html` at the client/program folder root (default short name; multi-page collision or legacy fallback `*-landing-page-audit.html`) + `_engine/working/audit-findings.md` (default short name; multi-page collision or legacy fallback `_engine/working/*-audit-findings.md`) — scored issues, fix recommendations, mockup-level suggestions
 - Provides specific CRO/UX/copy problems to solve in the new page
 
 ### post-launch-optimization
-- `deliverables/*-optimization-report.md` — conversion rate data, landing page friction signals (e.g., high CTR + low CVR = page issue)
+- `_engine/working/optimization-report.md` (default short name; legacy fallback `_engine/working/*-optimization-report.md`) — conversion rate data, landing page friction signals (e.g., high CTR + low CVR = page issue)
 
 ## Downstream Skills (outputs for)
 
@@ -41,9 +41,9 @@
 
 | File | Location | Description |
 |---|---|---|
-| Landing page HTML | `{client}/deliverables/{page-name}-landing-page.html` | Full HTML prototype |
-| Page spec JSON | `{client}/deliverables/{page-name}-page-spec.json` | Structured spec for Lovable rebuild |
-| Wiki log entry | `{client}/wiki/log.md` | LANDING-PAGE entry |
+| Landing page bundle | `{client}/landing-page/index.html` (folder root, presentable bundle — default short name; multi-page collision fallback: `{client}/{page-name}/index.html`) | Full HTML prototype + assets |
+| Page spec JSON | `{client}/_engine/working/page-spec.json` (default short name; multi-page collision fallback: `{client}/_engine/working/{page-name}-page-spec.json`) | Structured spec for Lovable rebuild |
+| Wiki log entry | `{client}/_engine/wiki/log.md` | LANDING-PAGE entry |
 
 ## Standalone Mode
 

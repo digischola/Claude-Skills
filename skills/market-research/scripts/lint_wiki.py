@@ -26,7 +26,7 @@ WIKI_PAGES = [
 
 # Pages expected when lint runs on a multi-program `type: program` folder.
 # Shared brand DNA pages (business.md, digital-presence.md etc.) live in
-# `../_shared/`, not in the program folder itself.
+# `../../_engine/wiki/` (the client-root _engine/), not in the program folder itself.
 PROGRAM_WIKI_PAGES_DEFAULT = ["strategy.md"]
 
 STALENESS_THRESHOLD_DAYS = 90
@@ -36,10 +36,10 @@ def detect_wiki_pages(client_path):
     """Return the list of wiki pages this folder is expected to contain.
 
     For standard (single-program) wikis: full WIKI_PAGES list.
-    For multi-program program folders (wiki-config.json `type: program`):
+    For multi-program program folders (`_engine/wiki-config.json` `type: program`):
     only the pages registered in wiki-config.json (or strategy.md default).
     """
-    config_path = client_path / "wiki-config.json"
+    config_path = client_path / "_engine" / "wiki-config.json"
     if config_path.exists():
         try:
             cfg = json.loads(config_path.read_text(encoding="utf-8"))
@@ -56,35 +56,35 @@ def detect_wiki_pages(client_path):
 
 
 def check_wiki_exists(client_path):
-    """Verify wiki folder structure exists."""
-    wiki_path = client_path / "wiki"
-    sources_path = client_path / "sources"
+    """Verify _engine/{wiki,sources} folder structure exists."""
+    wiki_path = client_path / "_engine" / "wiki"
+    sources_path = client_path / "_engine" / "sources"
     issues = []
 
     if not wiki_path.exists():
-        issues.append(("CRITICAL", "wiki/ folder missing — run init_wiki.py first"))
+        issues.append(("CRITICAL", "_engine/wiki/ folder missing — run init_wiki.py first"))
         return issues, False
 
     if not sources_path.exists():
-        issues.append(("WARNING", "sources/ folder missing — no raw sources stored"))
+        issues.append(("WARNING", "_engine/sources/ folder missing — no raw sources stored"))
 
     expected_pages = detect_wiki_pages(client_path)
     for page in expected_pages:
         if not (wiki_path / page).exists():
-            issues.append(("WARNING", f"wiki/{page} missing"))
+            issues.append(("WARNING", f"_engine/wiki/{page} missing"))
 
     if not (wiki_path / "index.md").exists():
-        issues.append(("WARNING", "wiki/index.md missing — no table of contents"))
+        issues.append(("WARNING", "_engine/wiki/index.md missing — no table of contents"))
 
     if not (wiki_path / "log.md").exists():
-        issues.append(("WARNING", "wiki/log.md missing — no change history"))
+        issues.append(("WARNING", "_engine/wiki/log.md missing — no change history"))
 
     return issues, True
 
 
 def check_empty_pages(client_path):
     """Find wiki pages that are still empty templates."""
-    wiki_path = client_path / "wiki"
+    wiki_path = client_path / "_engine" / "wiki"
     issues = []
 
     for page in detect_wiki_pages(client_path):
@@ -95,14 +95,14 @@ def check_empty_pages(client_path):
         # Check if page is essentially empty (just template scaffolding)
         stripped = re.sub(r'#.*\n|---\n|\*.*\*|\{.*\}|>\s*\n', '', content).strip()
         if len(stripped) < 50:
-            issues.append(("WARNING", f"wiki/{page} is still an empty template — needs data ingestion"))
+            issues.append(("WARNING", f"_engine/wiki/{page} is still an empty template — needs data ingestion"))
 
     return issues
 
 
 def check_stale_pages(client_path):
     """Find wiki pages not updated in over STALENESS_THRESHOLD_DAYS days."""
-    wiki_path = client_path / "wiki"
+    wiki_path = client_path / "_engine" / "wiki"
     issues = []
     now = datetime.now()
 
@@ -116,7 +116,7 @@ def check_stale_pages(client_path):
         age_days = (now - mtime).days
 
         if age_days > STALENESS_THRESHOLD_DAYS:
-            issues.append(("WARNING", f"wiki/{page} last updated {age_days} days ago — may need refresh"))
+            issues.append(("WARNING", f"_engine/wiki/{page} last updated {age_days} days ago — may need refresh"))
 
         # Also check for explicit date stamps in content
         content = filepath.read_text(encoding="utf-8")
@@ -127,7 +127,7 @@ def check_stale_pages(client_path):
                 latest_dt = datetime.strptime(latest, "%Y-%m-%d")
                 content_age = (now - latest_dt).days
                 if content_age > STALENESS_THRESHOLD_DAYS:
-                    issues.append(("INFO", f"wiki/{page} newest date reference is {latest} ({content_age} days old)"))
+                    issues.append(("INFO", f"_engine/wiki/{page} newest date reference is {latest} ({content_age} days old)"))
             except ValueError:
                 pass
 
@@ -136,7 +136,7 @@ def check_stale_pages(client_path):
 
 def check_metadata_headers(client_path):
     """Validate metadata headers on wiki pages (Confidence values, etc.)."""
-    wiki_path = client_path / "wiki"
+    wiki_path = client_path / "_engine" / "wiki"
     issues = []
 
     for page in WIKI_PAGES:
@@ -153,17 +153,17 @@ def check_metadata_headers(client_path):
         # Validate confidence value
         conf_match = re.search(r'Confidence:\s*(HIGH|MEDIUM|LOW|PENDING)', content)
         if not conf_match:
-            issues.append(("WARNING", f"wiki/{page} has non-standard Confidence value (should be HIGH/MEDIUM/LOW/PENDING)"))
+            issues.append(("WARNING", f"_engine/wiki/{page} has non-standard Confidence value (should be HIGH/MEDIUM/LOW/PENDING)"))
         elif conf_match.group(1) == "PENDING":
-            issues.append(("WARNING", f"wiki/{page} has not been populated yet (Confidence: PENDING)"))
+            issues.append(("WARNING", f"_engine/wiki/{page} has not been populated yet (Confidence: PENDING)"))
 
     return issues
 
 
 def check_orphan_sources(client_path):
     """Find source files not referenced in any wiki page."""
-    sources_path = client_path / "sources"
-    wiki_path = client_path / "wiki"
+    sources_path = client_path / "_engine" / "sources"
+    wiki_path = client_path / "_engine" / "wiki"
     issues = []
 
     if not sources_path.exists():
@@ -181,14 +181,14 @@ def check_orphan_sources(client_path):
         if source_file.name.startswith("."):
             continue
         if source_file.name not in wiki_content and source_file.stem not in wiki_content:
-            issues.append(("WARNING", f"sources/{source_file.name} not referenced in any wiki page — orphan source"))
+            issues.append(("WARNING", f"_engine/sources/{source_file.name} not referenced in any wiki page — orphan source"))
 
     return issues
 
 
 def check_gaps(client_path):
     """Find persistent gaps (BLANK / unknown / TBD markers) in wiki pages."""
-    wiki_path = client_path / "wiki"
+    wiki_path = client_path / "_engine" / "wiki"
     issues = []
     gap_patterns = [
         r'\[?BLANK\]?',
@@ -211,7 +211,7 @@ def check_gaps(client_path):
             page_gaps += len(matches)
         if page_gaps > 0:
             total_gaps += page_gaps
-            issues.append(("INFO", f"wiki/{page} has {page_gaps} gap markers — consider filling with new sources"))
+            issues.append(("INFO", f"_engine/wiki/{page} has {page_gaps} gap markers — consider filling with new sources"))
 
     if total_gaps > 10:
         issues.append(("WARNING", f"Total {total_gaps} gaps across wiki — significant knowledge holes remain"))
@@ -221,7 +221,7 @@ def check_gaps(client_path):
 
 def check_contradictions(client_path):
     """Basic contradiction detection: same metric with different values across pages."""
-    wiki_path = client_path / "wiki"
+    wiki_path = client_path / "_engine" / "wiki"
     issues = []
 
     # Collect all numbers with context from each page
@@ -255,12 +255,12 @@ def check_contradictions(client_path):
 
 
 def check_wiki_config(client_path):
-    """Verify wiki-config.json is present and valid."""
-    config_path = client_path / "wiki-config.json"
+    """Verify _engine/wiki-config.json is present and valid."""
+    config_path = client_path / "_engine" / "wiki-config.json"
     issues = []
 
     if not config_path.exists():
-        issues.append(("WARNING", "wiki-config.json missing — no metadata for this wiki"))
+        issues.append(("WARNING", "_engine/wiki-config.json missing — no metadata for this wiki"))
         return issues
 
     try:
@@ -270,10 +270,10 @@ def check_wiki_config(client_path):
         required_fields = ["business_name", "created_date"]
         for field in required_fields:
             if field not in config:
-                issues.append(("WARNING", f"wiki-config.json missing '{field}' field"))
+                issues.append(("WARNING", f"_engine/wiki-config.json missing '{field}' field"))
 
     except json.JSONDecodeError:
-        issues.append(("CRITICAL", "wiki-config.json is invalid JSON"))
+        issues.append(("CRITICAL", "_engine/wiki-config.json is invalid JSON"))
 
     return issues
 

@@ -11,16 +11,16 @@ Turn a raw source video into a polished edit, end-to-end, from one command. The 
 
 User says: *"Edit this testimonial. ~/Downloads/raw.mp4. Make it feel premium. Client is Thrive Retreats / Nrsimha 2026."*
 
-Skill runs the pipeline and drops a finished MP4 at `Desktop/{Client}/{Project}/edits/{YYYY-MM-DD}-{name}.mp4`.
+Skill runs the pipeline and drops a finished MP4 at `Desktop/{Client}/{Project}/{YYYY-MM-DD}-{name}.mp4` (folder root — final MP4s are presentables under the post-2026-04-29 `_engine/` convention).
 
 ## Pipeline (11 steps — execute literally per Skill Protocol Supremacy)
 
 ### Step 1 — Load context
 
 1. Read [analyst-profile.md](../../shared-context/analyst-profile.md) for Mayank's voice/quality standards.
-2. Read [output-structure.md](../../shared-context/output-structure.md) — for client-folder videos drop the final MP4 in `outputs/` and re-run `~/.claude/scripts/build_outputs_index.py {client}`; for Digischola, drop into `brand/videos/edits/` or `brand/queue/pending-approval/` then run `~/.claude/scripts/build_digischola_index.py`.
+2. Read [output-structure.md](../../shared-context/output-structure.md) — post-2026-04-29 `_engine/` convention: client-folder videos go at the program-folder root (drop the final MP4 directly in `Desktop/{Client}/{Project}/`, not in `outputs/`) and re-run `~/.claude/scripts/build_outputs_index.py {client}`; for Digischola, drop into `brand/videos/edits/` or `brand/queue/pending-approval/` (both stay at top under the new convention) then run `~/.claude/scripts/build_digischola_index.py`.
 3. Identify **client**, **project folder**, **brief**, **source video path** from the user message. If missing, ask for the minimum: which client + what mood/feel?
-3. Default brand config path: `Desktop/{Client}/brand/brand-identity.md`. If the file is absent, use Digischola's brand config as a neutral fallback and flag the missing client brand.
+3. Default brand config path: `Desktop/{Client}/{Project}/_engine/wiki/brand-identity.md` (single-program client) or `Desktop/{Client}/_engine/wiki/brand-identity.md` (multi-program). For Digischola, `Desktop/Digischola/brand/_engine/wiki/brand-identity.md`. If the file is absent, use Digischola's brand config as a neutral fallback and flag the missing client brand.
 
 ### Step 2 — Run the prepare phase
 
@@ -110,3 +110,4 @@ Verify prerequisites on first run with `ffmpeg -version`, `which jq`, `python3 -
 - [2026-04-24] [PERSONAL] `+120%` overflowed bottom/top in metric-hero beat. Reduced default font-size 380→260px, added `white-space: nowrap`, `max-width: 100%`, `padding: 0 40px` safety in assembler CSS.
 - [2026-04-24] [PERSONAL] HeyGen watermark + lower-third stacked on top of each other. Unified: removed separate `watermark-mask`, enlarged `#lower-third` to 460×200px at `right:0 bottom:0`, extended to full source-video window (clip_start → clip_end).
 - [2026-04-25] [SKILL-BUILD] One-command orchestrator `edit_video.py` (prepare + ship phases) + director recipe + transcript accuracy gate + face detection. Skill now runs end-to-end without hand-written JSON: user drops video + brief, agent reads recipe + inputs, writes content-plan.json, orchestrator delivers MP4.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; client wikis and intermediate working files now live under `_engine/`; presentables (HTML/MP4/PDF) sit at the program-folder root. Daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top for Digischola. → Updated SKILL.md Step 1 (output destination + brand config path), trigger-pattern delivery path (final MP4 at folder root, no longer `edits/` subdir for client work), and `references/content-plan-recipe.md` (brand config input path under `_engine/wiki/`). Source video paths and HyperFrames project paths are user/runtime inputs (no migration needed).

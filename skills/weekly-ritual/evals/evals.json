@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Cron fires at Wed 09:00 IST: `python3 scripts/weekly_ritual.py --day auto`",
-      "expected_output": "auto_detect_day() resolves Wednesday \u2192 'sunday' (legacy internal label for the planning ritual). Idempotency check passes (no fire within last 12h). macOS notification fires. Clipboard receives 'run wednesday planning'. brand/weekly-ritual.state.json updated with last_fired_sunday timestamp. Launcher HTML written to brand/weekly-ritual/launcher-sunday.html.",
+      "expected_output": "auto_detect_day() resolves Wednesday \u2192 'sunday' (legacy internal label for the planning ritual). Idempotency check passes (no fire within last 12h). macOS notification fires. Clipboard receives 'run wednesday planning'. brand/_engine/weekly-ritual.state.json updated with last_fired_sunday timestamp. Launcher HTML written to brand/weekly-ritual/launcher-sunday.html.",
       "expected_output_alt": "If ritual already fired in last 12h, script exits silently with 'idempotent skip' log entry and no notification.",
       "assertions": [
         {
@@ -21,7 +21,7 @@
         },
         {
           "name": "state_updated",
-          "description": "brand/weekly-ritual.state.json: last_fired_sunday set to current ISO timestamp"
+          "description": "brand/_engine/weekly-ritual.state.json: last_fired_sunday set to current ISO timestamp"
         },
         {
           "name": "idempotency_guard",

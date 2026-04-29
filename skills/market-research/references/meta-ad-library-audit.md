@@ -20,7 +20,7 @@ Operational procedure for checking competitor Meta/Facebook ad activity using Ch
 
 Read strategy.md competitor table from the "Competitive Landscape" section. Extract company names from the first column.
 
-**Option A (automated):** Run `scripts/parse_competitor_list.py /path/to/wiki/strategy.md` to get a JSON array of competitor objects with URL-encoded names.
+**Option A (automated):** Run `scripts/parse_competitor_list.py /path/to/_engine/wiki/strategy.md` to get a JSON array of competitor objects with URL-encoded names.
 
 **Option B (manual):** Read the table directly from strategy.md and extract names.
 
@@ -132,7 +132,7 @@ The dashboard agent reads the "Ads Active" column from strategy.md to populate t
 ## Output Artifacts
 
 This procedure modifies one file only:
-- `{client-folder}/wiki/strategy.md` — updates Ads Active column + adds audit summary sub-section
+- `{client-folder}/_engine/wiki/strategy.md` — updates Ads Active column + adds audit summary sub-section
 
 No separate deliverable file is created. The audit data lives in the wiki for downstream skill consumption.
 

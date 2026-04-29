@@ -141,7 +141,7 @@ Load this file in Step 3. Contains decision thresholds, analysis logic, and outp
 
 **Rotation-brief handoff to `ad-copywriter` Refresh Mode:**
 
-When any creative hits URGENT or PLAN status, emit a `{client}-rotation-brief.json` to `{client-folder}/deliverables/`. This is the machine-readable trigger that puts ad-copywriter into Refresh Mode (see `ad-copywriter/references/refresh-mode.md`).
+When any creative hits URGENT or PLAN status, emit `rotation-brief.json` to `{client-folder}/_engine/working/`. This is the machine-readable trigger that puts ad-copywriter into Refresh Mode (see `ad-copywriter/references/refresh-mode.md`). Folder location already encodes client + program — no client prefix in the filename.
 
 Required top-level keys: `client_name`, `analysis_date`, `source_report`, `source_creative_brief`, `refresh_urgency`, `fatigued_creatives[]`, `strategy_guardrails`.
 
@@ -156,7 +156,7 @@ Each `fatigued_creatives` entry must include:
 
 Default `strategy_guardrails`: `respect_character_limits: true`, `preserve_cta_target_url: true`, `ab_test_against_original: true`, `min_new_variants_per_fatigued: 2`.
 
-Also flag in the main report's top-actions list: `[REFRESH] N fatigued creatives rotated — see {client}-rotation-brief.json and run ad-copywriter in Refresh Mode.`
+Also flag in the main report's top-actions list: `[REFRESH] N fatigued creatives rotated — see rotation-brief.json and run ad-copywriter in Refresh Mode.`
 
 ---
 
@@ -345,7 +345,7 @@ Priority Score = Impact × Confidence × Ease
 
 **Purpose:** Track what was recommended last time and whether it was actually implemented. Previously this was a manual step — analyst had to eyeball last week's report and compare. Now automated via `scripts/track_recommendations.py`.
 
-**Inputs:** Previous `{business-name}-optimization-report.md` + current live entity state (ad status, budget, keyword status) from Windsor.ai.
+**Inputs:** Previous `optimization-report.md` (from `_engine/working/`; legacy fallback `*-optimization-report.md`) + current live entity state (ad status, budget, keyword status) from Windsor.ai.
 
 **Automated audit — use `scripts/track_recommendations.py`:**
 
