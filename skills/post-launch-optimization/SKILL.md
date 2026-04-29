@@ -68,7 +68,7 @@ Load `references/analysis-framework.md` for thresholds and logic.
 
 ### Step 4: Generate Report
 
-Save as `{client-folder}/_engine/working/{business-name}-optimization-report.md`.
+Save as `{client-folder}/_engine/working/optimization-report.md`.
 
 Report structure defined in `references/output-format-spec.md`. Key sections:
 - Executive summary (5 lines max — what happened, what to do)
@@ -83,7 +83,7 @@ Source label every finding: `[DATA]` (from Windsor.ai), `[CALCULATED]` (derived 
 
 ### Step 5: Generate Dashboard
 
-Save as `{client-folder}/{business-name}-optimization-dashboard.html` (folder root — it's a presentable).
+Save as `{client-folder}/optimization-dashboard.html` (folder root — it's a presentable).
 
 Read `references/output-format-spec.md` (Dashboard Structure section) for layout and components. Read client's `brand-config.json` for styling if available.
 
@@ -137,3 +137,4 @@ When user says "quick check" or "fire check" — run Layer 1 only:
 - [2026-04-22] [Loomer shutdown warning — READ-ONLY rule locked] Jon Loomer published 2026-03-19 "AI-Related Ad Account Shutdowns, Meta AI Chat, and More" reporting Meta nuking ad accounts that route through third-party AI connectors (Naman Bansal lost 17 accounts). Mechanism per Loomer: Meta's detection flags "large volume of API calls" from AI agents as automated abuse; may be collateral, but accounts die regardless. Madgicx markets an "only safe way" MCP (marketing claim, unverified). **Rule locked for this skill:** (1) Windsor pulls are READ-ONLY — all `get_data` calls on `facebook`, `google_ads`, or any Meta-connected connector pull historical state, never mutate. (2) No Claude-initiated write to Meta Ads Manager via any MCP. When the analysis says "pause this ad set" or "raise budget on X," Claude generates the instruction; user executes in Ads Manager UI. This was already the implicit pattern (skill outputs a markdown report + HTML dashboard, not API calls); rule is now EXPLICIT and must not be relaxed, regardless of future "safe MCP" marketing. (3) If a client's ad account ever receives a Business Manager warning about "unusual API activity," pause Windsor pulls for that account immediately and fall back to CSV export from Ads Manager for that cycle. (4) Adjacent: same rule applies to personal-brand `performance-review` skill's Meta organic pulls (facebook_organic, instagram) — see its 2026-04-22 entry.
 - [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** weekly analysis outputs (HTML dashboard at folder root + MD report in `_engine/working/`) — overwritten in place on re-run for the same client/period. Note: cross-period historical comparisons live in `_engine/wiki/log.md` change-log entries, NOT in dated parallel report files. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
 - [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. Optimization dashboard HTML stays at folder root (presentable); markdown report and rotation-brief JSON go to `_engine/working/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Output filename templates dropped redundant client/business-name prefix. Filename = deliverable type only: `optimization-report.md` (in `_engine/working/`), `optimization-dashboard.html` (folder root), `rotation-brief.json` (in `_engine/working/`) — folder location already encodes client + program. Validator's `classify_file()` already used substring matching so it accepts both new short-name and legacy `{client}-`prefixed forms automatically. → Updated SKILL.md Step 4 + Step 5, references/output-format-spec.md, references/analysis-framework.md (Layer 4 rotation-brief, Layer 11 prior-report path), scripts/validate_output.py docstring.

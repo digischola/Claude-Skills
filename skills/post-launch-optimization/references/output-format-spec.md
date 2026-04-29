@@ -2,7 +2,7 @@
 
 Load this file in Steps 4 and 5. Defines the report and dashboard structure.
 
-## Report Structure (`{business-name}-optimization-report.md`)
+## Report Structure (`optimization-report.md` in `_engine/working/`)
 
 ```markdown
 # {Client Name} — Weekly Optimization Report
@@ -138,7 +138,7 @@ Every finding must be tagged:
 - `[INFERRED]` — analyst synthesis with stated evidence
 - `[PREVIOUS]` — from prior optimization report (Layer 11)
 
-## Dashboard Structure (`{business-name}-optimization-dashboard.html`)
+## Dashboard Structure (`optimization-dashboard.html` at folder root)
 
 Single-page HTML. Dark mode. Client branding from brand-config.json.
 

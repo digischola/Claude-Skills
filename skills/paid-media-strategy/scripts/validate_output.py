@@ -587,18 +587,23 @@ def print_results(name, issues):
 
 
 def validate_creative_brief_presence(report_path):
-    """Step 5.5 produces {client}-creative-brief.json. Downstream skills (ad-copywriter,
-    landing-page-builder, campaign-setup) depend on it. Missing = silent pipeline break."""
+    """Step 5.5 produces creative-brief.json (default short name; legacy
+    `{client}-creative-brief.json` accepted as backwards-compat). Downstream skills
+    (ad-copywriter, landing-page-builder, campaign-setup) depend on it. Missing =
+    silent pipeline break."""
     issues = {"CRITICAL": [], "WARNING": [], "INFO": []}
     working_dir = os.path.dirname(os.path.abspath(report_path))
-    # Look for *-creative-brief.json anywhere in the same _engine/working/ folder
-    candidates = [
+    # Prefer the new short name; fall back to any legacy *-creative-brief.json.
+    candidates = []
+    if os.path.exists(os.path.join(working_dir, 'creative-brief.json')):
+        candidates.append('creative-brief.json')
+    candidates.extend([
         f for f in os.listdir(working_dir)
-        if f.endswith('-creative-brief.json') or f == 'creative-brief.json'
-    ]
+        if f.endswith('-creative-brief.json') and f != 'creative-brief.json'
+    ])
     if not candidates:
         issues["CRITICAL"].append(
-            "No *-creative-brief.json found in _engine/working/ — "
+            "No creative-brief.json (or legacy *-creative-brief.json) found in _engine/working/ — "
             "Step 5.5 output missing; downstream ad-copywriter/landing-page-builder/campaign-setup "
             "will run in degraded mode"
         )

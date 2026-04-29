@@ -35,8 +35,16 @@ Or check the client folder root if the project structure varies.
 The skill produces a single HTML file saved to:
 
 ```
+{Client Name}/{Project or Business}/landing-page-audit.html
+```
+
+If a `landing-page-audit.html` already exists in that folder (multi-page audit case — same program folder hosts audits for several pages), fall back to:
+
+```
 {Client Name}/{Project or Business}/{page-name}-landing-page-audit.html
 ```
+
+so the second and later audits don't overwrite the first.
 
 This is a self-contained static HTML dashboard (no external dependencies except Chart.js CDN). It can be:
 - Opened directly in a browser

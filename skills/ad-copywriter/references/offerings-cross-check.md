@@ -25,10 +25,10 @@ Two output files, not one:
 
 | File | Audience | Contents |
 |---|---|---|
-| `{name}-ad-copy-best-case.md` | Strategy / forward planning | Full creative brief realised, gated claims included, **prominent banner** at top: "BEST CASE — DO NOT IMPORT until Phase 0 complete" |
-| `{name}-ad-copy-current-state.md` | Production / campaign-setup | Gated claims **stripped**, ad groups reframed against verified offerings only, banner: "Current-state copy — safe for production import" |
+| `ad-copy-best-case.md` | Strategy / forward planning | Full creative brief realised, gated claims included, **prominent banner** at top: "BEST CASE — DO NOT IMPORT until Phase 0 complete" |
+| `ad-copy-current-state.md` | Production / campaign-setup | Gated claims **stripped**, ad groups reframed against verified offerings only, banner: "Current-state copy — safe for production import" |
 
-The CSV (`{name}-google-ads.csv` / `-meta-ads.csv`) is generated **only from the current-state file**. Never from best-case.
+The CSV (`google-ads.csv` / `meta-ads.csv`) is generated **only from the current-state file**. Never from best-case.
 
 ### Gated-claim phrases (auto-strip list)
 

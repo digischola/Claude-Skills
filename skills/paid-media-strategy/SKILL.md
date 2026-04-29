@@ -99,13 +99,13 @@ Write the strategy report covering all 8 dimensions. Each section includes: rati
 
 3. **Anti-over-architecting check.** For each Phase 0 / prerequisite / new-product / new-LP recommendation in the strategy, verify the brief actually requested it. If the brief said "test campaign with existing intro passes" and the strategy proposes a dedicated landing page + new digital SKU + 7-day free trial, that's scope drift. Move those to a clearly-labeled "Phase 2 — Optimizations Beyond Brief" section, NOT pre-launch blockers. Default for unflagged drift: demote to Phase 2.
 
-Save as `{client-folder}/_engine/working/{business-name}-paid-media-strategy.md`.
+Save as `{client-folder}/_engine/working/paid-media-strategy.md`.
 
 ### Step 5: Generate HTML Strategy Dashboard
 
 **Brand-config gate (mandatory, do first):**
 1. Read `{client-folder}/_engine/brand-config.json` (single-program) or `{client-root}/_engine/brand-config.json` (multi-program — `_engine/` at the client root) — extract colors, fonts, anomalies, manual_override notes.
-2. Check for existing client dashboards (e.g., `*-research-dashboard.html`) — if one exists, match its design language (light/dark mode, section pattern, color palette, font stack). Consistency across deliverables is non-negotiable.
+2. Check for existing client dashboards (e.g., `research-dashboard.html` at folder root, or legacy `*-research-dashboard.html`) — if one exists, match its design language (light/dark mode, section pattern, color palette, font stack). Consistency across deliverables is non-negotiable.
 3. For monochromatic brands (primary = black/white): derive accent tones from product photography or manual_override guidance — never use generic tech colors.
 4. Map brand fonts to web-safe fallbacks (e.g., IvyPresto Display → Georgia serif, FH Oscar → Helvetica Neue).
 
@@ -118,11 +118,11 @@ Adapt template to match brand-config — override default dark mode if brand/exi
 
 Read `references/dashboard-specs.md` for the full specification. Populate all `{{PLACEHOLDER}}` variables with strategy data and brand-derived colors/fonts.
 
-Save as `{client-folder}/{business-name}-strategy-dashboard.html` (folder root — it's a presentable).
+Save as `{client-folder}/strategy-dashboard.html` (folder root — it's a presentable).
 
 ### Step 5.5: Generate Creative Brief JSON
 
-Generate a structured creative brief for the ad-copywriter skill. Read `references/creative-brief-spec.md` for schema and field source labels. Populate from strategy report (campaigns, formats, hooks) + wiki (personas, pain points, brand voice). Save as `{client-folder}/_engine/working/{business-name}-creative-brief.json`.
+Generate a structured creative brief for the ad-copywriter skill. Read `references/creative-brief-spec.md` for schema and field source labels. Populate from strategy report (campaigns, formats, hooks) + wiki (personas, pain points, brand voice). Save as `{client-folder}/_engine/working/creative-brief.json`.
 
 ### Step 6: Generate CSV Media Plan
 
@@ -134,7 +134,7 @@ Create a structured CSV/spreadsheet with:
 - Monthly budget projection: spend by month across phases
 - KPI targets: expected CPC, CTR, conversion rate, CPA/ROAS by campaign
 
-Save as `{client-folder}/_engine/working/{business-name}-media-plan.csv` (intermediate CSV consumed by campaign-setup; the upload-ready bundle is what campaign-setup produces at folder root).
+Save as `{client-folder}/_engine/working/media-plan.csv` (intermediate CSV consumed by campaign-setup; the upload-ready bundle is what campaign-setup produces at folder root).
 
 ### Step 7: Update Wiki & Flag Downstream
 
@@ -199,3 +199,4 @@ Keep under 30 lines. Prune quarterly. See references/feedback-loop.md for protoc
 - [2026-04-16] [Validator hardening] Finding: two validator blind spots. (a) Step 5.5 produces `creative-brief.json` — the pipeline's spine contract — but the validator never checked that it existed or parsed. A paid-media-strategy session could "pass" with no brief at all, then silently break ad-copywriter, landing-page-builder, and campaign-setup 30 minutes later. (b) Cross-file campaign-name match used pure substring containment (`cn in rn or rn in cn`), so "Summer" wrongly matched "Summer Sale Campaign" — real drift could pass. → Action: (a) added `validate_creative_brief_presence()` step that globs for `*-creative-brief.json` in `_engine/working/`, parses it, requires `business_name` + `campaigns[]`, and warns if no campaign has `visual_direction.image_gen_prompt_prefix`; (b) replaced substring match with `_is_structured_variant()` — accepts exact equality OR structured separator variants (`" — "`, `" – "`, `": "`, `" | "`, `" / "`) with a 60% minimum length-overlap guard. Eliminates false matches on short names inside longer ones.
 - [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** _engine/working/CLIENT-paid-media-strategy.md, CLIENT-strategy-dashboard.html (folder root), _engine/working/CLIENT-media-plan.csv, _engine/working/CLIENT-creative-brief.json — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
 - [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. Strategy dashboard HTML stays at folder root (presentable); strategy report MD, media-plan CSV (intermediate), and creative-brief JSON go to `_engine/working/`; brand-config moves to `_engine/brand-config.json`. → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Output filename templates dropped redundant client/business-name prefix. Filename = deliverable type only: `paid-media-strategy.md`, `strategy-dashboard.html`, `media-plan.csv`, `creative-brief.json` — folder location already encodes client + program. Validator's `validate_creative_brief_presence()` now prefers the new short name and falls back to legacy `*-creative-brief.json` for backwards-compat. → Updated SKILL.md Step 4 + Step 5 + Step 5.5 + Step 6, references/skill-coordination.md, scripts/validate_output.py.

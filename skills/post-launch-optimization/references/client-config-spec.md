@@ -46,7 +46,7 @@ Created on first optimization run. Updated when targets change.
   "analysis_history": [
     {
       "date": "2026-04-16",
-      "report_path": "_engine/working/thrive-optimization-report.md",
+      "report_path": "_engine/working/optimization-report.md",
       "top_actions": ["action summary 1", "action summary 2"],
       "cpa_at_analysis": 12.50,
       "roas_at_analysis": 4.2

@@ -2,12 +2,19 @@
 """Ad Copywriter — Output Validation Script
 
 Usage: python3 validate_output.py <file1> [file2] [file3] ...
-Files are detected by name pattern:
-  *-ad-copy-report.md    → Ad copy report
-  *-google-ads.csv       → Google Ads CSV
-  *-meta-ads.csv         → Meta Ads CSV
-  *-image-prompts.md     → Image generation prompts
-  *-video-storyboards.md → Video storyboards
+Files are detected by name pattern. Default short-name forms (preferred):
+  ad-copy-report.md            → Ad copy report
+  ad-copy-best-case.md         → Ad copy report (Gate A best-case)
+  ad-copy-current-state.md     → Ad copy report (Gate A current-state)
+  google-ads.csv               → Google Ads CSV
+  meta-ads.csv                 → Meta Ads CSV
+  image-prompts.md             → Image generation prompts
+  video-storyboards.md         → Video storyboards
+  creative-brief.json          → Upstream creative brief
+
+Backwards-compat: legacy `{client}-`prefixed forms (e.g., `iskm-ad-copy-report.md`,
+`thrive-google-ads.csv`) are also detected via substring match. Prefer the short
+form for new client folders — folder location already encodes client + program.
 """
 
 import sys

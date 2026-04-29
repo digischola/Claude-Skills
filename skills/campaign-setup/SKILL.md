@@ -21,13 +21,23 @@ Read these shared context files before starting:
 
 Verify the client has the required prior deliverables. This skill is designed to consume structured output from prior skills, not to run standalone. Standalone mode is supported but will require manual input for everything.
 
-Required inputs:
+Required inputs (preferred new short-name forms; backwards-compat fallback to legacy `{client}-`prefixed glob):
 - `{client}/_engine/wiki/strategy.md` — market research context
-- `{client}/_engine/working/{client}-paid-media-strategy.md` — platform strategy, campaign architecture
-- `{client}/_engine/working/{client}-media-plan.csv` — campaigns, budgets, targeting (intermediate CSV)
-- `{client}/_engine/working/{client}-google-ads.csv` — RSAs, headlines, descriptions (if Google in scope; intermediate CSV from ad-copywriter)
-- `{client}/_engine/working/{client}-meta-ads.csv` — ad variants, primary text, headlines (if Meta in scope; intermediate CSV from ad-copywriter)
-- `{client}/_engine/working/{client}-*-page-spec.json` — landing page URLs (or direct URL from user)
+- `{client}/_engine/working/paid-media-strategy.md` (fallback `{client}/_engine/working/*-paid-media-strategy.md`) — platform strategy, campaign architecture
+- `{client}/_engine/working/media-plan.csv` (fallback `{client}/_engine/working/*-media-plan.csv`) — campaigns, budgets, targeting (intermediate CSV)
+- `{client}/_engine/working/google-ads.csv` (fallback `{client}/_engine/working/*-google-ads.csv`) — RSAs, headlines, descriptions (if Google in scope; intermediate CSV from ad-copywriter)
+- `{client}/_engine/working/meta-ads.csv` (fallback `{client}/_engine/working/*-meta-ads.csv`) — ad variants, primary text, headlines (if Meta in scope; intermediate CSV from ad-copywriter)
+- `{client}/_engine/working/page-spec.json` (fallback `{client}/_engine/working/*-page-spec.json`) — landing page URLs (or direct URL from user)
+
+**Reader pattern:** try the short name first, then fall back to the glob. Example:
+```python
+candidate = engine_working / 'paid-media-strategy.md'
+if not candidate.exists():
+    candidates = list(engine_working.glob('*-paid-media-strategy.md'))
+    if candidates:
+        candidate = candidates[0]
+```
+This keeps un-migrated client folders working while new ones get clean names.
 
 Missing inputs → fall back to standalone mode with guided questions.
 
@@ -179,3 +189,4 @@ Run `scripts/validate_output.py` against generated CSVs. Fixes any CRITICAL fail
 - **[2026-04-26] [Google Ads policy — Wellness/Yoga clients] Health-condition keywords auto-rejected by Personalized Advertising Restrictions** → Finding: keyword `yoga for back pain sydney` rejected at Editor import with "health category not accepted." Google's restricted-categories policy auto-rejects keywords implying medical conditions, pain, mental-health diagnoses, fertility, weight loss, addiction. Affects every wellness/yoga/fitness/therapy/healthcare client. Other terms in this trap to pre-filter: `yoga for back pain`, `yoga for anxiety`, `yoga for depression`, `yoga for arthritis`, `yoga for fibromyalgia`, `yoga for weight loss`, `yoga for fertility`, `yoga for migraines`, `yoga for sciatica`, `yoga for insomnia`, `yoga for adhd`, `yoga for ptsd`. → **Rule:** when generating keyword sets for wellness / yoga / fitness / therapy / healthcare clients, pre-filter against Google's restricted-health-condition list. Reframe symptom-keywords into structural alternatives: "yoga for back pain" → "yoga for desk workers" / "mobility yoga"; "yoga for anxiety" → "yoga for stress" / "calming yoga"; "yoga for weight loss" → "yoga for fitness" / "body composition yoga". Generation-time fix is cheaper than post-import fix because rejected keyword propagates through ad-copy report + media plan + dashboard + creative brief CSV. Action candidate: add `references/restricted-keyword-categories.md` listing Google's sensitive categories with sector-specific reframing recipes; integrate as a Step 4 pre-filter in keyword CSV generation; could share the reference file with ad-copywriter + market-research skills since they generate keyword universes too.
 - [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** {client}/campaign-setup/google-ads/*.csv, {client}/campaign-setup/meta-ads/*.csv, {client}/campaign-setup/pre-launch-checklist.md, {client}/campaign-setup/launch-runbook.md — all overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
 - [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. The upload-ready `campaign-setup/` CSV bundle is a presentable folder bundle, so it sits at the client/program folder root (not inside `_engine/`). → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Upstream input filename templates dropped the `{client}-` prefix. Step 1 now reads `paid-media-strategy.md`, `media-plan.csv`, `google-ads.csv`, `meta-ads.csv`, `page-spec.json` (short forms) from `_engine/working/`, falling back to legacy `*-`prefixed glob if the short form doesn't exist. Reader pattern documented inline. The `campaign-setup/` bundle's INTERNAL filenames (e.g. `01-campaigns.csv`, `meta-bulk-import.csv`) were already non-prefixed and unchanged. → Updated SKILL.md Step 1, references/skill-coordination.md.

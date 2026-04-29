@@ -9,23 +9,23 @@
 
 ### market-research
 - `_engine/wiki/research.md` — buyer personas, competitor positioning
-- `*-research-dashboard.html` (folder root) — keyword themes, audience insights presentable; raw report at `_engine/working/*-research-report.md`
+- `research-dashboard.html` at folder root (default short name; legacy fallback `*-research-dashboard.html`) — keyword themes, audience insights presentable; raw report at `_engine/working/market-research.md` (legacy fallback `_engine/working/*-market-research.md`)
 
 ### paid-media-strategy
-- `_engine/working/*-creative-brief.json` — campaign architecture, visual direction, image_gen_prompt_prefix, landing page mapping, A/B testing plan, proof element hierarchy
-- `_engine/working/*-strategy-report.md` — campaign goals, target audiences, budget context
+- `_engine/working/creative-brief.json` (default short name; legacy fallback `_engine/working/*-creative-brief.json`) — campaign architecture, visual direction, image_gen_prompt_prefix, landing page mapping, A/B testing plan, proof element hierarchy
+- `_engine/working/paid-media-strategy.md` (default short name; legacy fallback `_engine/working/*-paid-media-strategy.md` or `*-strategy-report.md`) — campaign goals, target audiences, budget context
 
 ### ad-copywriter
-- `_engine/working/*-ad-copy-report.md` — headlines, CTAs, value propositions, primary text
-- `_engine/working/*-meta-ads.csv` — Meta ad copy (primary text, headlines, descriptions; intermediate CSV)
-- `_engine/working/*-google-ads.csv` — Google RSA copy (headlines, descriptions; intermediate CSV)
+- `_engine/working/ad-copy-report.md` (default short name; legacy fallback `_engine/working/*-ad-copy-report.md`) — headlines, CTAs, value propositions, primary text
+- `_engine/working/meta-ads.csv` (default short name; legacy fallback `_engine/working/*-meta-ads.csv`) — Meta ad copy (primary text, headlines, descriptions; intermediate CSV)
+- `_engine/working/google-ads.csv` (default short name; legacy fallback `_engine/working/*-google-ads.csv`) — Google RSA copy (headlines, descriptions; intermediate CSV)
 
 ### landing-page-audit
-- `*-landing-page-audit.html` at the client/program folder root + `_engine/working/*-audit-findings.md` — scored issues, fix recommendations, mockup-level suggestions
+- `landing-page-audit.html` at the client/program folder root (default short name; multi-page collision or legacy fallback `*-landing-page-audit.html`) + `_engine/working/audit-findings.md` (default short name; multi-page collision or legacy fallback `_engine/working/*-audit-findings.md`) — scored issues, fix recommendations, mockup-level suggestions
 - Provides specific CRO/UX/copy problems to solve in the new page
 
 ### post-launch-optimization
-- `_engine/working/*-optimization-report.md` — conversion rate data, landing page friction signals (e.g., high CTR + low CVR = page issue)
+- `_engine/working/optimization-report.md` (default short name; legacy fallback `_engine/working/*-optimization-report.md`) — conversion rate data, landing page friction signals (e.g., high CTR + low CVR = page issue)
 
 ## Downstream Skills (outputs for)
 
@@ -41,8 +41,8 @@
 
 | File | Location | Description |
 |---|---|---|
-| Landing page bundle | `{client}/{page-name}/index.html` (folder root, presentable bundle) | Full HTML prototype + assets |
-| Page spec JSON | `{client}/_engine/working/{page-name}-page-spec.json` | Structured spec for Lovable rebuild |
+| Landing page bundle | `{client}/landing-page/index.html` (folder root, presentable bundle — default short name; multi-page collision fallback: `{client}/{page-name}/index.html`) | Full HTML prototype + assets |
+| Page spec JSON | `{client}/_engine/working/page-spec.json` (default short name; multi-page collision fallback: `{client}/_engine/working/{page-name}-page-spec.json`) | Structured spec for Lovable rebuild |
 | Wiki log entry | `{client}/_engine/wiki/log.md` | LANDING-PAGE entry |
 
 ## Standalone Mode

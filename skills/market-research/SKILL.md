@@ -122,7 +122,7 @@ Identify critical gaps, contradictions, and low-confidence areas. If gaps are si
 
 Read `references/report-structure.md`. Report covers all 11 dimensions with: source tags on every data point, BLANK fields with explanations, confidence ratings (HIGH/MEDIUM/LOW), marketing implications per section, and "data-supported" vs "directional" labels on recommendations.
 
-Save as `{client-folder}/_engine/working/{business-name}-market-research.md`.
+Save as `{client-folder}/_engine/working/market-research.md`.
 
 ### Step 7: Generate HTML Dashboard
 
@@ -136,7 +136,7 @@ Read `references/dashboard-specs.md` for the full specification. The dashboard m
 - **Keyword data tables** populated from platform CSV data when available
 - **Source indicators** (tooltips for INFERRED, "Data not available" for BLANK)
 
-Save as `{client-folder}/{business-name}-research-dashboard.html` (folder root — HTML is a presentable).
+Save as `{client-folder}/research-dashboard.html` (folder root — HTML is a presentable).
 
 ### Step 8: Update Wiki & Flag Downstream Connections
 
@@ -191,3 +191,4 @@ Pre-2026-04-12 entries pruned 2026-04-26: encoded into perplexity-prompt-templat
 - [2026-04-27] [Self-brand · DigiSchola productized-audit India] Two patterns to carry forward. (1) When the audit subject is itself a marketing-services brand selling the audited capability, research surfaces a credibility paradox that doubles as creative material — DigiSchola sells "tracking from day one" but its own site has zero pixels. The Phase 0 fix is also the strongest LinkedIn-content moment ("I just installed the pixel after auditing my own site"). (2) For productized SKUs at micro-budget (₹500/day = ₹3,500/week), Meta Purchase-event learning-phase exit requires ~₹75K/week — about 21× available spend. Phase 1 must therefore optimize for upper-funnel proxy events (Initiate Checkout / LP View) until 30-40 audits log via combined paid+organic+referral, then transition to Purchase. **RULE:** for productized digital SKUs at <₹1K/day, hard-code a Phase 1 upper-funnel-proxy event recommendation and a Phase 2 Purchase-transition trigger condition into Section 11 of the Perplexity prompt. The default "optimize for Purchase from day 1" is provably wrong at this budget tier — call it out explicitly in the prompt so Perplexity doesn't drift into the generic recommendation.
 - [2026-04-27] [Validator regex] [DigiSchola self-brand] Markdown validator's `executive_summary_present` check requires literal "Executive Summary" header — variants like "Executive Verdict" / "Executive Decision" do NOT match. Also `blank_fields_documented` warns on 0 BLANK occurrences — analyst can have a "Gaps & Unknowns" section but if it doesn't use the literal token "BLANK", validator counts it as zero gaps. Both warnings are advisory, but if treated as binding they push analysts to specific keywords. **RULE:** Use literal "Executive Summary" as section header (verdict-style framing belongs in the section body, not the header). When listing gaps, mark each with literal "BLANK — reason" so the validator can count them. Don't fight the validator on token shape — it's cheaper to conform than to widen the regex.
 - [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Output filename templates dropped redundant client/business-name prefix. Filename = deliverable type only (`research-dashboard.html`, `market-research.md`) since folder location already encodes client + program. Validators accept legacy `{client}-`prefixed names as backwards-compat fallback. → Updated SKILL.md, references/wiki-schema.md, references/multi-program-structure.md.

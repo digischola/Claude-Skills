@@ -26,7 +26,7 @@ When a client has multiple programs, products, or business lines that need indep
 ### Single-Program (default)
 ```
 Desktop/{Client Name}/{Business Name}/
-├── {name}-research-dashboard.html    ← presentables at folder root
+├── research-dashboard.html           ← presentables at folder root
 └── _engine/
     ├── wiki/
     │   ├── index.md
@@ -38,7 +38,7 @@ Desktop/{Client Name}/{Business Name}/
     │   ├── strategy.md               ← research lives here
     │   └── ...
     ├── working/
-    │   └── {name}-market-research.md
+    │   └── market-research.md
     ├── sources/
     ├── brand-config.json
     └── wiki-config.json
@@ -59,7 +59,7 @@ Desktop/{Client Name}/
 │   └── wiki-config.json                  ← type: "shared", programs: [list]
 │
 ├── {Program 1 Name}/                     ← per-program research
-│   ├── {program}-research-dashboard.html ← program presentables at program root
+│   ├── research-dashboard.html           ← program presentables at program root
 │   └── _engine/
 │       ├── wiki/
 │       │   ├── index.md                  ← program-specific index
@@ -67,12 +67,12 @@ Desktop/{Client Name}/
 │       │   ├── strategy.md               ← market research for this program
 │       │   └── ...                       ← any dimension pages needed
 │       ├── working/
-│       │   └── {program}-market-research.md
+│       │   └── market-research.md
 │       ├── sources/
 │       └── wiki-config.json              ← type: "program", parent: "../_engine"
 │
 ├── {Program 2 Name}/
-│   ├── {program}-research-dashboard.html
+│   ├── research-dashboard.html
 │   └── _engine/
 │       ├── wiki/
 │       ├── working/

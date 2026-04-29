@@ -27,10 +27,10 @@ Read these shared context files before starting:
 - `{client}/_engine/brand-config.json` — colors, fonts, logo (multi-program: `{client-root}/_engine/brand-config.json`)
 - `{client}/_engine/wiki/offerings.md` — offering details, pricing, inclusions
 - `{client}/_engine/wiki/brand-identity.md` — tone, personality
-- `{client}/_engine/working/*-creative-brief.json` — visual direction, proof hierarchy (if exists)
-- `{client}/_engine/working/*-ad-copy-report.md` — headlines, CTAs, value props (if exists)
-- `{client}/*-landing-page-audit.html` (folder root) and `{client}/_engine/working/*-audit-findings.md` — issues to fix (if exists)
-- `{client}/_engine/working/*-optimization-report.md` — CVR data, friction signals (if exists)
+- `{client}/_engine/working/creative-brief.json` (default short name) — visual direction, proof hierarchy. Backwards-compat fallback: `{client}/_engine/working/*-creative-brief.json` if the short-name file doesn't exist.
+- `{client}/_engine/working/ad-copy-report.md` (default short name) — headlines, CTAs, value props. Backwards-compat fallback: `{client}/_engine/working/*-ad-copy-report.md`.
+- `{client}/landing-page-audit.html` (folder root, default short name) and `{client}/_engine/working/audit-findings.md` — issues to fix. Multi-page or legacy fallback: `{client}/*-landing-page-audit.html` and `{client}/_engine/working/*-audit-findings.md`.
+- `{client}/_engine/working/optimization-report.md` (default short name) — CVR data, friction signals. Backwards-compat fallback: `{client}/_engine/working/*-optimization-report.md`.
 
 See `references/skill-coordination.md` for full upstream/downstream map.
 
@@ -110,7 +110,7 @@ Load `references/landing-page-research.md` §§8-16 for design rules.
 
 ### Step 5: Generate Page Spec JSON
 
-Save as `{client}/_engine/working/{page-name}-page-spec.json`.
+Save as `{client}/_engine/working/page-spec.json` (default short name — folder location already encodes client + program). If the program folder will host specs for multiple distinct landing pages, fall back to `{client}/_engine/working/{page-name}-page-spec.json` so the second and later pages don't overwrite the first.
 
 Structure:
 ```json
@@ -136,7 +136,7 @@ This spec helps the Lovable rebuild stay faithful to the prototype's structure a
 
 Update `{client}/_engine/wiki/log.md` — add LANDING-PAGE entry with date and page details.
 
-The finished page bundle (`{bundle-name}/index.html` plus assets) sits at the client/program folder root as a presentable folder bundle. Internal bundle structure (assets/, fonts/, etc.) is unchanged.
+The finished page bundle defaults to `landing-page/index.html` at the client/program folder root (presentable folder bundle — folder location already encodes client + program). If the program folder will host bundles for multiple distinct landing pages, fall back to `{page-name}/index.html` (e.g., `home/index.html`, `booking/index.html`) to disambiguate. Internal bundle structure (assets/, fonts/, etc.) is unchanged.
 
 If audit existed: note which issues were addressed.
 
@@ -184,3 +184,4 @@ Flag downstream connections (post-launch-optimization will track CVR on new page
 - [2026-04-20] [Visual verification is mandatory BEFORE delivery — not after] Same session, v2 shipped with a **broken logo** (rendered as a solid white circle blob instead of the THRIVE RETREATS wordmark) and **backward button semantics** (Contact Us outlined, Book Now solid — opposite of live Thrive). Three compounding errors: (a) the two logo SVGs copied from Downloads (`logo-1.svg`, `logo-2.svg`) got renamed with swapped semantics — the 156×156 square MONOGRAM landed at `logo-wordmark.svg` and the 186×62 horizontal WORDMARK landed at `logo-mark.svg`. Size/shape didn't match the filename; I missed it because I trusted the filename I had just assigned. (b) `filter: brightness(0) invert(1)` applied to a complex SVG with `<clipPath>` + `<mask>` + duplicated `<path>` produced a solid white circle, not a white wordmark. (c) The original audit had flagged "Contact Us = outlined with red text, fails 2.68:1 contrast" but the LIVE production DOM actually ships Contact Us as SOLID red with white text — my audit color-check was reading a different button. User flagged all three in one short message. → **RULE:** After writing the HTML, BEFORE declaring done, take at least one screenshot via computer-use MCP with Chrome open to the `file://` path of the deliverable. Verify: (1) logo renders as the real brand mark (not a circle, square, broken image, or any blob), (2) header button styling matches the source-of-truth (live site DOM or brand guide), (3) no obvious layout breaks (centering, overflow, overlap). The validator cannot see rendered output — it only reads HTML/CSS source. **Two new asset-handling rules:** (a) after copying any vector logo, verify its geometry matches its filename (run `head -1 file.svg | grep viewBox` and compare to the expected aspect: wordmark is wide, monogram is square, icon is tiny); don't trust the filename you just assigned. (b) when a logo needs to display on a dark background and the source SVG has `fill="#darkcolor"`, DO NOT rely on `filter: brightness(0) invert(1)` — it breaks on SVGs with clipPath/mask/complex geometry. Instead, create a dedicated variant via `sed 's/fill="#darkhex"/fill="#fff"/g' dark.svg > white.svg` and use it directly.
 - [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** {client}/PAGE-NAME/index.html (folder root bundle), {client}/_engine/working/PAGE-NAME-page-spec.json — both overwritten in place on re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
 - [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. The finished landing-page bundle is a presentable folder bundle (entry point is its own `index.html`) and stays at the client/program folder root; only the page-spec JSON moves to `_engine/working/`. Bundle's INTERNAL structure is unchanged. → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Output filename templates dropped redundant client/page-name prefix. Default bundle folder is `landing-page/` (was `{client}-page/` or `{page-name}-page/`); default spec file is `_engine/working/page-spec.json` (was `{page-name}-page-spec.json`); upstream readers prefer short names first (`creative-brief.json`, `ad-copy-report.md`, `audit-findings.md`, `optimization-report.md`, `paid-media-strategy.md`) and fall back to the legacy `*-`prefixed glob. Multi-page collision fallback keeps `{page-name}-` prefix for both the bundle and the spec. → Updated SKILL.md Step 1 + Step 5 + Step 6, references/skill-coordination.md.

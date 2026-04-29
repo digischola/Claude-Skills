@@ -6,12 +6,12 @@ Refresh Mode is the third operating mode of ad-copywriter (alongside Standalone 
 
 ## When Refresh Mode fires
 
-Input detected: a file matching `{client}/_engine/working/*-rotation-brief.json` in the client folder.
+Input detected: `{client}/_engine/working/rotation-brief.json` (default short name) — backwards-compat fallback to a glob match `{client}/_engine/working/*-rotation-brief.json` if the short name isn't present (legacy `{client}-rotation-brief.json` files).
 
 Typical trigger chain:
 1. post-launch-optimization Layer 4 detects fatigue on an ad (frequency >3.5, CTR decline >30%, CPA increase >50%)
 2. Layer 10 elevates "refresh fatigued creative" into the top-5 action list
-3. Skill emits `{client}-rotation-brief.json` alongside the report
+3. Skill emits `rotation-brief.json` alongside the report (in `_engine/working/`)
 4. Analyst runs ad-copywriter → it reads the rotation brief → enters Refresh Mode
 
 ---
@@ -22,8 +22,8 @@ Typical trigger chain:
 {
   "client_name": "Thrive Retreats",
   "analysis_date": "2026-04-16",
-  "source_report": "Thrive-optimization-2026-04-16.md",
-  "source_creative_brief": "Thrive-creative-brief.json",
+  "source_report": "optimization-report.md",
+  "source_creative_brief": "creative-brief.json",
   "refresh_urgency": "URGENT",
   "fatigued_creatives": [
     {
@@ -71,8 +71,8 @@ Typical trigger chain:
 ## Refresh Mode workflow (overrides to the standard Steps 1-8)
 
 ### Step 1 — Mode detection (overridden)
-- Detect `*-rotation-brief.json` in `{client}/_engine/working/` → Refresh Mode
-- Load the rotation brief AND the original `*-creative-brief.json` AND the wiki
+- Detect `rotation-brief.json` (or legacy `*-rotation-brief.json`) in `{client}/_engine/working/` → Refresh Mode
+- Load the rotation brief AND the original creative brief (`creative-brief.json`, legacy fallback `*-creative-brief.json`) AND the wiki
 - Skip the 6-question standalone intake entirely
 - State clearly in the output: "Refresh Mode — 3 fatigued creatives being rotated"
 

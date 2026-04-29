@@ -100,10 +100,10 @@ Read these reference files (load only sections relevant to the client's platform
 For every persona / ad-group label / headline / description / callout / snippet value that names a specific service, modality, or class style, verify it appears in `_engine/wiki/offerings.md`. If unmatched: drop, reframe to a verified offering, or wrap as `<<UNVERIFIED-CLAIM:phrase>>`. See `references/offerings-cross-check.md` §Gate B for the full protocol and common false-claim categories (prenatal yoga, chair yoga, EMDR, hydrafacial, etc.).
 
 **Output filename:**
-- **Default:** `{client-folder}/_engine/working/{business-name}-ad-copy-report.md`
+- **Default:** `{client-folder}/_engine/working/ad-copy-report.md`
 - **Gate A fired** (Step 1 detected gated launch state): write **two** files in `_engine/working/`:
-  - `{business-name}-ad-copy-best-case.md` — banner: "BEST CASE — DO NOT IMPORT until Phase 0 complete". Includes gated claims for forward planning.
-  - `{business-name}-ad-copy-current-state.md` — banner: "Current-state copy — safe for production import". Gated claims stripped per `phase_0_prerequisites[].claim_phrases`. The Step 5 CSV is generated **only from this file**.
+  - `ad-copy-best-case.md` — banner: "BEST CASE — DO NOT IMPORT until Phase 0 complete". Includes gated claims for forward planning.
+  - `ad-copy-current-state.md` — banner: "Current-state copy — safe for production import". Gated claims stripped per `phase_0_prerequisites[].claim_phrases`. The Step 5 CSV is generated **only from this file**.
 
 Both files MUST include a `## Gate Audit (auto-generated)` section listing triggers, stripped phrases, and Gate B verified/failed claims. See `references/offerings-cross-check.md` §"Logging requirements" for the audit-section template.
 
@@ -111,11 +111,11 @@ Both files MUST include a `## Gate Audit (auto-generated)` section listing trigg
 
 Read `references/output-format-spec.md` for column formats.
 
-**Google Ads CSV** (`{client-folder}/_engine/working/{business-name}-google-ads.csv` — intermediate, consumed by campaign-setup):
+**Google Ads CSV** (`{client-folder}/_engine/working/google-ads.csv` — intermediate, consumed by campaign-setup):
 - One row per RSA: Campaign, Ad Group, H1-H15, D1-D4, Path1, Path2, Pin notes, Final URL
 - Character limit validation on every cell — CRITICAL, do not ship over-limit copy
 
-**Meta Ads CSV** (`{client-folder}/_engine/working/{business-name}-meta-ads.csv` — intermediate, consumed by campaign-setup):
+**Meta Ads CSV** (`{client-folder}/_engine/working/meta-ads.csv` — intermediate, consumed by campaign-setup):
 - One row per ad variant: Campaign, Ad Set, Ad Name, Primary Text, Headline, Description, CTA, Format, Landing URL
 - A/B variant labels in Ad Name (e.g., "Prospecting-DesignBuyer-HookA")
 
@@ -130,7 +130,7 @@ Use `image_gen_prompt_prefix` from creative brief as base prompt. Append per-ad 
 - Text overlay zone instruction ("leave clean space at top 20% for text")
 - P1/P2 priority from creative brief formats
 
-Save as `{client-folder}/_engine/working/{business-name}-image-prompts.md`.
+Save as `{client-folder}/_engine/working/image-prompts.md`.
 
 ### Step 7: Generate Video Storyboards
 
@@ -147,7 +147,7 @@ One storyboard per video ad from creative brief formats. Per frame:
 
 Include combined VO script at bottom — one continuous text block for pasting into AI Studio.
 
-Save as `{client-folder}/_engine/working/{business-name}-video-storyboards.md`.
+Save as `{client-folder}/_engine/working/video-storyboards.md`.
 
 ### Step 8: Validate & Update Wiki
 
@@ -196,3 +196,4 @@ Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts
   **RULE:** Search demand ≠ service offering. Every persona, ad group, headline, callout, snippet must trace to a verified offerings.md entry — or drop, reframe, or wrap as `<<UNVERIFIED-CLAIM>>`.
 - [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** _engine/working/CLIENT-ad-copy-report.md, _engine/working/CLIENT-google-ads.csv, _engine/working/CLIENT-meta-ads.csv, _engine/working/CLIENT-image-prompts.md, _engine/working/CLIENT-video-storyboards.md — all overwritten in place on re-run. Refresh Mode _v2/_v3 ad-NAMING (in Meta Ads Manager) is preservation-of-A/B-control, NOT a re-run pattern — those are distinct ad-copy rotations, not the same case being re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
 - [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. Ad-copywriter intermediate CSVs (`*-google-ads.csv`, `*-meta-ads.csv`) are pre-bundle, so they go in `_engine/working/` (campaign-setup consumes them and produces the upload-ready bundle at folder root). → Updated all path references in SKILL.md, references/, scripts/, evals/.
+- [2026-04-29] [STRUCTURAL REFACTOR — filename simplification] Output filename templates dropped redundant client/business-name prefix. Filename = deliverable type only: `ad-copy-report.md`, `ad-copy-best-case.md`, `ad-copy-current-state.md`, `google-ads.csv`, `meta-ads.csv`, `image-prompts.md`, `video-storyboards.md`, `prompt-library.html`, `rotation-brief.json` — folder location already encodes client + program. Validator detects both new short-name forms and legacy `{client}-`prefixed forms via substring match (`'in name'`), so backwards-compat is automatic. → Updated SKILL.md, references/refresh-mode.md, references/output-format-spec.md, references/image-prompt-patterns.md, references/offerings-cross-check.md, assets/README.md, scripts/validate_output.py docstring, evals/evals.json.

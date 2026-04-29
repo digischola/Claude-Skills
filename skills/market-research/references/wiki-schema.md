@@ -27,7 +27,7 @@ Every client gets a persistent wiki — a living knowledge base that compounds a
 │       │   ├── digital-presence.md ← Digital presence & ad landscape
 │       │   └── strategy.md         ← Strategic implications & recommendations
 │       ├── working/                ← Intermediate skill output (md reports, json briefs)
-│       │   └── {business-name}-market-research.md
+│       │   └── market-research.md
 │       ├── brand-config.json       ← Skill-managed config files
 │       └── wiki-config.json        ← Wiki metadata (created date, last update, source count)
 ```

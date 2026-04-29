@@ -10,7 +10,7 @@ How this skill connects to the pipeline.
 **Consumes:**
 - `{client-folder}/_engine/wiki/` — all wiki pages (strategy.md, offerings.md, competitors.md, audiences.md)
 - `{client-folder}/_engine/brand-config.json` (single-program) or `{client-root}/_engine/brand-config.json` (multi-program) — for dashboard branding
-- `{client-folder}/_engine/working/{name}-market-research.md` — full research report (intermediate)
+- `{client-folder}/_engine/working/market-research.md` (default short name; legacy fallback `{client-folder}/_engine/working/*-market-research.md`) — full research report (intermediate)
 - `{client-folder}/_engine/sources/` — keyword CSVs, Perplexity raw output
 
 **Key data points used:**
@@ -62,14 +62,14 @@ market-research
     ├── _engine/wiki/ (all pages)
     ├── _engine/brand-config.json
     ├── _engine/sources/ (keyword CSVs, Perplexity raw)
-    └── *-research-dashboard.html (folder root) + _engine/working/*-research-report.md
+    └── research-dashboard.html (folder root, presentable; legacy `*-research-dashboard.html`) + _engine/working/market-research.md (legacy `*-market-research.md`)
          │
          ▼
 paid-media-strategy (this skill)
-    ├── _engine/working/{name}-paid-media-strategy.md (report)
-    ├── {name}-strategy-dashboard.html (folder root, presentable)
-    ├── _engine/working/{name}-media-plan.csv (intermediate)
-    ├── _engine/working/{name}-creative-brief.json (handoff)
+    ├── _engine/working/paid-media-strategy.md (report)
+    ├── strategy-dashboard.html (folder root, presentable)
+    ├── _engine/working/media-plan.csv (intermediate)
+    ├── _engine/working/creative-brief.json (handoff)
     └── _engine/wiki/strategy.md (updated)
          │
          ├──▶ ad-copywriter (creative direction, messaging angles)

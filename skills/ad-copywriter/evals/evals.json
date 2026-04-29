@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Generate ad copy for Retreat House. Creative brief exists at Desktop/Retreat House/Retreat House/_engine/working/retreat-house-creative-brief.json. Both Google and Meta, 4 campaigns, phased strategy.",
+      "prompt": "Generate ad copy for Retreat House. Creative brief exists at Desktop/Retreat House/Retreat House/_engine/working/creative-brief.json. Both Google and Meta, 4 campaigns, phased strategy.",
       "expected_output": "Google RSAs for Brand Search + Non-Brand Search (4 ad groups). Meta primary text + headlines for Prospecting and Retargeting. Image prompts using architectural photography prefix. Video storyboards with voiceover for 2 video ads. All character limits respected.",
       "assertions": [
         {
@@ -148,7 +148,7 @@
       "assertions": [
         {
           "name": "gate_a_dual_output",
-          "description": "Both *-ad-copy-best-case.md and *-ad-copy-current-state.md generated when do_not_launch_until_phase_0_complete is true"
+          "description": "Both ad-copy-best-case.md and ad-copy-current-state.md generated when do_not_launch_until_phase_0_complete is true (legacy `*-ad-copy-best-case.md` / `*-ad-copy-current-state.md` accepted as backwards-compat)"
         },
         {
           "name": "gate_a_csv_strip",
@@ -178,8 +178,8 @@
       "prompt": "Thrive Retreats: post-launch-optimization flagged Emily_Teacher_Training_Hero_v1 as URGENT fatigue (frequency 3.7, CTR decline 42%, CPA up 68%). Run ad-copywriter in Refresh Mode to generate 2+ replacement variants per the rotation-brief.json.",
       "inputs": {
         "mode": "refresh",
-        "rotation_brief": "Thrive/_engine/working/Thrive-rotation-brief.json",
-        "creative_brief": "Thrive/_engine/working/Thrive-creative-brief.json",
+        "rotation_brief": "Thrive/_engine/working/rotation-brief.json",
+        "creative_brief": "Thrive/_engine/working/creative-brief.json",
         "fatigued_count": 1,
         "platform": "meta"
       },

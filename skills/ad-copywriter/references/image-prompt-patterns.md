@@ -83,7 +83,7 @@ This logic generalizes across all clients — whatever subject specificity the b
 
 ## HTML prompt-library deliverable (MANDATORY — added 2026-04-27, expanded 2026-04-28)
 
-Alongside the markdown image-prompts file, the skill MUST also generate `{business-name}-prompt-library.html` — a one-page dashboard with:
+Alongside the markdown image-prompts file, the skill MUST also generate `prompt-library.html` (at the client/program folder root — folder location already encodes client + program) — a one-page dashboard with:
 
 - One card per prompt (cell)
 - **Two-tab toggle per card: JSON / Spec-prose** — both formats with their own copy buttons
