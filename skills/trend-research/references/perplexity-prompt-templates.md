@@ -67,7 +67,7 @@ ONLY include topics with at least 1 verifiable URL.
 
 ## Ingestion of Perplexity response
 
-After Mayank pastes the response into `brand/_research/trends/<week>/<pillar>-response.md`, run:
+After Mayank pastes the response into `brand/_engine/_research/trends/<week>/<pillar>-response.md`, run:
 
 ```bash
 python3 scripts/trend_research.py ingest-perplexity \
@@ -81,8 +81,8 @@ The script:
 3. Parses each topic into the candidate schema (seed, hook_candidate, source_urls, etc.)
 4. Sets `relevance_score` based on whether the response includes a "Suggested hook angle" + URL count (3+ URLs → 5, 1-2 URLs → 4, no URLs but pillar-fit → 3)
 5. Dedupes against existing idea-bank
-6. Appends survivors to idea-bank.json
-7. Logs to `brand/_research/trends/<week>/scan-log.md`
+6. Appends survivors to `_engine/idea-bank.json`
+7. Logs to `brand/_engine/_research/trends/<week>/scan-log.md`
 
 ## When to use Mode 2 vs Mode 1
 

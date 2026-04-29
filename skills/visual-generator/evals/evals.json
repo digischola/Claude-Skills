@@ -142,7 +142,7 @@
     {
       "id": 12,
       "path": "B-consistency",
-      "prompt": "Regenerate brand/hyperframes-scenes/shared/tokens.css from design-tokens.json via scripts/build_shared_tokens.py. Verify palette / fonts / easing / sceneDuration tokens are identical between the Remotion brand.ts and the generated tokens.css.",
+      "prompt": "Regenerate brand/_engine/hyperframes-scenes/shared/tokens.css from design-tokens.json via scripts/build_shared_tokens.py. Verify palette / fonts / easing / sceneDuration tokens are identical between the Remotion brand.ts and the generated tokens.css.",
       "expected_output": "build_shared_tokens.py exits 0 with zero brand.ts drift warnings. Generated tokens.css contains (a) --color-* custom properties for every palette entry, (b) --font-* for every fonts entry, (c) --ease-* for every easingCSS entry, (d) --dur-* for every sceneDuration entry, (e) .atmo-mesh-neutral / -positive / -warning classes matching the Remotion MeshGradient TONE_LAYERS recipes by construction.",
       "assertions": [
         {"name": "build_exits_zero", "description": "scripts/build_shared_tokens.py exits 0"},

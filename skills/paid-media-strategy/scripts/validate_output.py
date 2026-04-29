@@ -168,9 +168,24 @@ def validate_dashboard(filepath):
     if 'viewport' not in content:
         issues["WARNING"].append("Missing viewport meta tag for responsive design")
 
-    # Brand-config compliance check
-    deliverables_dir = os.path.dirname(filepath)
-    brand_config_path = os.path.join(deliverables_dir, "brand-config.json")
+    # Brand-config compliance check.
+    # Dashboard HTML now sits at the client folder root; brand-config.json lives in
+    # _engine/brand-config.json (single-program) or {client-root}/_engine/brand-config.json (multi-program).
+    # Walk up looking for the nearest _engine/ folder.
+    dashboard_dir = os.path.dirname(os.path.abspath(filepath))
+    brand_config_path = None
+    cur = dashboard_dir
+    for _ in range(5):
+        cand = os.path.join(cur, "_engine", "brand-config.json")
+        if os.path.exists(cand):
+            brand_config_path = cand
+            break
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            break
+        cur = parent
+    if brand_config_path is None:
+        brand_config_path = os.path.join(dashboard_dir, "_engine", "brand-config.json")
     if os.path.exists(brand_config_path):
         try:
             with open(brand_config_path, 'r', encoding='utf-8') as bc:
@@ -575,21 +590,21 @@ def validate_creative_brief_presence(report_path):
     """Step 5.5 produces {client}-creative-brief.json. Downstream skills (ad-copywriter,
     landing-page-builder, campaign-setup) depend on it. Missing = silent pipeline break."""
     issues = {"CRITICAL": [], "WARNING": [], "INFO": []}
-    deliverables_dir = os.path.dirname(os.path.abspath(report_path))
-    # Look for *-creative-brief.json anywhere in the same deliverables folder
+    working_dir = os.path.dirname(os.path.abspath(report_path))
+    # Look for *-creative-brief.json anywhere in the same _engine/working/ folder
     candidates = [
-        f for f in os.listdir(deliverables_dir)
+        f for f in os.listdir(working_dir)
         if f.endswith('-creative-brief.json') or f == 'creative-brief.json'
     ]
     if not candidates:
         issues["CRITICAL"].append(
-            "No *-creative-brief.json found in deliverables folder — "
+            "No *-creative-brief.json found in _engine/working/ — "
             "Step 5.5 output missing; downstream ad-copywriter/landing-page-builder/campaign-setup "
             "will run in degraded mode"
         )
     else:
         # Basic structural validation
-        path = os.path.join(deliverables_dir, candidates[0])
+        path = os.path.join(working_dir, candidates[0])
         try:
             import json as _json
             with open(path, 'r', encoding='utf-8') as f:

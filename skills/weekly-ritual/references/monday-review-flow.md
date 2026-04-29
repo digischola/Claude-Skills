@@ -112,7 +112,7 @@ If we're still in collecting (0-20 days) or active-early (21-55 days), report sh
 
 ## Step 5 — Update state
 
-Write to `brand/weekly-ritual.state.json`:
+Write to `brand/_engine/weekly-ritual.state.json`:
 ```json
 {
   "last_fired_friday": "2026-04-24T18:00:00+05:30",

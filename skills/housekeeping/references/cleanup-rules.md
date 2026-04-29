@@ -30,9 +30,9 @@ Classification tiers (scan.py applies in order, first match wins):
 - `**/evals/**`
 - `shared-scripts/**`
 
-### LOCKED brand wiki (`Desktop/Digischola/brand/`)
-- `brand-wiki.md`, `pillars.md`, `voice-guide.md`, `brand-identity.md`, `credentials.md`, `channel-playbook.md`, `icp.md`
-- `wiki-config.json`, `idea-bank.json`, `credential-usage-log.json`, `weekly-ritual.state.json`, `housekeeping.state.json`
+### LOCKED brand wiki (`Desktop/Digischola/brand/_engine/wiki/`)
+- `brand-wiki.md`, `pillars.md`, `voice-guide.md`, `brand-identity.md`, `credentials.md`, `channel-playbook.md`, `icp.md`, `voice-flavor.md`, `voice-lock.md`
+- `_engine/wiki-config.json`, `_engine/idea-bank.json`, `_engine/credential-usage-log.json`, `_engine/weekly-ritual.state.json`, `housekeeping.state.json` (skill-dir state)
 
 ### Performance data (tiny, irreplaceable reference)
 - `performance/log.json`
@@ -44,16 +44,19 @@ Classification tiers (scan.py applies in order, first match wins):
 - `queue/briefs/**` newer than 30 days
 - `queue/assets/{entry_id}/**` newer than 180 days OR where source draft still `scheduled`/`posting`
 
-### Client wiki
-- `Desktop/{Client}/{Project}/wiki/**` (every page, every log, every config)
-- `Desktop/{Client}/_shared/wiki/**` (multi-program shared DNA)
+### Client wiki (under `_engine/`)
+- `Desktop/{Client}/{Project}/_engine/wiki/**` (every page, every log, every config)
+- `Desktop/{Client}/_engine/wiki/**` (multi-program shared DNA — formerly `_shared/wiki/`)
 
 ### Client primary deliverables (always keep)
-- `Desktop/{Client}/{Project}/deliverables/*.md` — research, strategy, copy, audit, optimization, landing-page reports
-- `Desktop/{Client}/{Project}/deliverables/*.html` — dashboards
-- `Desktop/{Client}/{Project}/deliverables/*.json` — brand-config, creative-brief, page-spec, rotation-brief, client-config
-- `Desktop/{Client}/{Project}/deliverables/*.csv` — media plans, ad-copy CSVs, campaign-setup CSVs
-- `Desktop/{Client}/{Project}/deliverables/campaign-setup/**` — bulk-import directory tree
+Under the 2026-04-29 `_engine/` convention, presentables (HTML/MP4/PDF/upload-ready CSV bundles) live at the folder root and internals (md/json/intermediate csv) live in `_engine/working/`.
+- `Desktop/{Client}/{Project}/*.html` — dashboards, audits, landing pages
+- `Desktop/{Client}/{Project}/*.mp4`, `*.mov`, `*.webm`, `*.pdf` — finished video / docs
+- `Desktop/{Client}/{Project}/campaign-setup/**` — bulk-import directory tree (folder-bundle presentable)
+- `Desktop/{Client}/{Project}/_engine/working/*.md` — research, strategy, copy, audit, optimization, landing-page reports
+- `Desktop/{Client}/{Project}/_engine/working/*.json` — creative-brief, page-spec, rotation-brief, client-config
+- `Desktop/{Client}/{Project}/_engine/working/*.csv` — media plans, ad-copy CSVs (intermediate)
+- `Desktop/{Client}/{Project}/_engine/brand-config.json` (single-program) or `Desktop/{Client}/_engine/brand-config.json` (multi-program, at client root)
 
 ### Scheduler state (active)
 - `scheduler.log`, `scheduler-failures.log`, `housekeeping.log` (active, rotate not delete)
@@ -115,16 +118,16 @@ Well-understood junk. Safe to quarantine without per-item review in most cases.
 Rebuildable artifacts. User may have reasons to keep (e.g., won't re-run Perplexity to save $). Surface summary, let user decide per batch.
 
 ### Raw research sources (rebuildable by re-running upstream skill)
-- `Desktop/{Client}/{Project}/sources/perplexity-*.md` older than 90 days
-- `Desktop/{Client}/{Project}/sources/*.png` (screenshots) older than 90 days
-- `Desktop/{Client}/{Project}/sources/*keyword-plan*.csv` older than 90 days
-- `Desktop/{Client}/{Project}/sources/*keyword*.csv` older than 90 days
+- `Desktop/{Client}/{Project}/_engine/sources/perplexity-*.md` older than 90 days
+- `Desktop/{Client}/{Project}/_engine/sources/*.png` (screenshots) older than 90 days
+- `Desktop/{Client}/{Project}/_engine/sources/*keyword-plan*.csv` older than 90 days
+- `Desktop/{Client}/{Project}/_engine/sources/*keyword*.csv` older than 90 days
 
 ### Brand mining artifacts (rebuildable via `personal-brand-dna/scripts/mine_transcripts.py`)
-- `Desktop/Digischola/brand/_mining/**` older than 60 days
+- `Desktop/Digischola/brand/_engine/_mining/**` older than 60 days
 
 ### Trend research weekly folders (rebuildable from trend-research skill)
-- `Desktop/Digischola/brand/_research/trends/{YYYY-WNN}/**` older than 56 days (8 weeks)
+- `Desktop/Digischola/brand/_engine/_research/trends/{YYYY-WNN}/**` older than 56 days (8 weeks)
 - Exception: keep the most recent 8 weeks always
 
 ### Old published drafts (past attribution window)
@@ -136,9 +139,9 @@ Rebuildable artifacts. User may have reasons to keep (e.g., won't re-run Perplex
 - `Desktop/Digischola/brand/queue/assets/{entry_id}/**` where source draft status=`posted` AND older than 180 days
 
 ### Render intermediates
-- `Desktop/Digischola/brand/remotion-studio/out/**/*.mp4` older than 30 days (intermediate scene renders — final goes to `queue/assets/`)
-- `Desktop/Digischola/brand/remotion-studio/out/**/*.png` older than 30 days
-- `Desktop/Digischola/brand/_renders/**` older than 30 days
+- `Desktop/Digischola/brand/_engine/remotion-studio/out/**/*.mp4` older than 30 days (intermediate scene renders — final goes to `queue/assets/`)
+- `Desktop/Digischola/brand/_engine/remotion-studio/out/**/*.png` older than 30 days
+- `Desktop/Digischola/brand/_engine/_renders/**` older than 30 days
 
 ### Rotated log archives
 - `Desktop/Digischola/brand/scheduler.log.*` archives older than 90 days
@@ -160,7 +163,7 @@ Rebuildable artifacts. User may have reasons to keep (e.g., won't re-run Perplex
 - `skills/housekeeping/scan-report.json` and `approved-plan.json` older than 7 days. Most-recent run kept for debugging/diff. Rule id: `stale-scan-runtime`
 
 ### Superseded deliverables (post-walk detector)
-- For each `deliverables/` directory: group files by `(dir, suffix)` where suffix ∈ the DELIVERABLE_SUFFIX_RE list.
+- For each program folder root (presentables sit at the top — HTML/MP4/PDF) and `_engine/working/` directory (intermediate md/json/csv): group files by `(dir, suffix)` where suffix ∈ the DELIVERABLE_SUFFIX_RE list.
 - Within each group, flag older files **only** if the newer file's stem starts with `{older-stem}-` (or vice versa — newer is a prefix of older).
   - Catches: `thrive-market-research.md` superseded by `thrive-retreat-market-research.md`
   - Catches: `kingscliff-landing-page-audit.html` superseded by `kingscliff-lovable-landing-page-audit.html`
@@ -183,8 +186,8 @@ Pattern matches suggest deletion but intent is unclear. Always AskUserQuestion p
 ### Orphaned client folders
 - `Desktop/{FolderName}/` where ALL of the following:
   - Not in strategic-context `Current Clients & Revenue` list
-  - No `wiki/` subfolder modified in last 120 days
-  - No `deliverables/` subfolder modified in last 120 days
+  - No `_engine/wiki/` subfolder modified in last 120 days
+  - No top-level presentables (`*.html`, `*.mp4`, `*.pdf`, `campaign-setup/**`) or `_engine/working/` files modified in last 120 days
   - Top-level folder itself not modified in last 120 days
 - Examples to watch: test clients, one-off projects, old exploratory work
 
@@ -194,14 +197,15 @@ Pattern matches suggest deletion but intent is unclear. Always AskUserQuestion p
 - Rule id: `tools-version-folder`
 
 ### Unknown top-level directories in `Desktop/Digischola/brand/`
-- `{folder}/` where {folder} NOT in known set: {queue, calendars, performance, remotion-studio, hyperframes-scenes, music, face-samples, _mining, _research, weekly-ritual, _archive}
+- `{folder}/` where {folder} NOT in known set: {queue, calendars, performance, videos, social-images, _engine, _archive}
+- Note (2026-04-29 `_engine/` convention): media build dirs (remotion-studio, hyperframes-scenes, music, face-samples, voice-samples) and skill scratch (_mining, _research) live INSIDE `_engine/` now. Do not flag `_engine/` itself as unknown.
 
 ### Unknown top-level directories on `Desktop/`
 - `{folder}/` where {folder} NOT in known set: {Digischola, Claude Skills, .claude, Thrive Retreat, Happy Buddha, ISKM, Salt Air Cinema, Gargi Modi, remotion-promo} AND not modified in last 90 days
 - Update the known set when a new real client is onboarded.
 
 ### Large single files (>50MB) outside known patterns
-- Anything >50MB NOT in: Remotion renders, `music/`, `face-samples/`, deliverable PDFs, brand-identity assets
+- Anything >50MB NOT in: Remotion renders, `_engine/music/`, `_engine/face-samples/`, `_engine/voice-samples/`, top-level presentables (HTML/MP4/PDF), brand-identity assets
 
 ### Loose Desktop clutter
 - `Desktop/Screenshot *.png` older than 30 days

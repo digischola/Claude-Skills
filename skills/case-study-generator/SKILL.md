@@ -15,15 +15,15 @@ Quality bar is also higher: stronger structure, more rigorous metric verificatio
 
 ## Context Loading
 
-**Brand wiki:**
-- `Desktop/Digischola/brand/voice-guide.md` — Conservative client-naming policy
-- `Desktop/Digischola/brand/credentials.md` — public client mentions allowed
-- `Desktop/Digischola/brand/idea-bank.json` — source client-win entries
-- `Desktop/Digischola/brand/pillars.md` — must be LOCKED
+**Brand wiki (post-2026-04-29 `_engine/` convention — DNA inside `_engine/wiki/`, idea-bank inside `_engine/`):**
+- `Desktop/Digischola/brand/_engine/wiki/voice-guide.md` — Conservative client-naming policy
+- `Desktop/Digischola/brand/_engine/wiki/credentials.md` — public client mentions allowed
+- `Desktop/Digischola/brand/_engine/idea-bank.json` — source client-win entries
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — must be LOCKED
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md` — workflow, voice standards, formatting preferences
-- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (top-level `queue/`, `calendars/`, `performance/`, `videos/`, `social-images/`; skill internals + brand DNA wiki in `brand/_engine/`); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 **Skill references:**
 - `references/case-study-structure.md` — Setup → Problem → Diagnosis → Fix → Result → Lesson framework
@@ -171,3 +171,4 @@ Format: [DATE] [CONTEXT] Finding → Action. Keep under 30 lines.
 - [2026-04-20] [Initial build] Built as the specialized engine for client wins (1-2 per month). 4-deliverable bundle: LI carousel, X thread, blog post, IG carousel. All share the same hook + metrics + Setup→Problem→Diagnosis→Fix→Result→Lesson narrative arc. validate_case_study.py enforces hook consistency + metric drift + voice rules + length limits + naming consistency before bundling. Output bundle goes to `pending-approval/case-study-<entry_id>/` so scheduler-publisher ships each deliverable independently. visual-generator's generate_brief.py invoked for LI + IG carousel renders.
 - [2026-04-20] [Public clients allowed] Per `credentials.md`: Thrive Retreats, ISKM Singapore, Happy Buddha Retreats, Samir's Indian Kitchen, Chart & Chime, CrownTECH have publicly-displayed metrics on digischola.in — these names are allowed in case studies. Any other client → Conservative anonymization (e.g., "a wellness retreat client in NSW").
 - [2026-04-20] [Cross-skill] Reads from idea-bank.json (work-capture's data store). Reuses post-writer's validate_post.py for hard-rule per-deliverable validation. Invokes visual-generator's generate_brief.py for the carousel briefs. Outputs feed scheduler-publisher (each deliverable independently scheduleable). performance-review measures engagement per-deliverable to inform which case-study format formulation works best (carousel vs thread vs blog vs IG).
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top. → Updated brand wiki paths in SKILL.md context-loading section (`voice-guide.md`, `credentials.md`, `pillars.md` under `_engine/wiki/`; `idea-bank.json` under `_engine/`) and patched `scripts/case_study.py:read_idea_bank()` to read from `brand/_engine/idea-bank.json`. Output destination `brand/queue/pending-approval/case-study-<entry_id>/` is unchanged (queue stays at top).

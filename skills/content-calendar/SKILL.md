@@ -12,10 +12,10 @@ Plan next week's posts across all channels by pulling from the idea-bank. Output
 Read before running:
 
 **Brand wiki (required):**
-- `Desktop/Digischola/brand/pillars.md` — Status MUST be LOCKED
-- `Desktop/Digischola/brand/channel-playbook.md` — phase + weekly rhythm
-- `Desktop/Digischola/brand/voice-guide.md` — register-per-channel for planned slots
-- `Desktop/Digischola/brand/idea-bank.json` — source entries
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — Status MUST be LOCKED
+- `Desktop/Digischola/brand/_engine/wiki/channel-playbook.md` — phase + weekly rhythm
+- `Desktop/Digischola/brand/_engine/wiki/voice-guide.md` — register-per-channel for planned slots
+- `Desktop/Digischola/brand/_engine/idea-bank.json` — source entries
 
 **Skill references:**
 - `references/cadence-templates.md` — Phase 1 slot grid (Mon LI / Wed LI / Fri LI / Thu carousel / Sat IG)
@@ -38,11 +38,11 @@ Read before running:
 
 ### Step 1: Validate pillars LOCKED
 
-Script runs `load_pillars_status()`. If `pillars.md` first 20 lines do not show `Status: LOCKED`, exit 2 with a prompt to run `personal-brand-dna` first.
+Script runs `load_pillars_status()`. If `_engine/wiki/pillars.md` first 20 lines do not show `Status: LOCKED`, exit 2 with a prompt to run `personal-brand-dna` first.
 
 ### Step 2: Load idea-bank
 
-Script loads `idea-bank.json` and filters to entries with `status: raw` AND no `scheduled_week` set (not already assigned to a previous week).
+Script loads `_engine/idea-bank.json` and filters to entries with `status: raw` AND no `scheduled_week` set (not already assigned to a previous week).
 
 ### Step 3: BLOCK checks
 
@@ -114,7 +114,7 @@ Read `references/feedback-loop.md`. Add dated learning if user overrode slot ass
 
 ## Output Checklist
 
-- [ ] pillars.md status confirmed as LOCKED (script gate)
+- [ ] `_engine/wiki/pillars.md` status confirmed as LOCKED (script gate)
 - [ ] Week start resolved (Monday)
 - [ ] All CRITICAL block conditions passed (non-empty bank, queue under cap)
 - [ ] Slot grid built (12 slots for Phase 1 balanced week)
@@ -142,3 +142,4 @@ See references/feedback-loop.md for protocol.
 - [2026-04-18] [Design decision] v1 does not track historical performance. When `performance-review` ships, it should feed: hooks promoted to Tier 1, pillar weightings for rotation, winning formats per day. Rotation-rules.md has a placeholder section for this.
 - [2026-04-18] [Design decision] Themed-week (`--theme`) is an opt-in override, not a default. Balanced mode is the operational default.
 - [2026-04-22] [Ambiguous-format resolver — user caught the gap] W18 shipped with ZERO video content because the Sat IG slot's `format` was literally `reel-or-carousel` — a decision-punt string that forced Step 6 (visual-generator) to pick. Downstream had no rule, so it always defaulted to carousel. User asked "we did not create any video why so?". Root cause: Skill Protocol Supremacy violation — calendar should commit to one format at build time. Fix: added `resolve_ambiguous_format()` (Pass 5 in `match_slots_to_entries`) with rule: **default reel (IG algorithmic growth bias); override to carousel only when entry is data-heavy** (benchmark/median/threshold/tier/floor keywords, 3+ numeric signals, or CAROUSEL_TAGS). Honors REEL_TAGS (case-study, transformation, win, behind-the-scenes) as explicit reel overrides. Resolutions appear inline in calendar markdown with ‡ marker + reason line. Follow-up finding: W18's Sat IG entry (LP benchmark data) STILL resolves to carousel under the new rule because it's legitimately data-heavy. Real unlock is UPSTREAM: idea-bank is currently 15-of-17 trend entries (data-heavy by design), so Reels stay rare until work-capture adds story/win/transformation entries. Target mix: 60% data-heavy / 40% story-heavy entries for healthy Reel cadence.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top of `Digischola/brand/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

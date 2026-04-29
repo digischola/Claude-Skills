@@ -105,7 +105,10 @@ def auto_detect_day() -> str | None:
 # ── State file ───────────────────────────────────────────────────────────
 
 def state_path(brand_folder: Path) -> Path:
-    return brand_folder / STATE_FILENAME
+    # Post-2026-04-29 _engine/ convention: state lives in brand/_engine/.
+    # brand_folder is the Desktop/Digischola root; the canonical path is
+    # Desktop/Digischola/brand/_engine/weekly-ritual.state.json.
+    return brand_folder / "brand" / "_engine" / STATE_FILENAME
 
 
 def read_state(brand_folder: Path) -> dict:
@@ -120,6 +123,7 @@ def read_state(brand_folder: Path) -> dict:
 
 def write_state(brand_folder: Path, state: dict) -> None:
     p = state_path(brand_folder)
+    p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(state, indent=2, default=str))
 
 
@@ -196,7 +200,7 @@ def _quick_status(brand_folder: Path) -> dict:
     pending = brand_folder / "brand" / "queue" / "pending-approval"
     published = brand_folder / "brand" / "queue" / "published"
     calendars = brand_folder / "brand" / "calendars"
-    ib = brand_folder / "brand" / "idea-bank.json"
+    ib = brand_folder / "brand" / "_engine" / "idea-bank.json"
     pending_count = len(list(pending.glob("*.md"))) if pending.exists() else 0
     published_count = len(list(published.glob("*.md"))) if published.exists() else 0
     calendars_list = []
@@ -381,10 +385,15 @@ async function copyPrompt() {{
 
 def write_launcher_html(brand_folder: Path, day: str, prompt: str,
                         state: dict) -> Path:
-    """Materialize the launcher HTML at brand/weekly-ritual/launcher-<day>.html
+    """Materialize the launcher HTML at brand/_engine/weekly-ritual/launcher-<day>.html
     and return the path. Called right before notification so the banner click
-    lands on a fresh page."""
-    out_dir = brand_folder / "brand" / "weekly-ritual"
+    lands on a fresh page.
+
+    Post-2026-04-29 _engine/ convention: launcher HTML is intermediate skill
+    state (regenerated each fire), so it lives under brand/_engine/ instead
+    of cluttering the top of brand/.
+    """
+    out_dir = brand_folder / "brand" / "_engine" / "weekly-ritual"
     out_dir.mkdir(parents=True, exist_ok=True)
     html = build_launcher_html(day, prompt, brand_folder, state)
     out = out_dir / f"launcher-{day}.html"

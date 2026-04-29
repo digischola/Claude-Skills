@@ -91,7 +91,7 @@ Alongside the markdown image-prompts file, the skill MUST also generate `{busine
 - Per-card metadata visible at a glance: aspect ratio, priority, intended placement
 - **Animated reference-image badge** on cards where `requires_reference_image: true` (pulse animation, sky-blue or amber accent, paperclip icon, "Attach: {reference_subject}" text)
 - Filter chips (priority, angle, reference-required-only)
-- Brand-config-derived styling (read from `deliverables/brand-config.json`)
+- Brand-config-derived styling (read from `_engine/brand-config.json` at the client root)
 - Mobile-readable (founder may copy from phone)
 
 The MD file remains as the analyst-readable archive. The HTML is the production tool.

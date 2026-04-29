@@ -17,10 +17,10 @@ Checks:
 - Import order consistency
 
 Usage:
-  python scripts/validate_output.py <deliverables_root>
+  python scripts/validate_output.py <bundle_root>
 
 Example:
-  python scripts/validate_output.py "/Users/me/Desktop/Retreat House/Retreat House/deliverables/campaign-setup"
+  python scripts/validate_output.py "/Users/me/Desktop/Retreat House/Retreat House/campaign-setup"
 """
 
 from __future__ import annotations

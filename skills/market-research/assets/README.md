@@ -11,7 +11,7 @@ This skill does NOT use a static HTML template. Each dashboard is built from scr
 ## Quality Reference
 
 The benchmark for dashboard quality is the CrownTech dashboard:
-`Gargi Modi/CrownTech/deliverables/CrownTech_Market_Research_Presentation.html`
+`Gargi Modi/CrownTech/CrownTech_Market_Research_Presentation.html`
 
 Every new dashboard should match or exceed this quality level for:
 - Chart.js visualizations (radar, bar, line, doughnut)

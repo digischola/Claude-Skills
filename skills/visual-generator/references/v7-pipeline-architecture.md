@@ -59,7 +59,7 @@ Draft markdown → parse scenes → clone VO → extract word timestamps → per
            │
 ┌──────────▼───────────────────────────────────────────────────────────┐
 │ 5. RENDER EACH SCENE (Remotion)                                      │
-│    cd brand/remotion-studio && npx remotion render <CompId>          │
+│    cd brand/_engine/remotion-studio && npx remotion render <CompId>  │
 │      --props=<tempfile>.json <assets>/scene-N-rmt.mp4                │
 │    30 fps · 1080×1920 · H.264 · CRF 18 · yuv420p                     │
 │    Chromium OpenGL renderer: angle (required for Paper shaders)      │
@@ -195,7 +195,7 @@ Every composition pulls from `theme/brand.ts`:
 - `scripts/render_html_carousel.py` / `render_html_mp4.py` — Path A (carousels/animated)
 - `scripts/generate_brief.py` — Path A brief generator
 
-### Studio side (`brand/remotion-studio/src/`)
+### Studio side (`brand/_engine/remotion-studio/src/`)
 
 - `Root.tsx` — composition registry (id → component + duration + defaultProps)
 - `theme/brand.ts` — palette, fonts, subtitle tokens, easing, per-scene durations

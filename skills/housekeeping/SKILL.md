@@ -46,7 +46,7 @@ Within 7 days of quarantine:
 ```
 python3 scripts/rollback.py --date YYYY-MM-DD
 python3 scripts/rollback.py --date YYYY-MM-DD --pattern "*.csv"
-python3 scripts/rollback.py --date YYYY-MM-DD --path "Desktop/Digischola/brand/_mining/voice-samples.txt"
+python3 scripts/rollback.py --date YYYY-MM-DD --path "Desktop/Digischola/brand/_engine/_mining/voice-samples.txt"
 ```
 
 Restores items to their original paths. Fails loudly on destination-conflict (file was recreated at original path in the meantime — requires manual resolution).
@@ -57,12 +57,12 @@ Read `references/cleanup-rules.md` §PROTECTED for full list. Highlights that sh
 
 - `.claude/CLAUDE.md`, `.claude/shared-context/*.md`
 - Any skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, `evals/` (the architecture itself)
-- LOCKED brand wiki: `pillars.md`, `voice-guide.md`, `brand-identity.md`, `credentials.md`, `channel-playbook.md`, `icp.md`, `brand-wiki.md`, `wiki-config.json`
-- `idea-bank.json`, `credential-usage-log.json`, `weekly-ritual.state.json`, `performance/log.json`, active `scheduler.log`
-- Active client wiki pages (`Desktop/{Client}/{Project}/wiki/**`)
-- Drafts in `queue/pending-approval/` where `posting_status ≠ posted`
+- LOCKED brand wiki (under `_engine/wiki/`): `pillars.md`, `voice-guide.md`, `brand-identity.md`, `credentials.md`, `channel-playbook.md`, `icp.md`, `brand-wiki.md`, `voice-flavor.md`, `voice-lock.md`
+- `_engine/idea-bank.json`, `_engine/credential-usage-log.json`, `_engine/weekly-ritual.state.json`, `_engine/wiki-config.json`, `performance/log.json`, active `scheduler.log`
+- Active client wiki pages (`Desktop/{Client}/{Project}/_engine/wiki/**`)
+- Drafts in `queue/pending-approval/` where `posting_status ≠ posted` (queue stays at top — unchanged)
 - Drafts in `queue/published/` newer than 180 days (performance-review attribution window)
-- Primary client deliverables (research, strategy, copy, audit, optimization reports — all .md/.html/.json/.csv in `deliverables/`)
+- Primary client presentables at folder root (HTML/MP4/PDF/campaign-setup bundles) + intermediate working files in `_engine/working/` (md/json/csv reports, briefs, page-specs)
 - `.git/**` anywhere, macOS Keychain (filesystem-untouchable anyway)
 
 ## References
@@ -87,3 +87,5 @@ Read `references/cleanup-rules.md` §PROTECTED for full list. Highlights that sh
 - [2026-04-24] [NAME-SIGNALS-INTENT-PROVEN-UNRELIABLE] Second housekeeping run on the same `2026-04-22-cleared` folder. After detailed inspection (per pre-quarantine-inspect rule above), surfaced 5 future-dated drafts (Apr 28 a5592011, Apr 29 77235986, Apr 30 39d288c2, Apr 30 6960361a, May 02 bb6662fc) with entry-IDs absent from the active queue. User chose "Skip everything — keep the archive as-is" despite the folder being explicitly named `*cleared*`. Confirms the prior rule: name-signals-intent is unreliable when the folder contains future-scheduled work the user may have re-shuffled hastily. → New rule: when a `*cleared*` folder contains pending-approval-shaped drafts dated AFTER today, downgrade the recommendation tier from "Quarantine all" to "Quarantine only obviously-stale media files; preserve all .md drafts." The cleared-archive name is a soft signal, not a quarantine warrant. The `scripts/inspect_folder.py` helper is still pending and again required hand-crafted bash this run — promote to higher priority.
 
 - [2026-04-24] [SKIP-RUN-IS-VALID-OUTCOME] Run completed with 0 items quarantined and 0 bytes reclaimed. Validate step warned "no manifest" because nothing was moved — that's correct behavior, not an error. State file updated normally to record the no-op run so the 24h idempotency check still works. Rule: a "skip everything" outcome is a successful run, not a failed one. Treat zero-quarantine as data — it tells you the user wants to keep what they have and bloat tolerance is currently high. After 3+ consecutive skip-everything runs, surface a question: "you've kept everything 3 weeks running — should I lower the AUTO threshold or expand PROTECTED rules?" Don't keep asking the same questions if the answer is consistently no.
+
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top. Client folders mirror: `_engine/wiki/`, `_engine/sources/`, `_engine/working/`, with presentables (HTML/MP4/PDF/campaign-setup bundles) at the program-folder root. → Updated `references/cleanup-rules.md` (PROTECTED brand wiki paths under `_engine/wiki/`, client wiki + deliverables redefined for new layout, raw-research + mining + render-intermediates paths under `_engine/`, KNOWN_BRAND_FOLDERS reduced to top-level set, large-file allowlist), `references/skill-coordination.md` (every never-delete and rebuildable path), `references/quarantine-protocol.md` (flatten examples), SKILL.md (Protected list + rollback example), `scripts/scan.py` (KNOWN_BRAND_FOLDERS + LOCKED_BRAND_FILES sets, is_protected for `_engine/wiki/` brand DNA + client wiki + presentables/working files, classify_likely_bloat paths under `_engine/`, large-file allowlist, analyze_deliverables_groups now scans both folder roots and `_engine/working/`), `scripts/cleanup.py` (PROTECTED_NAMES added voice-flavor/lock, defense-in-depth check for `_engine/wiki/` and presentables + `_engine/working/`), `scripts/rollback.py` (docstring example). Recognized that `_engine/` is the new internals folder — its contents are NOT flagged as bloat just for being below the top level; legitimate top-level entries are now exactly `{queue, calendars, performance, videos, social-images, _engine, _archive, tools}`.

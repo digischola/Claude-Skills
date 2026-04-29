@@ -8,7 +8,7 @@ This is the reference the skill reads (via Claude inside a running session, OR b
 |---|---|
 | source-probe.json | from `probe_source.sh` — dims, duration, aspect, silent segments |
 | transcript.json | word-level whisper output |
-| brand config | `Desktop/<Client>/brand/brand-identity.md` for Digischola; client-specific for others |
+| brand config | `Desktop/Digischola/brand/_engine/wiki/brand-identity.md` for Digischola; `Desktop/<Client>/{Project}/_engine/wiki/brand-identity.md` (or `Desktop/<Client>/_engine/wiki/brand-identity.md` for multi-program clients) for others — post-2026-04-29 `_engine/` convention |
 | brief | one-line creative direction from the user |
 | speaker name + title | from brand config or user-supplied |
 | face-bboxes.json | optional, from `analyze_source.py` |

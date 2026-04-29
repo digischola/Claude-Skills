@@ -9,7 +9,7 @@
       "assertions": [
         {
           "name": "folder_created",
-          "description": "Client folder created at Desktop/Thrive Retreat/Thrive Retreat/ with sources/, wiki/, deliverables/"
+          "description": "Client folder created at Desktop/Thrive Retreat/Thrive Retreat/ with _engine/ (containing sources/, wiki/, working/)"
         },
         {
           "name": "wiki_initialized",
@@ -17,7 +17,7 @@
         },
         {
           "name": "brand_extracted",
-          "description": "brand-config.json saved to deliverables/ with actual colors from the website"
+          "description": "brand-config.json saved to _engine/ with actual colors from the website"
         },
         {
           "name": "wellness_lens_loaded",
@@ -140,7 +140,7 @@
         },
         {
           "name": "brand_config_saved",
-          "description": "brand-config.json saved to deliverables/ with colors, fonts, logo, and confidence level"
+          "description": "brand-config.json saved to _engine/ with colors, fonts, logo, and confidence level"
         }
       ],
       "files": []

@@ -13,13 +13,13 @@ python3 visual-generator/scripts/enroll_voice.py
 
 Opens a dark-mode browser page at `http://127.0.0.1:8766`. Read 10 varied
 sentences, Mac mic captures via MediaRecorder API, each sample auto-converted
-to 24kHz mono WAV and saved to `brand/voice-samples/`. ~3 min total.
+to 24kHz mono WAV and saved to `brand/_engine/voice-samples/`. ~3 min total.
 
 Sentences cover varied tone — greeting, credentials, data, rhetorical question,
 punchy insight, measured reframe — so F5-TTS learns Mayank's full range, not
 just a neutral baseline.
 
-After all 10 recorded, `brand/voice-lock.md` auto-writes with transcripts +
+After all 10 recorded, `brand/_engine/wiki/voice-lock.md` auto-writes with transcripts +
 metadata. The wizard self-shuts-down.
 
 Status check / re-enrollment:

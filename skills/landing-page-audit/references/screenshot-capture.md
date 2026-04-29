@@ -128,7 +128,7 @@ This captures the above-the-fold mobile view — the most critical viewport for 
 - Main content area (form, features, testimonials)
 - Footer area (CTA repetition, trust signals)
 
-Save screenshots to: `{client-folder}/sources/{page-name}-mobile.png`
+Save screenshots to: `{client-folder}/_engine/sources/{page-name}-mobile.png`
 If multiple scroll captures: `{page-name}-mobile-1.png`, `{page-name}-mobile-2.png`, etc.
 
 ### 4. Desktop Screenshot (1440×900px)
@@ -145,7 +145,7 @@ Wait 2 seconds for responsive reflow.
 Tool: read_page (screenshot mode)
 ```
 
-Save to: `{client-folder}/sources/{page-name}-desktop.png`
+Save to: `{client-folder}/_engine/sources/{page-name}-desktop.png`
 
 ### 5. Restore Browser
 

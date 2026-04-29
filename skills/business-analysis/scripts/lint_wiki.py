@@ -217,7 +217,7 @@ def lint_index_page(wiki_dir):
 
     for page in wiki_pages:
         if page not in index_content:
-            issues.append(("WARN", "index.md", f"Page '{page}' exists in wiki/ but not referenced in index.md"))
+            issues.append(("WARN", "index.md", f"Page '{page}' exists in _engine/wiki/ but not referenced in index.md"))
 
     return issues
 
@@ -245,8 +245,8 @@ def lint_log_page(wiki_dir):
 def lint_wiki_config(client_dir):
     """Check wiki-config.json page registry matches actual files."""
     issues = []
-    config_path = client_dir / "wiki-config.json"
-    wiki_dir = client_dir / "wiki"
+    config_path = client_dir / "_engine" / "wiki-config.json"
+    wiki_dir = client_dir / "_engine" / "wiki"
 
     if not config_path.exists():
         issues.append(("ERROR", "wiki-config.json", "wiki-config.json does not exist"))
@@ -276,7 +276,7 @@ def lint_wiki_config(client_dir):
     # Pages registered but not on disk
     orphan_registrations = registered_pages - actual_pages
     for page in orphan_registrations:
-        issues.append(("ERROR", "wiki-config.json", f"Page '{page}' registered in config but file missing from wiki/"))
+        issues.append(("ERROR", "wiki-config.json", f"Page '{page}' registered in config but file missing from _engine/wiki/"))
 
     return issues
 
@@ -313,7 +313,7 @@ def main():
         sys.exit(1)
 
     client_dir = Path(sys.argv[1])
-    wiki_dir = client_dir / "wiki"
+    wiki_dir = client_dir / "_engine" / "wiki"
 
     if not wiki_dir.is_dir():
         print(f"ERROR: {wiki_dir} is not a directory")
@@ -323,7 +323,7 @@ def main():
 
     # Detect multi-program wiki type — program folders only hold per-program
     # research (strategy.md etc.), not the 4 shared brand-DNA pages.
-    config_path = client_dir / "wiki-config.json"
+    config_path = client_dir / "_engine" / "wiki-config.json"
     wiki_type = "standard"
     program_pages = []
     if config_path.exists():

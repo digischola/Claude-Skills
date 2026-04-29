@@ -141,7 +141,7 @@ Load this file in Step 3. Contains decision thresholds, analysis logic, and outp
 
 **Rotation-brief handoff to `ad-copywriter` Refresh Mode:**
 
-When any creative hits URGENT or PLAN status, emit a `{client}-rotation-brief.json` to `{client-folder}/deliverables/`. This is the machine-readable trigger that puts ad-copywriter into Refresh Mode (see `ad-copywriter/references/refresh-mode.md`).
+When any creative hits URGENT or PLAN status, emit a `{client}-rotation-brief.json` to `{client-folder}/_engine/working/`. This is the machine-readable trigger that puts ad-copywriter into Refresh Mode (see `ad-copywriter/references/refresh-mode.md`).
 
 Required top-level keys: `client_name`, `analysis_date`, `source_report`, `source_creative_brief`, `refresh_urgency`, `fatigued_creatives[]`, `strategy_guardrails`.
 

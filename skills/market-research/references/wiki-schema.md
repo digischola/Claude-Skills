@@ -9,26 +9,27 @@ Every client gets a persistent wiki — a living knowledge base that compounds a
 ```
 {Client Name}/
 ├── {Project or Business}/
-│   ├── sources/                    ← Raw, immutable inputs
-│   │   ├── perplexity-YYYY-MM-DD.md
-│   │   ├── client-brief.md
-│   │   ├── performance-YYYY-MM.csv
-│   │   └── ...
-│   ├── wiki/                       ← LLM-maintained, compounds over time
-│   │   ├── index.md                ← Content catalog, updated on every ingest
-│   │   ├── log.md                  ← Append-only chronological record
-│   │   ├── business.md             ← Business fundamentals
-│   │   ├── market.md               ← Local market dynamics
-│   │   ├── competitors.md          ← Competitive landscape
-│   │   ├── audience.md             ← Audience & customer psychology
-│   │   ├── benchmarks.md           ← Industry benchmarks (Meta + Google)
-│   │   ├── digital-presence.md     ← Digital presence & ad landscape
-│   │   └── strategy.md             ← Strategic implications & recommendations
-│   ├── deliverables/               ← Final outputs for client/team
-│   │   ├── research-dashboard.html
-│   │   ├── brand-config.json
-│   │   └── ...
-│   └── wiki-config.json            ← Wiki metadata (created date, last update, source count)
+│   ├── research-dashboard.html     ← Final HTML/PDF/MP4 presentables at folder root
+│   └── _engine/                    ← Skill internals (everything Mayank doesn't double-click)
+│       ├── sources/                ← Raw, immutable inputs
+│       │   ├── perplexity-YYYY-MM-DD.md
+│       │   ├── client-brief.md
+│       │   ├── performance-YYYY-MM.csv
+│       │   └── ...
+│       ├── wiki/                   ← LLM-maintained, compounds over time
+│       │   ├── index.md            ← Content catalog, updated on every ingest
+│       │   ├── log.md              ← Append-only chronological record
+│       │   ├── business.md         ← Business fundamentals
+│       │   ├── market.md           ← Local market dynamics
+│       │   ├── competitors.md      ← Competitive landscape
+│       │   ├── audience.md         ← Audience & customer psychology
+│       │   ├── benchmarks.md       ← Industry benchmarks (Meta + Google)
+│       │   ├── digital-presence.md ← Digital presence & ad landscape
+│       │   └── strategy.md         ← Strategic implications & recommendations
+│       ├── working/                ← Intermediate skill output (md reports, json briefs)
+│       │   └── {business-name}-market-research.md
+│       ├── brand-config.json       ← Skill-managed config files
+│       └── wiki-config.json        ← Wiki metadata (created date, last update, source count)
 ```
 
 ---
@@ -99,7 +100,7 @@ Each wiki page follows this structure:
 
 ---
 
-## Wiki Config (wiki-config.json)
+## Wiki Config (`_engine/wiki-config.json`)
 
 ```json
 {
@@ -108,7 +109,7 @@ Each wiki page follows this structure:
   "created": "2026-04-07",
   "last_updated": "2026-04-07",
   "sources_ingested": 1,
-  "brand_config": "deliverables/brand-config.json",
+  "brand_config": "brand-config.json",
   "pages": ["business", "market", "competitors", "audience", "benchmarks", "digital-presence", "strategy"]
 }
 ```
@@ -121,5 +122,5 @@ Each wiki page follows this structure:
 2. **Wiki pages compound.** New data updates existing pages — doesn't replace them. Change history tracks what changed and why.
 3. **Gaps carry forward.** BLANK fields from the first research pass stay visible until filled by new data. They're a to-do list, not a failure.
 4. **Cross-references.** Wiki pages link to each other. A finding in competitors.md that affects strategy gets linked in both places.
-5. **Source traceability.** Every claim traces back to a specific source file in sources/. The accuracy protocol (EXTRACTED/INFERRED/BLANK) applies to wiki content exactly like standalone reports.
+5. **Source traceability.** Every claim traces back to a specific source file in `_engine/sources/`. The accuracy protocol (EXTRACTED/INFERRED/BLANK) applies to wiki content exactly like standalone reports.
 6. **One wiki per project.** Different projects for the same client get separate wikis. CrownTech IT Relocation ≠ CrownTech Cloud Services.

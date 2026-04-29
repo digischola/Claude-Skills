@@ -219,7 +219,7 @@ def render_reel_brief(meta, body, entry_id, source_path: Path):
     lines.append(f"# Visual Brief: {entry_id} → Reel (Hyperframes)")
     lines.append("")
     lines.append("## Engine")
-    lines.append("Hyperframes at `/Users/digischola/Desktop/Digischola/brand/hyperframes-scenes/`.")
+    lines.append("Hyperframes at `/Users/digischola/Desktop/Digischola/brand/_engine/hyperframes-scenes/`.")
     lines.append("Use the built-in 'make a video' skill. Start Claude Code inside hyperframes-scenes. Paste this brief as input.")
     lines.append("")
     lines.append(BRAND_BLOCK)
@@ -391,7 +391,7 @@ def main():
         print(f"  3. Run that command in Claude Code to render HTML → {spec['render_output']}.")
         print(f"  4. Run import_assets.py to catalog the output into queue.")
     else:  # Hyperframes
-        print(f"  1. cd into /Users/digischola/Desktop/Digischola/brand/hyperframes-scenes/")
+        print(f"  1. cd into /Users/digischola/Desktop/Digischola/brand/_engine/hyperframes-scenes/")
         print(f"  2. Start Claude Code there. Invoke 'make a video' skill with this brief.")
         print(f"  3. Iterate on localhost preview. Approve and render to MP4.")
         print(f"  4. Run import_assets.py on the output MP4 to catalog into queue.")

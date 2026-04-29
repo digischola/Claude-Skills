@@ -82,7 +82,8 @@ def now_ist_iso() -> str:
 
 
 def read_idea_bank(brand_folder: Path) -> dict:
-    p = brand_folder / "brand" / "idea-bank.json"
+    # Post-2026-04-29 _engine/ convention: idea-bank lives in brand/_engine/.
+    p = brand_folder / "brand" / "_engine" / "idea-bank.json"
     if not p.exists():
         sys.exit(f"idea-bank.json not found at {p}")
     return json.loads(p.read_text())

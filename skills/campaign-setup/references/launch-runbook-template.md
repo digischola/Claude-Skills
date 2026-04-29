@@ -1,6 +1,6 @@
 # Launch Runbook Template
 
-Fill-in template for `deliverables/campaign-setup/launch-runbook.md`. This is the ops playbook for the actual upload. Follow it top to bottom on launch day.
+Fill-in template for `{{CLIENT_DIR}}/campaign-setup/launch-runbook.md`. This is the ops playbook for the actual upload. Follow it top to bottom on launch day.
 
 Rule: no shortcut. Each step has a verification. Never click Post in Ads Editor or Publish in Ads Manager without completing the prior step's check.
 
@@ -35,8 +35,8 @@ Rule: no shortcut. Each step has a verification. Never click Post in Ads Editor 
 
 ### 0.3 Backups
 - [ ] Google Ads Editor: `Account → Get recent changes` (snapshot current state)
-- [ ] Google Ads Editor: `File → Export → Entire account as CSV` → save to `deliverables/campaign-setup/backups/google-pre-launch-{{DATE}}/`
-- [ ] Meta Ads Manager: filter to all existing campaigns → Export → save to `deliverables/campaign-setup/backups/meta-pre-launch-{{DATE}}/`
+- [ ] Google Ads Editor: `File → Export → Entire account as CSV` → save to `{{CLIENT_DIR}}/campaign-setup/backups/google-pre-launch-{{DATE}}/`
+- [ ] Meta Ads Manager: filter to all existing campaigns → Export → save to `{{CLIENT_DIR}}/campaign-setup/backups/meta-pre-launch-{{DATE}}/`
 - [ ] Wiki `log.md` entry: "Pre-launch backup saved at {{TIMESTAMP}}"
 
 ---
@@ -153,13 +153,13 @@ Final authorization step. Do not proceed without explicit client confirmation ti
 - [ ] Google Ads UI → Campaigns → select all {{CLIENT_NAME}} campaigns
 - [ ] Bulk action → Enable
 - [ ] Refresh — all show "Eligible" or "Limited by budget"
-- [ ] Screenshot for audit trail → `deliverables/campaign-setup/launch-evidence/google-live-{{DATE}}.png`
+- [ ] Screenshot for audit trail → `{{CLIENT_DIR}}/campaign-setup/launch-evidence/google-live-{{DATE}}.png`
 
 ### 3.2 Enable Meta campaigns
 - [ ] Ads Manager → Campaigns → select all new campaigns
 - [ ] Toggle Status → Active
 - [ ] Refresh → status shows "Active" or "In review"
-- [ ] Screenshot → `deliverables/campaign-setup/launch-evidence/meta-live-{{DATE}}.png`
+- [ ] Screenshot → `{{CLIENT_DIR}}/campaign-setup/launch-evidence/meta-live-{{DATE}}.png`
 
 ### 3.3 Launch announcement
 - [ ] Slack / email to client: "Campaigns live at {{TIMESTAMP}}. Monitoring window 0-24h."
@@ -223,4 +223,4 @@ Rollback = Pause, NOT Delete. Preserves historical data for debugging.
 - Meta Ads Manager: https://adsmanager.facebook.com/adsmanager/manage/campaigns?act={{META_AD_ACCOUNT_ID}}
 - Meta Events Manager: https://business.facebook.com/events_manager2/list/pixel/{{META_PIXEL_ID}}
 - Landing page(s): {{LANDING_URLS}}
-- Wiki log: `{{CLIENT_DIR}}/wiki/log.md`
+- Wiki log: `{{CLIENT_DIR}}/_engine/wiki/log.md`

@@ -4,10 +4,10 @@ Detailed step-by-step Claude follows when Mayank pastes "run wednesday planning"
 
 ## Pre-checks (BLOCK if any fails)
 
-1. `Desktop/Digischola/brand/pillars.md` exists AND status is LOCKED
-2. `Desktop/Digischola/brand/idea-bank.json` exists (the FILE — entry count check moved to after Step 1, since Step 1's whole job is to populate the bank via trend-research)
-3. `Desktop/Digischola/brand/queue/pending-approval/` exists (create if not)
-4. `last_fired_sunday` in `brand/weekly-ritual.state.json` is >12h ago (idempotency)
+1. `Desktop/Digischola/brand/_engine/wiki/pillars.md` exists AND status is LOCKED
+2. `Desktop/Digischola/brand/_engine/idea-bank.json` exists (the FILE — entry count check moved to after Step 1, since Step 1's whole job is to populate the bank via trend-research)
+3. `Desktop/Digischola/brand/queue/pending-approval/` exists (create if not — queue/ stays at top)
+4. `last_fired_sunday` in `brand/_engine/weekly-ritual.state.json` is >12h ago (idempotency)
 
 If any pre-check fails, refuse and explain. Do not proceed.
 
@@ -29,7 +29,7 @@ Invoke the `trend-research` skill in Mode 1 (autonomous WebSearch).
   4. Run `python3 trend-research/scripts/trend_research.py dedupe-check --json '<candidate>'` — skip if DUP or QUALITY-REJECT.
   5. For survivors, run `python3 trend-research/scripts/trend_research.py ingest --pillar <slug> --json '<candidate>'`.
 - After all 3 pillars: run `python3 trend-research/scripts/trend_research.py stats` to confirm count.
-- Append per-pillar count + skipped reasons to `brand/_research/trends/<week>/scan-log.md`.
+- Append per-pillar count + skipped reasons to `brand/_engine/_research/trends/<week>/scan-log.md`.
 
 Target: 3-6 candidates added per pillar (9-18 total per week). If <3 added for any pillar, surface a WARNING — Mayank may want to manually run Mode 2 (Perplexity-prompt deep research) for that pillar.
 
@@ -84,7 +84,7 @@ For each Mon/Wed/Fri "anchor" post (the LinkedIn primary), check if content-cale
 
 For each draft whose channel/format requires media (carousels, quote cards, animated, reels):
 - Invoke visual-generator with target format
-- Brief lands at `brand/queue/briefs/<date>-<entry_id>-<target>-brief.md`
+- Brief lands at `brand/queue/briefs/<date>-<entry_id>-<target>-brief.md` (queue/ stays at top — briefs/ is inside queue/)
 - Surface to Mayank: "These N briefs need rendering in Claude Design / Hyperframes"
 - Do NOT auto-render — that's a manual creative step
 
@@ -125,11 +125,11 @@ Produce a markdown summary:
 - Drafts scheduled: P
 - Warnings: pillar shortage, missing entries, etc.
 
-Write the summary to `brand/weekly-ritual/sunday-2026-WXX.md` for traceability.
+Write the summary to `brand/_engine/weekly-ritual/sunday-2026-WXX.md` for traceability.
 
 ## Step 9 — Update state
 
-Write to `brand/weekly-ritual.state.json`:
+Write to `brand/_engine/weekly-ritual.state.json`:
 ```json
 {
   "last_fired_sunday": "2026-04-19T09:00:00+05:30",

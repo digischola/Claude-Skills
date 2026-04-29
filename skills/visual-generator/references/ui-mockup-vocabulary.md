@@ -1,6 +1,6 @@
 # UI Mockup Vocabulary — v7.2 Primitive Catalog
 
-Canonical spec for the 10 primitives in `brand/remotion-studio/src/components/UIMockups.tsx`. Every Remotion composition composes these — never roll a one-off mockup. If a scene needs something new, add a primitive here first.
+Canonical spec for the 10 primitives in `brand/_engine/remotion-studio/src/components/UIMockups.tsx`. Every Remotion composition composes these — never roll a one-off mockup. If a scene needs something new, add a primitive here first.
 
 Design lineage: **Cody Plofker teardown aesthetic** — realistic browser chrome, before/after, eye-gaze, callout arrows, data highlights. NO geometric abstractions. NO generic icons. Every scene must feel like the viewer is watching a real LP being diagnosed.
 

@@ -25,9 +25,10 @@ import sys
 from pathlib import Path
 
 REPO = Path("/Users/digischola/Desktop/Digischola")
-TOKENS_JSON = REPO / "brand/remotion-studio/src/theme/design-tokens.json"
-TOKENS_CSS = REPO / "brand/hyperframes-scenes/shared/tokens.css"
-BRAND_TS = REPO / "brand/remotion-studio/src/theme/brand.ts"
+# Post-2026-04-29 _engine/ convention: media build dirs live under brand/_engine/.
+TOKENS_JSON = REPO / "brand/_engine/remotion-studio/src/theme/design-tokens.json"
+TOKENS_CSS = REPO / "brand/_engine/hyperframes-scenes/shared/tokens.css"
+BRAND_TS = REPO / "brand/_engine/remotion-studio/src/theme/brand.ts"
 
 
 def generate_tokens_css(tokens: dict) -> str:

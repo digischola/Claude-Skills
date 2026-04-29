@@ -4,8 +4,8 @@ TOW Path B Reel prompt packet generator (Claude-driven, Gemini Pro paste-target)
 
 Reads:
   - A Reel-format draft .md file (must have format: reel + scene breakdown)
-  - brand/face-lock.md (CHARACTER LOCK BLOCK + skin enhancer + negative prompt)
-  - brand/voice-lock.md (reference samples for clone_voice.py)
+  - brand/_engine/wiki/face-lock.md (CHARACTER LOCK BLOCK + skin enhancer + negative prompt)
+  - brand/_engine/wiki/voice-lock.md (reference samples for clone_voice.py)
 
 Outputs:
   - One HTML "Reel packet" page at /tmp/reel-packet-<entry_id>.html
@@ -211,7 +211,8 @@ def classify_scene_type(scene: dict, idx: int, total: int) -> str:
 
 
 def parse_face_lock(brand: Path) -> dict:
-    p = brand / "brand" / "face-lock.md"
+    # Post-2026-04-29 _engine/ convention: face-lock.md is brand DNA wiki.
+    p = brand / "brand" / "_engine" / "wiki" / "face-lock.md"
     if not p.exists():
         return {"character_block": "", "skin_block": "", "negative": ""}
     text = p.read_text(encoding="utf-8")
@@ -374,7 +375,7 @@ def build_kling_prompt(scene: dict, draft_meta: dict, face: dict | None = None) 
 
     return f"""KLING PROMPT — face-body scene (paste into Kling Pro Image-to-Video + Lip Sync)
 
-REFERENCE IMAGE: upload {scene.get('reference', 'face-01.jpg')} from brand/face-samples/ as the subject reference.
+REFERENCE IMAGE: upload {scene.get('reference', 'face-01.jpg')} from brand/_engine/face-samples/ as the subject reference.
 
 SCENE (visual only, NO text, NO captions, NO UI elements, NO numbers on screen):
 {visual}
@@ -772,7 +773,7 @@ def main():
     vo_script = parse_vo_script(body)
     face = parse_face_lock(args.brand_folder)
     if not face["character_block"]:
-        print("⚠ brand/face-lock.md missing or no CHARACTER LOCK BLOCK. Image prompts will be incomplete.")
+        print("⚠ brand/_engine/wiki/face-lock.md missing or no CHARACTER LOCK BLOCK. Image prompts will be incomplete.")
 
     entry_id = fm.get("entry_id", "unknown")
     assets_dir = args.brand_folder / "brand" / "queue" / "assets" / entry_id

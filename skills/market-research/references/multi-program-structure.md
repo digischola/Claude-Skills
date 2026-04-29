@@ -26,55 +26,58 @@ When a client has multiple programs, products, or business lines that need indep
 ### Single-Program (default)
 ```
 Desktop/{Client Name}/{Business Name}/
-├── wiki/
-│   ├── index.md
-│   ├── log.md
-│   ├── business.md
-│   ├── brand-identity.md
-│   ├── digital-presence.md
-│   ├── offerings.md
-│   ├── strategy.md          ← research lives here
-│   └── ...
-├── deliverables/
-│   ├── brand-config.json
-│   ├── {name}-market-research.md
-│   └── {name}-research-dashboard.html
-├── sources/
-└── wiki-config.json
+├── {name}-research-dashboard.html    ← presentables at folder root
+└── _engine/
+    ├── wiki/
+    │   ├── index.md
+    │   ├── log.md
+    │   ├── business.md
+    │   ├── brand-identity.md
+    │   ├── digital-presence.md
+    │   ├── offerings.md
+    │   ├── strategy.md               ← research lives here
+    │   └── ...
+    ├── working/
+    │   └── {name}-market-research.md
+    ├── sources/
+    ├── brand-config.json
+    └── wiki-config.json
 ```
 
 ### Multi-Program
 ```
 Desktop/{Client Name}/
-├── _shared/                          ← shared brand DNA (created by business-analysis)
+├── _engine/                              ← client-wide internals (formerly `_shared/`)
 │   ├── wiki/
-│   │   ├── index.md                  ← master index linking all programs
-│   │   ├── log.md                    ← shared-level changes only
-│   │   ├── business.md               ← core business DNA
-│   │   ├── brand-identity.md         ← visual identity, fonts, colors
-│   │   ├── digital-presence.md       ← website, social, analytics
-│   │   └── offerings.md              ← all offerings overview (links to program wikis)
-│   ├── deliverables/
-│   │   └── brand-config.json         ← single source of truth for brand
-│   └── wiki-config.json              ← type: "shared", programs: [list]
+│   │   ├── index.md                      ← master index linking all programs
+│   │   ├── log.md                        ← client-wide changes only
+│   │   ├── business.md                   ← core business DNA
+│   │   ├── brand-identity.md             ← visual identity, fonts, colors
+│   │   ├── digital-presence.md           ← website, social, analytics
+│   │   └── offerings.md                  ← all offerings overview (links to program wikis)
+│   ├── brand-config.json                 ← single source of truth for brand
+│   └── wiki-config.json                  ← type: "shared", programs: [list]
 │
-├── {Program 1 Name}/                 ← per-program research
-│   ├── wiki/
-│   │   ├── index.md                  ← program-specific index
-│   │   ├── log.md                    ← program-specific changes
-│   │   ├── strategy.md               ← market research for this program
-│   │   └── ...                       ← any dimension pages needed
-│   ├── deliverables/
-│   │   ├── {program}-market-research.md
-│   │   └── {program}-research-dashboard.html
-│   ├── sources/
-│   └── wiki-config.json              ← type: "program", parent: "../_shared"
+├── {Program 1 Name}/                     ← per-program research
+│   ├── {program}-research-dashboard.html ← program presentables at program root
+│   └── _engine/
+│       ├── wiki/
+│       │   ├── index.md                  ← program-specific index
+│       │   ├── log.md                    ← program-specific changes
+│       │   ├── strategy.md               ← market research for this program
+│       │   └── ...                       ← any dimension pages needed
+│       ├── working/
+│       │   └── {program}-market-research.md
+│       ├── sources/
+│       └── wiki-config.json              ← type: "program", parent: "../_engine"
 │
 ├── {Program 2 Name}/
-│   ├── wiki/
-│   ├── deliverables/
-│   ├── sources/
-│   └── wiki-config.json
+│   ├── {program}-research-dashboard.html
+│   └── _engine/
+│       ├── wiki/
+│       ├── working/
+│       ├── sources/
+│       └── wiki-config.json
 ```
 
 ---
@@ -83,18 +86,19 @@ Desktop/{Client Name}/
 
 | Content | Single-Program | Multi-Program |
 |---|---|---|
-| Brand colors, fonts, logo | `deliverables/brand-config.json` | `_shared/deliverables/brand-config.json` |
-| Business fundamentals | `wiki/business.md` | `_shared/wiki/business.md` |
-| Brand identity | `wiki/brand-identity.md` | `_shared/wiki/brand-identity.md` |
-| Digital presence | `wiki/digital-presence.md` | `_shared/wiki/digital-presence.md` |
-| Offerings overview | `wiki/offerings.md` | `_shared/wiki/offerings.md` |
-| Market research / strategy | `wiki/strategy.md` | `{Program}/wiki/strategy.md` |
-| Keyword data | `sources/keyword_data_*.json` | `{Program}/sources/keyword_data_*.json` |
-| Perplexity research | `sources/perplexity-*.md` | `{Program}/sources/perplexity-*.md` |
-| Report + dashboard | `deliverables/` | `{Program}/deliverables/` |
-| Competitor audit | `wiki/strategy.md` | `{Program}/wiki/strategy.md` |
+| Brand colors, fonts, logo | `_engine/brand-config.json` | `_engine/brand-config.json` (at client root) |
+| Business fundamentals | `_engine/wiki/business.md` | `_engine/wiki/business.md` (at client root) |
+| Brand identity | `_engine/wiki/brand-identity.md` | `_engine/wiki/brand-identity.md` (at client root) |
+| Digital presence | `_engine/wiki/digital-presence.md` | `_engine/wiki/digital-presence.md` (at client root) |
+| Offerings overview | `_engine/wiki/offerings.md` | `_engine/wiki/offerings.md` (at client root) |
+| Market research / strategy | `_engine/wiki/strategy.md` | `{Program}/_engine/wiki/strategy.md` |
+| Keyword data | `_engine/sources/keyword_data_*.json` | `{Program}/_engine/sources/keyword_data_*.json` |
+| Perplexity research | `_engine/sources/perplexity-*.md` | `{Program}/_engine/sources/perplexity-*.md` |
+| Markdown report (internal) | `_engine/working/` | `{Program}/_engine/working/` |
+| HTML dashboard (presentable) | folder root | `{Program}/` (program root) |
+| Competitor audit | `_engine/wiki/strategy.md` | `{Program}/_engine/wiki/strategy.md` |
 
-**Rule:** Anything that's the same across all programs → `_shared/`. Anything that changes per program → `{Program}/`.
+**Rule:** Anything that's the same across all programs → client-root `_engine/`. Anything that changes per program → `{Program}/_engine/`.
 
 ---
 
@@ -105,21 +109,21 @@ Desktop/{Client Name}/
 1. User provides client name + program name (or just client name)
 2. Check Desktop/{Client Name}/ exists
    a. If not → new client, ask: single program or multi-program?
-   b. If yes → check for _shared/ folder
-      - _shared/ exists → multi-program client, ask which program
-      - _shared/ doesn't exist → single-program client
+   b. If yes → check for _engine/wiki-config.json with type: "shared"
+      - Shared config exists → multi-program client, ask which program
+      - Doesn't exist → single-program client
         - If user wants a NEW program → convert to multi-program (see Migration below)
 3. Set working paths:
-   - shared_dir = _shared/ (or root if single-program)
-   - program_dir = {Program Name}/ (or root if single-program)
-   - brand_config = shared_dir/deliverables/brand-config.json
-   - wiki_dir = program_dir/wiki/
+   - client_engine = {Client}/_engine/ (client-wide for multi-program; equals scope_engine for single-program)
+   - scope_engine = {Program}/_engine/ for multi-program; {Client}/{Business}/_engine/ for single-program
+   - brand_config = client_engine/brand-config.json
+   - wiki_dir = scope_engine/wiki/
 ```
 
 ### Reading brand config:
-- Single-program: `{client-folder}/deliverables/brand-config.json`
-- Multi-program: `{client-folder}/_shared/deliverables/brand-config.json`
-- Skills always check `_shared/` first, fall back to root
+- Single-program: `{client-folder}/{business}/_engine/brand-config.json`
+- Multi-program: `{client-folder}/_engine/brand-config.json` (at the client root)
+- Skills always check the client-root `_engine/` first, fall back to scope `_engine/`
 
 ---
 
@@ -127,24 +131,24 @@ Desktop/{Client Name}/
 
 When an existing single-program client needs a second program:
 
-1. Create `_shared/` directory with wiki/, deliverables/ subfolders
-2. **Move** (not copy) shared files from existing program folder to `_shared/`:
-   - `wiki/business.md` → `_shared/wiki/business.md`
-   - `wiki/brand-identity.md` → `_shared/wiki/brand-identity.md`
-   - `wiki/digital-presence.md` → `_shared/wiki/digital-presence.md`
-   - `wiki/offerings.md` → `_shared/wiki/offerings.md`
-   - `deliverables/brand-config.json` → `_shared/deliverables/brand-config.json`
-3. Create `_shared/wiki/index.md` (master index)
-4. Create `_shared/wiki-config.json` with `type: "shared"`
-5. Update existing program's `wiki-config.json` with `type: "program"`, `parent: "../_shared"`
+1. Create the client-root `_engine/` directory with wiki/ subfolder
+2. **Move** (not copy) shared files from existing program's `_engine/` to the client-root `_engine/`:
+   - `{Business}/_engine/wiki/business.md` → `{Client}/_engine/wiki/business.md`
+   - `{Business}/_engine/wiki/brand-identity.md` → `{Client}/_engine/wiki/brand-identity.md`
+   - `{Business}/_engine/wiki/digital-presence.md` → `{Client}/_engine/wiki/digital-presence.md`
+   - `{Business}/_engine/wiki/offerings.md` → `{Client}/_engine/wiki/offerings.md`
+   - `{Business}/_engine/brand-config.json` → `{Client}/_engine/brand-config.json`
+3. Create `{Client}/_engine/wiki/index.md` (master index)
+4. Create `{Client}/_engine/wiki-config.json` with `type: "shared"`
+5. Update existing program's `_engine/wiki-config.json` with `type: "program"`, `parent: "../_engine"`
 6. Create new program folder with init_wiki.py `--program` flag
-7. Log migration in both `_shared/wiki/log.md` and existing program's `wiki/log.md`
+7. Log migration in both `{Client}/_engine/wiki/log.md` and existing program's `_engine/wiki/log.md`
 
 ---
 
 ## Wiki Config Schema
 
-### Shared config (`_shared/wiki-config.json`):
+### Shared config (`{Client}/_engine/wiki-config.json`):
 ```json
 {
   "type": "shared",
@@ -152,22 +156,22 @@ When an existing single-program client needs a second program:
   "created": "2026-04-12",
   "last_updated": "2026-04-12",
   "programs": ["Program 1", "Program 2"],
-  "brand_config": "deliverables/brand-config.json",
+  "brand_config": "brand-config.json",
   "pages": ["business", "brand-identity", "digital-presence", "offerings"]
 }
 ```
 
-### Program config (`{Program}/wiki-config.json`):
+### Program config (`{Program}/_engine/wiki-config.json`):
 ```json
 {
   "type": "program",
   "program_name": "Program 1",
   "business_name": "Client Business",
-  "parent": "../_shared",
+  "parent": "../../_engine",
   "created": "2026-04-12",
   "last_updated": "2026-04-12",
   "sources_ingested": 0,
-  "brand_config": "../_shared/deliverables/brand-config.json",
+  "brand_config": "../../_engine/brand-config.json",
   "pages": ["strategy"]
 }
 ```
@@ -179,7 +183,7 @@ When an existing single-program client needs a second program:
 When running research for Program 2 after Program 1 is complete:
 - Check Program 1's strategy.md for reusable insights (market size, PESTEL, some buyer personas may overlap)
 - Flag shared findings with `[SHARED from {Program 1}]` tag
-- Don't duplicate — reference: "See {Program 1}/wiki/strategy.md Section 3 for PESTEL analysis (applies to both programs)"
+- Don't duplicate — reference: "See {Program 1}/_engine/wiki/strategy.md Section 3 for PESTEL analysis (applies to both programs)"
 - Each program gets its own competitor table, keyword data, and benchmarks — never share these
 
 ---
@@ -187,7 +191,7 @@ When running research for Program 2 after Program 1 is complete:
 ## Downstream Skill Behavior
 
 All downstream skills (paid-media-strategy, meta-ad-copywriter, etc.) must:
-1. Read brand from `_shared/` (or root for single-program)
-2. Read program-specific strategy from `{Program}/wiki/`
-3. Output deliverables to `{Program}/deliverables/`
+1. Read brand from `{Client}/_engine/brand-config.json` (multi-program) or `{Client}/{Business}/_engine/brand-config.json` (single-program)
+2. Read program-specific strategy from `{Program}/_engine/wiki/`
+3. Output presentables (HTML/PDF/MP4) to the program folder root; output internals (md reports, json briefs) to `{Program}/_engine/working/`
 4. Reference both shared business context AND program-specific research

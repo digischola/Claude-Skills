@@ -169,19 +169,20 @@ def check_structure(eval_case, client_folder):
     results = []
     cf = Path(client_folder)
 
-    wiki = cf / "wiki"
+    wiki = cf / "_engine" / "wiki"
     wiki_exists = wiki.is_dir() and any(wiki.iterdir()) if wiki.is_dir() else False
     results.append({"assertion": "wiki_updated", "passed": wiki_exists,
-                     "detail": "wiki/ dir: " + ("exists with files" if wiki_exists else "MISSING or empty")})
+                     "detail": "_engine/wiki/ dir: " + ("exists with files" if wiki_exists else "MISSING or empty")})
 
-    strat = wiki / "strategy.md" if wiki.is_dir() else cf / "wiki" / "strategy.md"
+    strat = wiki / "strategy.md"
     results.append({"assertion": "strategy_in_wiki", "passed": strat.exists(),
-                     "detail": "wiki/strategy.md: " + ("exists" if strat.exists() else "MISSING")})
+                     "detail": "_engine/wiki/strategy.md: " + ("exists" if strat.exists() else "MISSING")})
 
-    deliv = cf / "deliverables"
-    has_md = any(deliv.glob("*strategy*.md")) if deliv.is_dir() else False
-    has_html = any(deliv.glob("*dashboard*.html")) if deliv.is_dir() else False
-    has_csv = (any(deliv.glob("*media-plan*.csv")) or any(deliv.glob("*media_plan*.csv"))) if deliv.is_dir() else False
+    # Presentables (HTML/PDF) sit at the client folder root; intermediates live in _engine/working/.
+    working = cf / "_engine" / "working"
+    has_md = any(working.glob("*strategy*.md")) if working.is_dir() else False
+    has_html = any(cf.glob("*dashboard*.html"))
+    has_csv = (any(working.glob("*media-plan*.csv")) or any(working.glob("*media_plan*.csv"))) if working.is_dir() else False
     results.append({"assertion": "deliverables_complete", "passed": has_md and has_html,
                      "detail": "MD: %s | HTML: %s | CSV: %s" % (_yn(has_md), _yn(has_html), _yn(has_csv))})
 

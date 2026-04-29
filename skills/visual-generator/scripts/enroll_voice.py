@@ -5,9 +5,9 @@ Voice enrollment wizard — record 10 voice samples for brand voice cloning.
 One-time setup. Starts a local HTTP server + dark-mode browser recorder page.
 Mayank reads 10 varied sentences (different tones: declarative, data-heavy,
 rhetorical question, energetic, measured). Browser captures via MediaRecorder API,
-uploads WebM → server converts to WAV via ffmpeg → saves to brand/voice-samples/.
+uploads WebM → server converts to WAV via ffmpeg → saves to brand/_engine/voice-samples/.
 
-After all 10 are recorded, writes brand/voice-lock.md with metadata + transcripts.
+After all 10 are recorded, writes brand/_engine/wiki/voice-lock.md with metadata + transcripts.
 clone_voice.py then uses these samples with F5-TTS to generate VOs in Mayank's voice.
 
 Usage:
@@ -103,11 +103,13 @@ ENROLLMENT_SENTENCES = [
 
 
 def voice_samples_dir(brand: Path) -> Path:
-    return brand / "brand" / "voice-samples"
+    # Post-2026-04-29 _engine/ convention: voice samples live in brand/_engine/.
+    return brand / "brand" / "_engine" / "voice-samples"
 
 
 def voice_lock_path(brand: Path) -> Path:
-    return brand / "brand" / "voice-lock.md"
+    # Post-2026-04-29 _engine/ convention: voice-lock.md is brand DNA wiki.
+    return brand / "brand" / "_engine" / "wiki" / "voice-lock.md"
 
 
 def sample_path(brand: Path, idx: int, ext: str = "wav") -> Path:
@@ -139,7 +141,7 @@ def enrollment_status(brand: Path) -> dict:
 
 
 def write_voice_lock(brand: Path):
-    """Write brand/voice-lock.md with metadata + transcripts after all 10 samples recorded."""
+    """Write brand/_engine/wiki/voice-lock.md with metadata + transcripts after all 10 samples recorded."""
     status = enrollment_status(brand)
     if status["done"] < len(ENROLLMENT_SENTENCES):
         return False
@@ -152,14 +154,14 @@ def write_voice_lock(brand: Path):
         "",
         f"**Enrolled:** {now}",
         f"**Samples:** {status['done']} / {status['total']} recorded",
-        f"**Location:** `brand/voice-samples/sample-01.wav` … `sample-10.wav`",
+        f"**Location:** `brand/_engine/voice-samples/sample-01.wav` … `sample-10.wav`",
         "",
         "## Use from Python",
         "",
         "```python",
         "from pathlib import Path",
         "# Reference sample for F5-TTS. Pick any recorded sample.",
-        "ref_wav = Path('brand/voice-samples/sample-01.wav')",
+        "ref_wav = Path('brand/_engine/voice-samples/sample-01.wav')",
         "ref_text = \"Hello, I'm Mayank from Digischola. I help wellness retreats convert more leads at lower cost.\"",
         "```",
         "",
@@ -172,7 +174,7 @@ def write_voice_lock(brand: Path):
             "",
             f"**Transcript:** {s['text']}",
             "",
-            f"**File:** `brand/voice-samples/sample-{s['id']:02d}.wav`",
+            f"**File:** `brand/_engine/voice-samples/sample-{s['id']:02d}.wav`",
             f"**Size:** {s['size_bytes']:,} bytes",
             "",
         ])
@@ -299,8 +301,8 @@ def render_page() -> str:
 
   <div class="done-screen" id="done-screen" style="display:none">
     <h2>✓ Voice enrollment complete</h2>
-    <p>All 10 samples recorded + saved to <code>brand/voice-samples/</code>.</p>
-    <p><code>brand/voice-lock.md</code> written. clone_voice.py can now generate Reel VOs in your voice.</p>
+    <p>All 10 samples recorded + saved to <code>brand/_engine/voice-samples/</code>.</p>
+    <p><code>brand/_engine/wiki/voice-lock.md</code> written. clone_voice.py can now generate Reel VOs in your voice.</p>
     <p style="margin-top:30px; color:{MUTED}; font-size:13px;">You can close this tab.</p>
   </div>
 </div>

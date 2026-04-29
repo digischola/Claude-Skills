@@ -29,8 +29,8 @@ total_warnings = 0
 CREATIVE_BRIEF = None
 
 # Offerings.md content for Gate B service-offering cross-check.
-# Populated by main() — looks up {client}/wiki/offerings.md or
-# {client}/_shared/wiki/offerings.md based on file path of inputs.
+# Populated by main() — looks up {client}/_engine/wiki/offerings.md (single-program)
+# or {client-root}/_engine/wiki/offerings.md (multi-program) based on file path of inputs.
 # See references/offerings-cross-check.md for protocol.
 OFFERINGS_TEXT = None
 OFFERINGS_PATH = None
@@ -72,10 +72,11 @@ def classify_file(path):
 
 
 def _find_offerings_md(input_paths):
-    """Walk up from any input path to find wiki/offerings.md or _shared/wiki/offerings.md.
+    """Walk up from any input path to find _engine/wiki/offerings.md.
 
-    Used by Gate B (service-offering cross-check). Searches for both single-program
-    and multi-program (_shared/) wiki layouts. Returns (text, path) or (None, None).
+    Used by Gate B (service-offering cross-check). Searches the new `_engine/` layout
+    for both single-program and multi-program (where `_engine/` sits at the client
+    root) clients. Returns (text, path) or (None, None).
     See references/offerings-cross-check.md for protocol.
     """
     candidates = []
@@ -83,8 +84,7 @@ def _find_offerings_md(input_paths):
         cur = os.path.dirname(os.path.abspath(ip))
         # Walk up max 5 levels from each input file
         for _ in range(5):
-            for sub in ('wiki/offerings.md', '_shared/wiki/offerings.md',
-                        '_shared/wiki/business.md', 'wiki/business.md'):
+            for sub in ('_engine/wiki/offerings.md', '_engine/wiki/business.md'):
                 cand = os.path.join(cur, sub)
                 if cand not in candidates:
                     candidates.append(cand)
@@ -248,7 +248,8 @@ def validate_gate_b(files):
     """
     if not OFFERINGS_TEXT:
         log_warning(
-            "Gate B unverified — no offerings.md found in {client}/wiki/ or {client}/_shared/wiki/. "
+            "Gate B unverified — no offerings.md found in {client}/_engine/wiki/ "
+            "(single-program) or {client-root}/_engine/wiki/ (multi-program). "
             "Service claims in ad copy could not be cross-checked. "
             "See references/offerings-cross-check.md §Gate B."
         )
@@ -655,8 +656,8 @@ def main():
             CREATIVE_BRIEF = None
 
     # Pre-load offerings.md for Gate B service-offering cross-check.
-    # Walks up from any input file to locate {client}/wiki/offerings.md or
-    # {client}/_shared/wiki/offerings.md.
+    # Walks up from any input file to locate {client}/_engine/wiki/offerings.md
+    # (single-program) or {client-root}/_engine/wiki/offerings.md (multi-program).
     OFFERINGS_TEXT, OFFERINGS_PATH = _find_offerings_md(list(files.values()))
 
     print("🔍 Ad Copywriter — Output Validation")

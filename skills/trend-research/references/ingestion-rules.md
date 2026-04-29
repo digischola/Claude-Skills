@@ -1,10 +1,10 @@
 # Ingestion Rules — dedup, quality filter, idea-bank schema
 
-Rules for adding trend candidates to `brand/idea-bank.json` without polluting it.
+Rules for adding trend candidates to `brand/_engine/idea-bank.json` without polluting it.
 
 ## Idea-bank schema (matches work-capture)
 
-Each entry in `idea-bank.json` "entries" array:
+Each entry in `_engine/idea-bank.json` "entries" array:
 
 ```json
 {
@@ -77,7 +77,7 @@ Both `pillar` (slug) and `suggested_pillar` (human) get written for backwards co
 
 ## Append safety
 
-Before writing to idea-bank.json:
+Before writing to `_engine/idea-bank.json`:
 
 1. Read the current file
 2. Verify it parses (don't corrupt existing data on a malformed read)
@@ -87,7 +87,7 @@ Before writing to idea-bank.json:
 
 ## Logging
 
-Per-week scan log at `brand/_research/trends/<week>/scan-log.md`:
+Per-week scan log at `brand/_engine/_research/trends/<week>/scan-log.md`:
 
 ```markdown
 # Trend Scan — 2026-W17

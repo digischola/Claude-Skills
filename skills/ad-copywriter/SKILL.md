@@ -12,7 +12,7 @@ Generates production-ready ad copy, AI image prompts, and video storyboards from
 Read these shared context files before starting:
 - `shared-context/analyst-profile.md` — workflow, client types, quality standards
 - `shared-context/accuracy-protocol.md` — 3 accuracy rules for all data handling
-- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to `outputs/`, intermediate MD/JSON/CSV to `working/`
+- `shared-context/output-structure.md` — write final HTML/MP4/PDF and upload-ready CSV bundles to the client/program folder root; intermediate MD/JSON/CSV to `_engine/working/`
 - `shared-context/client-shareability.md` — client-facing files must read like first copies; no correction trails / audit history / internal-process commentary. Validator: `python3 ~/.claude/scripts/check_client_shareability.py {client}`
 
 ## Process Overview
@@ -21,7 +21,7 @@ Read these shared context files before starting:
 
 Check in this order — Refresh Mode takes priority because it's the narrowest and most time-sensitive trigger:
 
-**Refresh Mode** (fatigue rotation) — if `{client-folder}/deliverables/*-rotation-brief.json` exists:
+**Refresh Mode** (fatigue rotation) — if `{client-folder}/_engine/working/*-rotation-brief.json` exists:
 - Load `references/refresh-mode.md` for the full workflow — it overrides Steps 2, 4, 5, 8
 - Load the rotation brief, the original `*-creative-brief.json`, and the wiki
 - State explicitly in output: "Refresh Mode — N fatigued creatives being rotated"
@@ -29,9 +29,9 @@ Check in this order — Refresh Mode takes priority because it's the narrowest a
 
 **Downstream mode** (creative brief exists, no rotation brief):
 - Read the creative brief JSON — campaigns, personas, hooks, formats, visual_direction, landing_page, ab_testing, proof_elements, brand_voice
-- Read `{client-folder}/wiki/strategy.md` for competitor context
-- Read `{client-folder}/deliverables/brand-config.json` for brand identity
-- **Read offerings (Gate B source-of-truth):** `{client-folder}/wiki/offerings.md` — or `{client-folder}/_shared/wiki/offerings.md` for multi-program clients. This is the cross-check authority for every service-claim phrase generated in Step 4.
+- Read `{client-folder}/_engine/wiki/strategy.md` for competitor context
+- Read `{client-folder}/_engine/brand-config.json` for brand identity
+- **Read offerings (Gate B source-of-truth):** `{client-folder}/_engine/wiki/offerings.md` (single-program) — or `{client-root}/_engine/wiki/offerings.md` for multi-program clients (where `_engine/` sits at the client root, formerly `_shared/`). This is the cross-check authority for every service-claim phrase generated in Step 4.
 - **Detect Gate A trigger conditions** in the creative brief (any one fires gated-output mode):
   1. `do_not_launch_until_phase_0_complete: true`
   2. Any `phase_0_prerequisites[].status` ∈ {`GATED`, `BLOCKED`, `PENDING`}
@@ -97,11 +97,11 @@ Read these reference files (load only sections relevant to the client's platform
 - Label each copy block: [BRIEF] = from creative brief hooks, [GENERATED] = new, [ADAPTED] = modified from brief
 
 **Gate B — Service-offering cross-check (always-on):**
-For every persona / ad-group label / headline / description / callout / snippet value that names a specific service, modality, or class style, verify it appears in `wiki/offerings.md`. If unmatched: drop, reframe to a verified offering, or wrap as `<<UNVERIFIED-CLAIM:phrase>>`. See `references/offerings-cross-check.md` §Gate B for the full protocol and common false-claim categories (prenatal yoga, chair yoga, EMDR, hydrafacial, etc.).
+For every persona / ad-group label / headline / description / callout / snippet value that names a specific service, modality, or class style, verify it appears in `_engine/wiki/offerings.md`. If unmatched: drop, reframe to a verified offering, or wrap as `<<UNVERIFIED-CLAIM:phrase>>`. See `references/offerings-cross-check.md` §Gate B for the full protocol and common false-claim categories (prenatal yoga, chair yoga, EMDR, hydrafacial, etc.).
 
 **Output filename:**
-- **Default:** `{client-folder}/deliverables/{business-name}-ad-copy-report.md`
-- **Gate A fired** (Step 1 detected gated launch state): write **two** files:
+- **Default:** `{client-folder}/_engine/working/{business-name}-ad-copy-report.md`
+- **Gate A fired** (Step 1 detected gated launch state): write **two** files in `_engine/working/`:
   - `{business-name}-ad-copy-best-case.md` — banner: "BEST CASE — DO NOT IMPORT until Phase 0 complete". Includes gated claims for forward planning.
   - `{business-name}-ad-copy-current-state.md` — banner: "Current-state copy — safe for production import". Gated claims stripped per `phase_0_prerequisites[].claim_phrases`. The Step 5 CSV is generated **only from this file**.
 
@@ -111,11 +111,11 @@ Both files MUST include a `## Gate Audit (auto-generated)` section listing trigg
 
 Read `references/output-format-spec.md` for column formats.
 
-**Google Ads CSV** (`{business-name}-google-ads.csv`):
+**Google Ads CSV** (`{client-folder}/_engine/working/{business-name}-google-ads.csv` — intermediate, consumed by campaign-setup):
 - One row per RSA: Campaign, Ad Group, H1-H15, D1-D4, Path1, Path2, Pin notes, Final URL
 - Character limit validation on every cell — CRITICAL, do not ship over-limit copy
 
-**Meta Ads CSV** (`{business-name}-meta-ads.csv`):
+**Meta Ads CSV** (`{client-folder}/_engine/working/{business-name}-meta-ads.csv` — intermediate, consumed by campaign-setup):
 - One row per ad variant: Campaign, Ad Set, Ad Name, Primary Text, Headline, Description, CTA, Format, Landing URL
 - A/B variant labels in Ad Name (e.g., "Prospecting-DesignBuyer-HookA")
 
@@ -130,7 +130,7 @@ Use `image_gen_prompt_prefix` from creative brief as base prompt. Append per-ad 
 - Text overlay zone instruction ("leave clean space at top 20% for text")
 - P1/P2 priority from creative brief formats
 
-Save as `{client-folder}/deliverables/{business-name}-image-prompts.md`.
+Save as `{client-folder}/_engine/working/{business-name}-image-prompts.md`.
 
 ### Step 7: Generate Video Storyboards
 
@@ -147,14 +147,14 @@ One storyboard per video ad from creative brief formats. Per frame:
 
 Include combined VO script at bottom — one continuous text block for pasting into AI Studio.
 
-Save as `{client-folder}/deliverables/{business-name}-video-storyboards.md`.
+Save as `{client-folder}/_engine/working/{business-name}-video-storyboards.md`.
 
 ### Step 8: Validate & Update Wiki
 
 Run `scripts/validate_output.py` against all deliverables. Fix any CRITICAL failures (character limits, missing fields).
 
-Update `{client-folder}/wiki/log.md` — add AD-COPYWRITER COMPLETE entry.
-Update `{client-folder}/wiki/index.md` — update downstream status.
+Update `{client-folder}/_engine/wiki/log.md` — add AD-COPYWRITER COMPLETE entry.
+Update `{client-folder}/_engine/wiki/index.md` — update downstream status.
 
 Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts.
 
@@ -191,7 +191,8 @@ Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts
   2. **Search-demand-without-service-offering:** "Pregnancy / Pre-Postnatal" persona seeded from keyword volume (670/mo AU); offerings.md documents only Vinyasa / Yin / Beginners / Yang to Yin. Every downstream skill treated search demand as equivalent to service offering.
   → **Action — Gate A + Gate B coded into validator (2026-04-26):**
   - **Gate A:** brief flags Phase-0 → MUST emit `*-ad-copy-best-case.md` + `*-ad-copy-current-state.md`; CSV generated only from current-state. Validator CRITICAL-fails if single report or CSV contains gated-claim phrases.
-  - **Gate B:** scan copy for service-claim phrases (22 yoga/wellness/therapy/fitness/beauty patterns); cross-check against `wiki/offerings.md` or `_shared/wiki/offerings.md`; CRITICAL-fail any unverified claim.
+  - **Gate B:** scan copy for service-claim phrases (22 yoga/wellness/therapy/fitness/beauty patterns); cross-check against `_engine/wiki/offerings.md` (single-program) or `{client-root}/_engine/wiki/offerings.md` (multi-program); CRITICAL-fail any unverified claim.
   - Full protocol in `references/offerings-cross-check.md`. Eval #7 covers gated-brief + offerings-mismatch scenario. Risk avoided: ACL §18/§29 false-advertising exposure + Google Ads policy disapprovals + near-100% bounce on /pricing/.
   **RULE:** Search demand ≠ service offering. Every persona, ad group, headline, callout, snippet must trace to a verified offerings.md entry — or drop, reframe, or wrap as `<<UNVERIFIED-CLAIM>>`.
-- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `wiki/log.md` (by-design change log) and `wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** working/CLIENT-ad-copy-report.md, working/CLIENT-google-ads.csv, working/CLIENT-meta-ads.csv, working/CLIENT-image-prompts.md, working/CLIENT-video-storyboards.md — all overwritten in place on re-run. Refresh Mode _v2/_v3 ad-NAMING (in Meta Ads Manager) is preservation-of-A/B-control, NOT a re-run pattern — those are distinct ad-copy rotations, not the same case being re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
+- [2026-04-27] [Universal — applies to all skills] Same-Client Re-Run Rule landed in CLAUDE.md as a universal Always-Active section. Same-client/same-case re-runs overwrite outputs in place — no v1/v2/v3, no -DATE parallel filenames, no dated section headers preserving prior content. One file per role, current state only. Only `_engine/wiki/log.md` (by-design change log) and `_engine/wiki/briefs.md` (brief history with `[ACTIVE]`/`[SUPERSEDED]` markers) are append-only. **For this skill specifically:** _engine/working/CLIENT-ad-copy-report.md, _engine/working/CLIENT-google-ads.csv, _engine/working/CLIENT-meta-ads.csv, _engine/working/CLIENT-image-prompts.md, _engine/working/CLIENT-video-storyboards.md — all overwritten in place on re-run. Refresh Mode _v2/_v3 ad-NAMING (in Meta Ads Manager) is preservation-of-A/B-control, NOT a re-run pattern — those are distinct ad-copy rotations, not the same case being re-run. **RULE:** if you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: all skill internals (wiki, sources, working, configs) now live in `_engine/` subfolder; presentables (HTML/PDF/CSV/MP4) at folder root. Ad-copywriter intermediate CSVs (`*-google-ads.csv`, `*-meta-ads.csv`) are pre-bundle, so they go in `_engine/working/` (campaign-setup consumes them and produces the upload-ready bundle at folder root). → Updated all path references in SKILL.md, references/, scripts/, evals/.

@@ -12,11 +12,11 @@ Turn an idea-bank entry into a ready-to-publish draft for a specific channel and
 Read these before drafting anything:
 
 **Brand wiki (required):**
-- `Desktop/Digischola/brand/pillars.md` — Status must be LOCKED
-- `Desktop/Digischola/brand/voice-guide.md` — three registers + universal rules
-- `Desktop/Digischola/brand/credentials.md` — trust anchors + verified metrics
-- `Desktop/Digischola/brand/icp.md` — audience fit per pillar
-- `Desktop/Digischola/brand/idea-bank.json` — source entries
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — Status must be LOCKED
+- `Desktop/Digischola/brand/_engine/wiki/voice-guide.md` — three registers + universal rules
+- `Desktop/Digischola/brand/_engine/wiki/credentials.md` — trust anchors + verified metrics
+- `Desktop/Digischola/brand/_engine/wiki/icp.md` — audience fit per pillar
+- `Desktop/Digischola/brand/_engine/idea-bank.json` — source entries
 
 **Skill references (required):**
 - `references/platform-specs.md` — algorithm rules, length, structure templates per channel
@@ -32,11 +32,11 @@ Read these before drafting anything:
 - `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 - `.claude/shared-context/accuracy-protocol.md`
 
-If pillars.md is not LOCKED, abort with: "Pillars not approved. Run personal-brand-dna first."
+If `_engine/wiki/pillars.md` is not LOCKED, abort with: "Pillars not approved. Run personal-brand-dna first."
 
 ## Inputs
 
-1. **Entry ID** (preferred) — a UUID from idea-bank.json
+1. **Entry ID** (preferred) — a UUID from `_engine/idea-bank.json`
 2. **Raw note** (fallback) — a user-provided note that gets captured via work-capture first, then drafted
 3. **Target channels** — one or more of: `linkedin-text`, `linkedin-carousel`, `linkedin-video`, `x-single`, `x-thread`, `instagram-caption`, `instagram-reel`, `facebook-post`, `whatsapp-status`, `whatsapp-channel`
 4. **Optional overrides** — target audience (global / US / AU / SG / IN), voice framework (default: auto-select per entry type), credential to anchor (default: auto-decide)
@@ -45,11 +45,11 @@ If pillars.md is not LOCKED, abort with: "Pillars not approved. Run personal-bra
 
 ### Step 1: Validate pillars lock
 
-Read `pillars.md` first 20 lines. If `Status:` line does not contain `LOCKED`, abort with an explicit message pointing user to `personal-brand-dna`.
+Read `_engine/wiki/pillars.md` first 20 lines. If `Status:` line does not contain `LOCKED`, abort with an explicit message pointing user to `personal-brand-dna`.
 
 ### Step 2: Load entry
 
-Read entry from idea-bank.json by ID. Extract `type`, `raw_note`, `suggested_pillar`, `channel_fit`, `format_candidates`, `tags`.
+Read entry from `_engine/idea-bank.json` by ID. Extract `type`, `raw_note`, `suggested_pillar`, `channel_fit`, `format_candidates`, `tags`.
 
 ### Step 3: Channel routing
 
@@ -136,7 +136,7 @@ selected_hook: A
 
 ### Step 9: Update credential log
 
-If a credential was anchored, append to `Desktop/Digischola/brand/credential-usage-log.json`:
+If a credential was anchored, append to `Desktop/Digischola/brand/_engine/credential-usage-log.json`:
 
 ```json
 {
@@ -153,15 +153,15 @@ Read `references/feedback-loop.md`. If the user rejected a hook, voice framework
 
 ## Output Checklist
 
-- [ ] pillars.md LOCKED check passed (abort if not)
-- [ ] Entry loaded from idea-bank.json OR captured fresh via work-capture
+- [ ] `_engine/wiki/pillars.md` LOCKED check passed (abort if not)
+- [ ] Entry loaded from `_engine/idea-bank.json` OR captured fresh via work-capture
 - [ ] Each target channel produces a draft with frontmatter + body
 - [ ] 3 hook candidates offered per channel, user picks before final draft
 - [ ] Voice framework applied (named in frontmatter)
 - [ ] Credential decision logged (anchored or skipped, with reason)
 - [ ] validate_post.py exit 0 or 1 for every saved draft (never 2)
 - [ ] Draft saved to queue/pending-approval/ with correct filename
-- [ ] credential-usage-log.json updated if anchored
+- [ ] `_engine/credential-usage-log.json` updated if anchored
 
 ## Anti-patterns
 
@@ -183,3 +183,4 @@ See references/feedback-loop.md for protocol and context tags.
 - [2026-04-18] [Validator bug caught in first test] `validate_post.py` was concatenating frontmatter channel + format even when `--channel` override was provided, producing keys like "linkedin-text-text-post" that did not match `CHANNEL_LIMITS`. Char limit checks were silently skipping. Fix: `--channel` override is now definitive; frontmatter channel+format only used when override absent. Re-tested clean + dirty posts; all gates work.
 - [2026-04-18] [Validator thread-mode upgrade] First X thread draft revealed that validator treated threads as single posts, summing all tweet bodies against the 280-char cap. Added `x-thread` channel mode with `split_thread_tweets()` + `check_thread_char_limits()` functions that split on `## Tweet N` section headers and validate each tweet independently. Universal checks (em dash, hype, bait) still run across full file. Also caught em dashes in my own section headers (`## Tweet 2 (setup — the problem)`); swapped all hyphens in headers to colons.
 - [2026-04-18] [Policy decision logged to voice-guide.md] User chose Conservative client-naming + Restrained emoji policy during first post-writer demo. Both codified in voice-guide.md with dedicated sections. All future post-writer runs should read these sections before drafting.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top of `Digischola/brand/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

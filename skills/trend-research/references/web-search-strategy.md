@@ -99,4 +99,4 @@ Quality filter drops anything <3. Borderline 3s get flagged `manual-review: true
 
 Pass each candidate through `scripts/trend_research.py dedupe-check` then `ingest`. Both calls are idempotent — safe to re-run.
 
-Final report: log per-pillar count + skipped (with reason) to `brand/_research/trends/<week>/scan-log.md`.
+Final report: log per-pillar count + skipped (with reason) to `brand/_engine/_research/trends/<week>/scan-log.md`.

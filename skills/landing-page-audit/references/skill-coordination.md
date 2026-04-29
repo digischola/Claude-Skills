@@ -23,7 +23,7 @@ If no brand-config exists, the skill uses a professional default dark theme (blu
 ### Where to find brand-config.json
 
 ```
-{Client Name}/{Project or Business}/deliverables/brand-config.json
+{Client Name}/{Project or Business}/_engine/brand-config.json
 ```
 
 Or check the client folder root if the project structure varies.
@@ -35,7 +35,7 @@ Or check the client folder root if the project structure varies.
 The skill produces a single HTML file saved to:
 
 ```
-{Client Name}/{Project or Business}/deliverables/{page-name}-landing-page-audit.html
+{Client Name}/{Project or Business}/{page-name}-landing-page-audit.html
 ```
 
 This is a self-contained static HTML dashboard (no external dependencies except Chart.js CDN). It can be:

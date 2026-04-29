@@ -4,7 +4,7 @@ Load this file in Step 1. Defines the per-client config structure stored in the 
 
 ## Config Location
 
-`{client-folder}/wiki/optimization-config.json`
+`{client-folder}/_engine/wiki/optimization-config.json`
 
 Created on first optimization run. Updated when targets change.
 
@@ -46,7 +46,7 @@ Created on first optimization run. Updated when targets change.
   "analysis_history": [
     {
       "date": "2026-04-16",
-      "report_path": "deliverables/thrive-optimization-report.md",
+      "report_path": "_engine/working/thrive-optimization-report.md",
       "top_actions": ["action summary 1", "action summary 2"],
       "cpa_at_analysis": 12.50,
       "roas_at_analysis": 4.2

@@ -17,7 +17,7 @@ Remotion is a React-based video engine. You write scenes as React components; Re
 ## Where it lives
 
 ```
-Desktop/Digischola/brand/remotion-studio/
+Desktop/Digischola/brand/_engine/remotion-studio/
 ├── package.json                    ← deps (Remotion, Paper shaders, etc.)
 ├── tsconfig.json
 ├── remotion.config.ts              ← render config (WebGL, codec, etc.)

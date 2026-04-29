@@ -77,7 +77,7 @@ WARN, not CRITICAL — because high-volume legitimate review counts exist (hotel
 
 ## Logging requirement
 
-Every market-research session for a local-business client MUST include this section in `wiki/digital-presence.md`:
+Every market-research session for a local-business client MUST include this section in `_engine/wiki/digital-presence.md`:
 
 ```markdown
 ## GBP Verification Log

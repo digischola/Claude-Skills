@@ -10,7 +10,7 @@
         {"name": "pillar_locked_slots_filled", "description": "Mon LI = LP Craft entry; Wed LI = Solo Ops entry; Fri LI = Small-Budget Paid Media entry"},
         {"name": "repurpose_chain_applied", "description": "Tue X thread inherits mon-li entry_id; Fri X thread inherits fri-li entry_id"},
         {"name": "sat_ig_repurpose", "description": "Sat IG has is_repurpose=true and entry_id matches a Mon/Wed/Fri/Thu LI slot"},
-        {"name": "statuses_flipped", "description": "Matched entries in idea-bank.json have status=shaped and scheduled_week set"},
+        {"name": "statuses_flipped", "description": "Matched entries in _engine/idea-bank.json have status=shaped and scheduled_week set"},
         {"name": "zero_critical_gaps", "description": "Gap alerts CRITICAL list is empty"},
         {"name": "exit_code_0", "description": "Script exits 0 for fully clean week"}
       ]
@@ -46,7 +46,7 @@
       "assertions": [
         {"name": "blocks_with_exit_2", "description": "Script exits 2"},
         {"name": "no_calendar_file_written", "description": "brand/calendars/ has no new file"},
-        {"name": "no_entries_flipped", "description": "idea-bank.json entries[*].status remains unchanged"},
+        {"name": "no_entries_flipped", "description": "_engine/idea-bank.json entries[*].status remains unchanged"},
         {"name": "clear_fix_instruction", "description": "Error message explicitly names work-capture as the next step"}
       ]
     }

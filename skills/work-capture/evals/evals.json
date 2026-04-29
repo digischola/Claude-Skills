@@ -9,7 +9,7 @@
         {"name": "correct_type", "description": "type is 'experiment' (not client-win, since test hasn't run yet)"},
         {"name": "specific_numbers_preserved", "description": "raw_note keeps 21%, 1.2%, 15-word details intact"},
         {"name": "pillar_match", "description": "suggested_pillar is Landing-Page Conversion Craft or equivalent approved pillar ID"},
-        {"name": "appended_to_bank", "description": "idea-bank.json entries array grew by 1"}
+        {"name": "appended_to_bank", "description": "_engine/idea-bank.json entries array grew by 1"}
       ]
     },
     {
@@ -27,17 +27,17 @@
       "prompt": "Capture: just some thoughts on AI and marketing in general.",
       "expected_output": "Skill rejects or asks for specifics. Generic observations without concrete hooks do NOT pass anti-patterns check. Skill responds: 'This is too generic. Can you share a specific moment: a number, a client, a tool, a specific test result?'",
       "assertions": [
-        {"name": "rejects_generic", "description": "No entry appended to idea-bank.json"},
+        {"name": "rejects_generic", "description": "No entry appended to _engine/idea-bank.json"},
         {"name": "requests_specifics", "description": "Skill response asks for concrete hook before capturing"}
       ]
     },
     {
       "id": 4,
       "prompt": "Capture this before pillars are approved.",
-      "expected_output": "Skill aborts with: 'Pillars not approved yet. Run personal-brand-dna and approve 3-5 pillars first.' No entry added to idea-bank.json.",
+      "expected_output": "Skill aborts with: 'Pillars not approved yet. Run personal-brand-dna and approve 3-5 pillars first.' No entry added to _engine/idea-bank.json.",
       "assertions": [
-        {"name": "pillar_gate_enforced", "description": "Skill reads brand-wiki.md or wiki-config.json approval_gates; aborts if pillars status is DRAFT"},
-        {"name": "no_entry_appended", "description": "idea-bank.json unchanged"}
+        {"name": "pillar_gate_enforced", "description": "Skill reads _engine/wiki/brand-wiki.md or _engine/wiki-config.json approval_gates; aborts if pillars status is DRAFT"},
+        {"name": "no_entry_appended", "description": "_engine/idea-bank.json unchanged"}
       ]
     }
   ]

@@ -4,8 +4,8 @@ How to convert mined work-history data + trend signals into 5-7 content pillar c
 
 ## Inputs
 
-1. `_mining/work-topics.json` — entity + keyword frequencies
-2. `_mining/voice-samples.txt` — what the owner actually talks about
+1. `_engine/_mining/work-topics.json` — entity + keyword frequencies
+2. `_engine/_mining/voice-samples.txt` — what the owner actually talks about
 3. Website extraction — services, case studies, credentials
 4. Analyst profile — workflow, client types
 5. Trend signals — optional WebSearch for niche-specific rising/saturated/underserved topics
@@ -14,7 +14,7 @@ How to convert mined work-history data + trend signals into 5-7 content pillar c
 
 ### Step 1 — Cluster work-history signals
 
-Group entities + keywords from `work-topics.json` by theme. Typical clusters that emerge:
+Group entities + keywords from `_engine/_mining/work-topics.json` by theme. Typical clusters that emerge:
 - **Tooling / systems** (keyword: skill, automation, workflow, prompt, agent) — if "skill" or equivalent dominates the corpus, this is a "building AI ops" pillar candidate
 - **Service delivery** (keyword: client, campaign, funnel, creative, ad copy) — day-to-day execution work
 - **Specific craft areas** (keyword: landing page, conversion, hook, carousel) — pillar-worthy niche expertise
@@ -42,7 +42,7 @@ The bridge usually becomes the strongest pillar because it's rare to have both t
 
 ### Step 4 — Candidate structure (for each pillar)
 
-Each candidate in `pillars.md` must contain:
+Each candidate in `_engine/wiki/pillars.md` must contain:
 1. **Thesis** — single-sentence positioning claim
 2. **Why this wins** — 3-4 bullets with data backing (CLI mention count, website evidence, trend tag, credential fit)
 3. **Content types** — concrete post formats (skill unveil, audit case study, build log, etc.)
@@ -67,7 +67,7 @@ Always flag a recommended final set of 3-4 with rationale. The user makes the fi
 
 ## Output format
 
-Write candidates to `pillars.md` with:
+Write candidates to `_engine/wiki/pillars.md` with:
 - Status banner (AWAITING APPROVAL)
 - Positioning tension section (if applicable)
 - Candidates numbered [1]-[7]

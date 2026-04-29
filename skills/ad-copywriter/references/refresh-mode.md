@@ -6,7 +6,7 @@ Refresh Mode is the third operating mode of ad-copywriter (alongside Standalone 
 
 ## When Refresh Mode fires
 
-Input detected: a file matching `{client}/deliverables/*-rotation-brief.json` in the client folder.
+Input detected: a file matching `{client}/_engine/working/*-rotation-brief.json` in the client folder.
 
 Typical trigger chain:
 1. post-launch-optimization Layer 4 detects fatigue on an ad (frequency >3.5, CTR decline >30%, CPA increase >50%)
@@ -71,7 +71,7 @@ Typical trigger chain:
 ## Refresh Mode workflow (overrides to the standard Steps 1-8)
 
 ### Step 1 — Mode detection (overridden)
-- Detect `*-rotation-brief.json` in `{client}/deliverables/` → Refresh Mode
+- Detect `*-rotation-brief.json` in `{client}/_engine/working/` → Refresh Mode
 - Load the rotation brief AND the original `*-creative-brief.json` AND the wiki
 - Skip the 6-question standalone intake entirely
 - State clearly in the output: "Refresh Mode — 3 fatigued creatives being rotated"

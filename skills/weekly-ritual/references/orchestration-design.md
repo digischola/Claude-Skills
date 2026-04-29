@@ -54,7 +54,7 @@ Use Claude Code's `schedule` skill to wake a Claude instance on Anthropic's infr
 2. **`weekly_ritual.py`** does ONLY two things:
    a. Fire a macOS notification ("Sunday planning ready" / "Friday review ready")
    b. Copy a ritual prompt to clipboard ("run sunday ritual" / "run friday review")
-   c. Update state file `brand/weekly-ritual.state.json` with `last_fired_sunday/friday`
+   c. Update state file `brand/_engine/weekly-ritual.state.json` with `last_fired_sunday/friday`
 
 3. **Mayank** sees the notification, opens Claude Code (likely already open), pastes from clipboard.
 

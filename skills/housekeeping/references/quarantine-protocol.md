@@ -9,8 +9,8 @@ Desktop/.housekeeping-quarantine/
 ├── 2026-04-27/
 │   ├── manifest.json
 │   └── items/
-│       ├── Desktop__Digischola__brand___mining__voice-samples.txt
-│       ├── Desktop__Digischola__brand___research__trends__2026-W08/
+│       ├── Desktop__Digischola__brand___engine___mining__voice-samples.txt
+│       ├── Desktop__Digischola__brand___engine___research__trends__2026-W08/
 │       └── ...
 ├── 2026-04-20/
 │   └── ...
@@ -40,7 +40,7 @@ Path flattening rules:
 ```
 python3 scripts/rollback.py --date 2026-04-27
 python3 scripts/rollback.py --date 2026-04-27 --pattern "*.csv"
-python3 scripts/rollback.py --date 2026-04-27 --path "Desktop/Digischola/brand/_mining/voice-samples.txt"
+python3 scripts/rollback.py --date 2026-04-27 --path "Desktop/Digischola/brand/_engine/_mining/voice-samples.txt"
 python3 scripts/rollback.py --date 2026-04-27 --dry-run
 ```
 

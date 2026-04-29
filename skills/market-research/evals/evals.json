@@ -132,11 +132,11 @@
         },
         {
           "name": "both_outputs_generated",
-          "description": "Both markdown report AND HTML dashboard are produced and saved to deliverables/"
+          "description": "Both markdown report (saved to _engine/working/) AND HTML dashboard (saved to folder root) are produced"
         },
         {
           "name": "wiki_updated",
-          "description": "Client wiki pages updated with findings, sources saved to sources/ folder"
+          "description": "Client wiki pages updated with findings, sources saved to _engine/sources/ folder"
         }
       ],
       "files": []
@@ -233,7 +233,7 @@
       "type": "prompt-check",
       "name": "GBP review-count gate — local-business primary-source verification",
       "prompt": "Research for a single-location yoga studio. Perplexity output reports '1,235 Google Business Profile reviews' as the dominant local-trust signal driving the strategic recommendation. Generate the standard market-research deliverables.",
-      "expected_output": "When N >= 200 reviews are claimed for a single-location local business, the validator must flag the figure as unverified unless an [VERIFIED]/[GBP]/[EXTRACTED — GBP] tag is adjacent. The skill must also direct the analyst to verify the count via GBP screenshot or Chrome MCP visit before treating it as load-bearing. The wiki/digital-presence.md must include a GBP Verification Log section.",
+      "expected_output": "When N >= 200 reviews are claimed for a single-location local business, the validator must flag the figure as unverified unless an [VERIFIED]/[GBP]/[EXTRACTED — GBP] tag is adjacent. The skill must also direct the analyst to verify the count via GBP screenshot or Chrome MCP visit before treating it as load-bearing. The _engine/wiki/digital-presence.md must include a GBP Verification Log section.",
       "assertions": [
         {
           "name": "validator_flags_unverified_review_count",
@@ -245,11 +245,11 @@
         },
         {
           "name": "third_party_disambiguation",
-          "description": "When MindBody / ClassPass / Booking.com / TripAdvisor / Yelp / Facebook / Trustpilot review counts surface alongside Google reviews, each is documented as a separate line in wiki/digital-presence.md with the platform name preserved"
+          "description": "When MindBody / ClassPass / Booking.com / TripAdvisor / Yelp / Facebook / Trustpilot review counts surface alongside Google reviews, each is documented as a separate line in _engine/wiki/digital-presence.md with the platform name preserved"
         },
         {
           "name": "verification_log_present",
-          "description": "wiki/digital-presence.md contains a 'GBP Verification Log' section listing date, method, Google review count [VERIFIED/UNVERIFIED], star rating [VERIFIED/UNVERIFIED], and a separate listing of third-party ratings"
+          "description": "_engine/wiki/digital-presence.md contains a 'GBP Verification Log' section listing date, method, Google review count [VERIFIED/UNVERIFIED], star rating [VERIFIED/UNVERIFIED], and a separate listing of third-party ratings"
         },
         {
           "name": "strategic_framing_softened_when_lower",

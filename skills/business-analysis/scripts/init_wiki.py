@@ -96,15 +96,15 @@ def create_log(wiki_dir, business_name, today):
     (wiki_dir / "log.md").write_text(content, encoding="utf-8")
 
 
-def create_config(client_dir, business_name, project_name, today):
-    """Create wiki-config.json with dynamic page registry."""
+def create_config(engine_dir, business_name, project_name, today):
+    """Create wiki-config.json with dynamic page registry inside _engine/."""
     config = {
         "business_name": business_name,
         "project": project_name,
         "created": today,
         "last_updated": today,
         "sources_ingested": 0,
-        "brand_config": "deliverables/brand-config.json",
+        "brand_config": "brand-config.json",
         "pages": {
             slug: {
                 "title": title,
@@ -115,7 +115,7 @@ def create_config(client_dir, business_name, project_name, today):
             for slug, title in BASE_PAGES.items()
         },
     }
-    (client_dir / "wiki-config.json").write_text(
+    (engine_dir / "wiki-config.json").write_text(
         json.dumps(config, indent=2), encoding="utf-8"
     )
 
@@ -131,12 +131,13 @@ def main():
     project_name = sys.argv[3] if len(sys.argv) > 3 else business_name
     today = date.today().isoformat()
 
-    # Create directories
-    wiki_dir = client_dir / "wiki"
-    sources_dir = client_dir / "sources"
-    deliverables_dir = client_dir / "deliverables"
+    # Create directories under _engine/
+    engine_dir = client_dir / "_engine"
+    wiki_dir = engine_dir / "wiki"
+    sources_dir = engine_dir / "sources"
+    working_dir = engine_dir / "working"
 
-    for d in [wiki_dir, sources_dir, deliverables_dir]:
+    for d in [wiki_dir, sources_dir, working_dir]:
         d.mkdir(parents=True, exist_ok=True)
 
     # Check if wiki already exists
@@ -148,17 +149,17 @@ def main():
     # Create all base wiki pages
     for slug, title in BASE_PAGES.items():
         create_wiki_page(wiki_dir, slug, title, business_name, today)
-        print(f"  Created wiki/{slug}.md")
+        print(f"  Created _engine/wiki/{slug}.md")
 
     # Create index, log, config
     create_index(wiki_dir, business_name, today)
-    print("  Created wiki/index.md")
+    print("  Created _engine/wiki/index.md")
 
     create_log(wiki_dir, business_name, today)
-    print("  Created wiki/log.md")
+    print("  Created _engine/wiki/log.md")
 
-    create_config(client_dir, business_name, project_name, today)
-    print("  Created wiki-config.json")
+    create_config(engine_dir, business_name, project_name, today)
+    print("  Created _engine/wiki-config.json")
 
     print(f"\nWiki initialized for {business_name}")
     print(f"  Location: {wiki_dir}")

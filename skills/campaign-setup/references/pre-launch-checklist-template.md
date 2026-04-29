@@ -1,6 +1,6 @@
 # Pre-Launch Verification Checklist Template
 
-Fill-in template for `deliverables/campaign-setup/pre-launch-checklist.md`. Every item must be checked before campaigns move from Paused → Enabled. A single unchecked item = do not launch.
+Fill-in template for `{client}/campaign-setup/pre-launch-checklist.md` (lives inside the bundle at the client/program folder root). Every item must be checked before campaigns move from Paused → Enabled. A single unchecked item = do not launch.
 
 Rule: the client or account owner signs the final section. The checklist is the audit trail.
 
@@ -209,5 +209,5 @@ If anything looks wrong in the first 24h:
 1. Pause all campaigns at account level (Google: account status; Meta: pause all)
 2. Export current account state as backup
 3. Review flagged issue against this checklist
-4. Re-import corrected CSV from `deliverables/campaign-setup/`
+4. Re-import corrected CSV from `{client}/campaign-setup/`
 5. Re-run this checklist for corrected entities only

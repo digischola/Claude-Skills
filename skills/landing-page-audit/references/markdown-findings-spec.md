@@ -2,7 +2,7 @@
 
 Structured markdown file produced alongside the HTML dashboard. Portable, shareable version for client calls, email summaries, and downstream skill consumption.
 
-**File path:** `{client-folder}/deliverables/{page-name}-audit-findings.md`
+**File path:** `{client-folder}/_engine/working/{page-name}-audit-findings.md`
 
 ---
 

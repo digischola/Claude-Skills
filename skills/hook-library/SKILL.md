@@ -22,8 +22,8 @@ A standalone skill enables:
 **Read inputs:**
 - `data/hooks.json` — master catalog (machine-readable; source of truth)
 - `post-writer/references/hook-library.md` — the seed file (parsed initially via `sync-from-post-writer`; re-parsed when Mayank manually adds patterns)
-- `Desktop/Digischola/brand/voice-guide.md` — for filter rules (no em dashes, no hype, etc.)
-- `Desktop/Digischola/brand/pillars.md` — for pillar mapping
+- `Desktop/Digischola/brand/_engine/wiki/voice-guide.md` — for filter rules (no em dashes, no hype, etc.)
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — for pillar mapping
 - (Optional) `brand/performance/YYYY-WXX.md` — performance-review output that triggers auto-promotion suggestions
 
 **Write outputs:**
@@ -136,3 +136,4 @@ Format: [DATE] [CONTEXT] Finding → Action. Keep under 30 lines.
 - [2026-04-20] [Initial build] Built as a wrapper around post-writer's existing 35-pattern reference. `sync-from-post-writer` parses the markdown table format (8 categories with 3-5 patterns each) into `data/hooks.json` with all patterns starting at Tier 2. CLI exposes list/get/search/promote/demote/sync/export/stats. Promotion log at `data/promotion-log.json` tracks all tier changes with reason + timestamp + source (performance-review / manual / claude-suggested).
 - [2026-04-20] [Tier caps] Tier 1 capped at 8 per pillar (else first-choice list bloats). Tier 3 capped at 5 per pillar (else too many experiments dilute signal). Tier 2 uncapped — default home for tested patterns. Caps enforced by `promote` command refusing to add a 9th Tier 1 pattern; user must demote one first.
 - [2026-04-20] [Cross-skill] Downstream consumers (post-writer, repurpose, case-study-generator) call `hook_lib.py list/get` for queries. They MUST handle the case where hook-library is offline (script error / missing file) by falling back to their local cached reference. post-writer's `references/hook-library.md` becomes a generated mirror (via `export --target post-writer`) so the fallback path stays current.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top of `Digischola/brand/`. → Updated all path references in SKILL.md, references/, scripts/, evals/.

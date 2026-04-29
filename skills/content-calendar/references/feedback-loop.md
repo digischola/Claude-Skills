@@ -30,7 +30,7 @@ Per CLAUDE.md Mandatory Session Close Protocol. Entries go in the `## Learnings 
 Example: user consistently moves Pillar 3 from Friday to Monday.
 1. Update `cadence-templates.md` rotation table to reflect new preference
 2. Add learning to SKILL.md: "[DATE] [Rotation] User prefers Pillar 3 on Monday, Pillar 1 on Friday. → Action: swapped Mon/Fri pillar locks in cadence-templates.md"
-3. If this changes weekly cadence substantively, update `channel-playbook.md` in brand wiki too
+3. If this changes weekly cadence substantively, update `_engine/wiki/channel-playbook.md` in brand wiki too
 
 ## Future feedback source: performance-review
 

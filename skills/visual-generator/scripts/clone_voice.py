@@ -6,7 +6,7 @@ REQUIRES Python 3.11+ (F5-TTS dependency chain doesn't resolve on 3.9).
 If this file is launched under python3.9, it re-execs itself under
 /opt/homebrew/bin/python3.11.
 
-Reads reference samples from `brand/voice-samples/` (produced by enroll_voice.py),
+Reads reference samples from `brand/_engine/voice-samples/` (produced by enroll_voice.py),
 takes a VO script, synthesizes via F5-TTS on Apple Silicon MPS backend, saves MP3.
 
 First run installs F5-TTS dependencies + downloads model weights (~1.3GB, one-time).
@@ -69,7 +69,8 @@ def read_frontmatter(path: Path) -> tuple[dict, str]:
 
 def find_reference(brand: Path, preferred_id: int = 1) -> tuple[Path, str]:
     """Return (sample_wav_path, transcript) for the chosen enrolled sample."""
-    samples_dir = brand / "brand" / "voice-samples"
+    # Post-2026-04-29 _engine/ convention: voice-samples + voice-lock under brand/_engine/.
+    samples_dir = brand / "brand" / "_engine" / "voice-samples"
     if not samples_dir.exists():
         sys.exit(
             "No voice samples found. Run enroll_voice.py first:\n"
@@ -83,15 +84,15 @@ def find_reference(brand: Path, preferred_id: int = 1) -> tuple[Path, str]:
             sys.exit(f"No sample-NN.wav files found in {samples_dir}. Re-run enroll_voice.py.")
         wav = avail[0]
 
-    # Pull transcript from voice-lock.md
-    voice_lock = brand / "brand" / "voice-lock.md"
+    # Pull transcript from voice-lock.md (now under _engine/wiki/)
+    voice_lock = brand / "brand" / "_engine" / "wiki" / "voice-lock.md"
     transcript = ""
     if voice_lock.exists():
         text = voice_lock.read_text(encoding="utf-8")
         # Find the "Transcript:" line under the section matching sample-NN
         sample_name = wav.stem  # e.g. "sample-01"
         try:
-            idx = text.index(f"`brand/voice-samples/{sample_name}.wav`")
+            idx = text.index(f"`brand/_engine/voice-samples/{sample_name}.wav`")
             # Walk back to the nearest "**Transcript:**" before that point
             prefix = text[:idx]
             last_t = prefix.rfind("**Transcript:**")

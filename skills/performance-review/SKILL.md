@@ -11,9 +11,9 @@ Weekly engagement-data analysis for Digischola posts. Records metrics, computes 
 
 Read before running:
 
-**Brand wiki:**
-- `Desktop/Digischola/brand/pillars.md` — pillar reference for aggregation
-- `Desktop/Digischola/brand/channel-playbook.md` — channel priority per phase
+**Brand wiki (post-2026-04-29 `_engine/wiki/` convention):**
+- `Desktop/Digischola/brand/_engine/wiki/pillars.md` — pillar reference for aggregation
+- `Desktop/Digischola/brand/_engine/wiki/channel-playbook.md` — channel priority per phase
 
 **Skill references (this skill):**
 - `references/metrics-schema.md` — per-channel required fields + weighted-score formulas
@@ -28,7 +28,7 @@ Read before running:
 
 **Shared context:**
 - `.claude/shared-context/analyst-profile.md`
-- `shared-context/output-structure.md` — Digischola uses queue-based structure (NOT outputs/working/ split); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
+- `shared-context/output-structure.md` — Digischola uses queue-based structure (top-level `queue/`, `calendars/`, `performance/`, `videos/`, `social-images/`; skill internals + brand DNA wiki in `brand/_engine/`); after content drops, run `python3 ~/.claude/scripts/build_digischola_index.py` to refresh the index
 
 ## Inputs
 
@@ -133,3 +133,4 @@ See references/feedback-loop.md for protocol + context tags.
 - [2026-04-22] [Windsor.ai integration — user caught "I can't do it manually man, we have Windsor"] v1 shipped with manual-CSV-paste as the only metric-entry path. User pointed out Windsor.ai already has 4 Digischola connectors authenticated (linkedin_organic, x_organic, facebook_organic, instagram — verified via get_connectors MCP). Built `scripts/pull_performance_windsor.py` (plan+merge CLI) + `references/windsor-field-map.md`. Flow: Claude runs `plan` command → reads plan.json → calls Windsor MCP `get_data` per job → writes results.json → Claude runs `merge` command → matches rows to drafts by URL (primary) or timestamp nearest-neighbor (±2h fallback) → computes weighted_score via canonical `record_performance.SCORERS` → appends to log.json + stamps draft frontmatter. `record_performance.py` kept as the manual fallback. friday-flow.md Step 2 rewritten from "ask Mayank for metrics" to "Windsor pull". Weekly-ritual Friday cron fires at Mon 18:00 IST (not Fri 18:00 — cadence shifted same day per the Thu→Wed cycle shift), user pastes "run friday review", Claude drives the Windsor pull + scoring + report rendering with zero manual entry.
 - [2026-04-22] [Loomer read-only rule — locked] Jon Loomer 2026-03-19 article reports Meta shutting down AD accounts connected to AI agents via third-party connectors (Naman Bansal lost 17 accounts). Article is about ADS, not organic Graph API, but Meta is tightening across the board. Rule locked: Windsor pulls from Claude are READ-ONLY — no write endpoints on any Meta surface (facebook_organic, instagram, or client-side facebook ads). The puller + SKILL chain never call create/update/delete endpoints. If Meta's Graph API tightens further and Digischola's FB/IG page gets a warning, user disconnects the relevant Windsor connector in Windsor's dashboard and falls back to record_performance.py. See references/windsor-field-map.md §Safety rule.
 - [2026-04-22] [Skill description expanded] SKILL.md frontmatter description updated to surface Windsor trigger keywords ("pull metrics", "windsor pull") + note the READ-ONLY safety rule. Primary path is Windsor; manual is fallback.
+- [2026-04-29] [STRUCTURAL REFACTOR] Folder convention changed: skill internals (idea-bank.json, brand DNA wiki, _mining, _research, media assets, configs) now live in `Digischola/brand/_engine/` subfolder; daily-workflow folders (queue/, calendars/, performance/, videos/, social-images/) stay at top. → Updated brand wiki paths in SKILL.md context loading (`pillars.md` and `channel-playbook.md` now under `_engine/wiki/`), `references/promotion-rules.md` (channel-playbook target), and `scripts/weekly_review.py` (suggestion target field). queue/published/ + brand/performance/ paths used by record_performance.py + weekly_review.py + pull_performance_windsor.py are unchanged (queue/performance stay top-level).
