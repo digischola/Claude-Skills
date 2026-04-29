@@ -75,6 +75,7 @@ def classify_file(path):
     if 'image-prompts' in name: return 'image_prompts'
     if 'video-storyboard' in name: return 'video_storyboards'
     if 'creative-brief' in name and name.endswith('.json'): return 'creative_brief'
+    if name.endswith('.html') and ('ad-copy-dashboard' in name or 'prompt-library' in name): return 'dashboard'
     return None
 
 
@@ -515,6 +516,85 @@ def validate_image_prompts(path):
     if short_prompts > 0:
         log_warning(f"{short_prompts} image prompts under 30 words (may be too short for quality output)")
 
+    # 2026-04-28 mandates from references/image-prompt-patterns.md:
+    # (1) Standalone-prompt mandate — no [universal prefix] placeholders
+    # (2) Dual-format mandate — both spec-prose and JSON forms per cell
+    # (3) Reference-image flagging — requires_reference_image / reference_subject metadata
+    placeholder_hits = re.findall(r'\[universal prefix\]|\{prefix\}|\[prefix\]|\[image_gen_prompt_prefix\]', content, re.I)
+    if placeholder_hits:
+        log_critical(f"{len(placeholder_hits)} unresolved prefix placeholder(s) in image prompts — every prompt must be standalone-complete (per 2026-04-28 standalone-prompt mandate)")
+
+    json_format_present = bool(re.search(r'JSON\s+format|"output":\s*\{|"brand_system":\s*\{|"text_elements":\s*\[', content))
+    spec_prose_present = bool(re.search(r'Spec-prose\s+format|BRAND DESIGN SYSTEM|COMPOSITION GRID', content, re.I))
+    if not (json_format_present and spec_prose_present):
+        missing = []
+        if not json_format_present: missing.append("JSON")
+        if not spec_prose_present: missing.append("spec-prose")
+        log_warning(f"Dual-format mandate not met — missing {' + '.join(missing)} format. Per 2026-04-28 rule, every image prompt MUST exist in both forms for analyst tool-fit testing.")
+
+    ref_flag_hits = re.findall(r'requires_reference_image|reference_subject|reference_image_attached', content, re.I)
+    if not ref_flag_hits:
+        log_warning("No reference-image metadata found (`requires_reference_image` / `reference_subject`). Per 2026-04-28 rule, every prompt must carry reference flags so the dashboard can surface attachment requirements. Flag `false` is also a valid value — but the field must exist.")
+
+    # Designer-brain mandate (2026-04-29) — seven required blocks per prompt
+    # See references/image-prompt-patterns.md §"Designer-brain mandate" for full spec.
+    # Hard-floor: every prompt MUST include all seven blocks (or explicitly mark a block
+    # as `intentionally omitted because <reason>`). Quality scoring layered on top.
+    seven_blocks = {
+        'BRAND DESIGN SYSTEM': r'BRAND DESIGN SYSTEM|"brand_system"\s*:',
+        'COMPOSITION GRID': r'COMPOSITION GRID|COMPOSITION ARCHITECTURE|"composition(_grid)?"\s*:',
+        'SUBJECT (frame coordinates)': r'SUBJECT(\b|\s)|"subject"\s*:',
+        'LIGHT + SURFACE': r'LIGHT(\s|\+|/)|LIGHTING(\s|/|:)|photography_style|"light(ing)?"\s*:|hardness|falloff',
+        'TEXT ELEMENTS': r'TEXT ELEMENTS|EMBEDDED TEXT|HEADLINE TEXT|"text_elements"\s*:|exact_copy',
+        'DECORATIVE / VECTOR': r'DECORATIVE|VECTOR ELEMENTS|MOTIF|gradient|motif|"decorative_elements"\s*:|"vector_(elements|vocabulary)"\s*:|intentionally omitted',
+        'NEGATIVE CONSTRAINTS + RENDER QUALITY': r'NEGATIVE\b|"negative_constraints"\s*:|RENDER QUALITY|"render_quality"\s*:',
+    }
+    block_block_pattern = re.compile(r'(?:^## Image \d+|^## Cell \d+)', re.MULTILINE)
+    block_starts = [m.start() for m in block_block_pattern.finditer(content)]
+    block_starts.append(len(content))
+    per_prompt_misses = []
+    quality_scores = []
+    for i in range(len(block_starts) - 1):
+        prompt_text = content[block_starts[i]:block_starts[i + 1]]
+        # Skip if this is the file header before any prompts
+        if i == 0 and 'Image 1' not in prompt_text and 'Cell 1' not in prompt_text:
+            continue
+        missing = []
+        for block_name, pattern in seven_blocks.items():
+            if not re.search(pattern, prompt_text, re.I):
+                missing.append(block_name)
+        # Quality score — counts depth markers per prompt
+        depth_markers = {
+            'pixel_coordinates': len(re.findall(r'\d+\s*px|\d+×\d+|\d+x\d+\s*pixels|columns?\s*\d', prompt_text, re.I)),
+            'hex_colors': len(re.findall(r'#[0-9a-f]{3,8}\b', prompt_text, re.I)),
+            'typography_specs': len(re.findall(r'weight\s*\d{3}|font[:_-]\w+|letter[- ]spacing|size:\s*\d+', prompt_text, re.I)),
+            'light_direction': len(re.findall(r'\d+°|hardness|falloff|backlit|side-light|from upper|cinematic light', prompt_text, re.I)),
+            'exact_copy_strings': len(re.findall(r'exact_copy|Exact copy:', prompt_text, re.I)),
+            'negative_count': len(re.findall(r'No [A-Z]\w+|negative_constraints', prompt_text)),
+        }
+        depth_score = sum(min(v, 5) for v in depth_markers.values())  # cap each at 5; max ~30
+        quality_scores.append(depth_score)
+        # Get prompt label for reporting
+        label_match = re.search(r'^## (Image \d+|Cell \d+)[^\n]*', prompt_text, re.MULTILINE)
+        label = label_match.group(0).strip('# ').strip() if label_match else f'block-{i}'
+        if missing:
+            per_prompt_misses.append((label, missing))
+
+    if per_prompt_misses:
+        for label, missing_blocks in per_prompt_misses[:10]:  # cap report
+            log_critical(f"Designer-brain HARD FLOOR violation in '{label}': missing required block(s) {missing_blocks}. See references/image-prompt-patterns.md §Designer-brain mandate. Mark intentionally-omitted blocks explicitly.")
+        if len(per_prompt_misses) > 10:
+            log_critical(f"... and {len(per_prompt_misses) - 10} more prompts with missing required blocks.")
+    elif quality_scores:
+        avg_score = sum(quality_scores) / len(quality_scores)
+        min_score = min(quality_scores)
+        log_info(f"Designer-brain depth: avg score {avg_score:.1f}/30, min {min_score}/30 across {len(quality_scores)} prompts (hard floor: all 7 blocks present).")
+        if avg_score < 12:
+            log_warning(f"Designer-brain quality score average {avg_score:.1f}/30 is shallow. Reference floor (Digischola Self-Audit) averages 22+. Consider adding pixel coordinates, hex colors, typography weights, light direction in degrees, exact_copy strings, explicit negative constraints.")
+        if min_score < 8:
+            shallow_idx = [i for i, s in enumerate(quality_scores) if s < 8]
+            log_warning(f"{len(shallow_idx)} prompt(s) under quality floor 8/30 — these prompts have all 7 blocks but the blocks are sparse. Designer-brain depth needed: pixel coordinates, hex specifics, typography weights, light direction.")
+
     # Creative-brief cross-check: image_gen_prompt_prefix must flow through.
     # image-prompt-patterns.md Rule #1: never deviate from the prefix. Without this
     # check, a skill run can silently drop the brand-consistent prompt prefix and
@@ -596,6 +676,61 @@ def validate_video_storyboards(path):
             log_warning(f"Total VO ~{total_vo_words} words for ~{declared_sec}s video — exceeds {budget}-word budget (2.5 wps AI voice pace)")
 
     log_info(f"Video storyboard stats: ~{max(len(videos),1)} videos, {len(frames)} frames, {len(vo_sections)} VO sections, {total_vo_words} VO words")
+
+def validate_dashboard(path):
+    """Validate the ad-copy HTML dashboard."""
+    if not os.path.exists(path):
+        log_critical(f"Dashboard file not found: {path}")
+        return
+    with open(path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    issues = []
+    if 'copyText(' not in content:
+        issues.append("missing copyText() helper for clipboard buttons")
+    if 'class="copy-btn"' not in content and 'copy-btn' not in content:
+        issues.append("no .copy-btn elements found")
+    required_sections = ['ads', 'prompts', 'storyboards', 'gate']
+    missing_anchors = [s for s in required_sections if f'id="{s}"' not in content]
+    if missing_anchors:
+        issues.append(f"missing section anchors: {missing_anchors}")
+    # Template-placeholder check — looks for genuine `{{IDENTIFIER}}` pattern
+    # (uppercase-letter + uppercase/underscore body + close braces). Bare `}}` from
+    # nested CSS @media / @keyframes blocks should NOT trigger this.
+    if re.search(r"\{\{\s*[A-Z][A-Z0-9_]*\s*\}\}", content):
+        issues.append("unrendered template placeholders {{IDENTIFIER}} present")
+    if len(content) < 5000:
+        issues.append(f"dashboard suspiciously small ({len(content)} chars) — likely missing data")
+    if issues:
+        for issue in issues:
+            log_warning(f"Dashboard: {issue}")
+    log_info(f"Dashboard stats: {len(content)} chars, {content.count('copy-btn')} copy buttons")
+
+
+def check_dashboard_presence(files):
+    """Check that the dashboard exists at the program folder root."""
+    # Probe: any input file in _engine/working/ implies the program folder is two levels up.
+    program_dir = None
+    for fpath in files.values():
+        p = os.path.abspath(fpath)
+        # Walk up to find _engine/working/
+        if os.sep + '_engine' + os.sep + 'working' + os.sep in p:
+            program_dir = p.split(os.sep + '_engine' + os.sep + 'working' + os.sep)[0]
+            break
+    if not program_dir:
+        return  # Can't determine — skip silently
+    candidates = [
+        os.path.join(program_dir, 'ad-copy-dashboard.html'),
+        os.path.join(program_dir, 'prompt-library.html'),
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            log_info(f"Dashboard present at: {c}")
+            return
+    log_critical(
+        f"Dashboard MISSING at folder root ({program_dir}). "
+        "Run scripts/render_ad_copy_dashboard.py to generate. See SKILL.md Step 7.5."
+    )
+
 
 def validate_cross_file(files):
     """Check consistency between report and CSVs."""
@@ -681,6 +816,7 @@ def main():
         ('meta_csv', 'Meta Ads CSV', validate_meta_csv),
         ('image_prompts', 'Image Prompts', validate_image_prompts),
         ('video_storyboards', 'Video Storyboards', validate_video_storyboards),
+        ('dashboard', 'Ad Copy Dashboard (HTML)', validate_dashboard),
     ]
 
     for file_key, label, validator_fn in validators:
@@ -710,6 +846,13 @@ def main():
     print("  Gate B — Service-Offering Cross-Check")
     print(f"{'='*60}")
     validate_gate_b(files)
+    flush_logs()
+
+    # Dashboard presence check (Step 7.5)
+    print(f"\n{'='*60}")
+    print("  Dashboard Presence (Step 7.5)")
+    print(f"{'='*60}")
+    check_dashboard_presence(files)
     flush_logs()
 
     # Final summary

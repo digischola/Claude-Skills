@@ -4,6 +4,133 @@ Load this file in Step 6 of the ad-copywriter skill. Also load `references/creat
 
 Defines prompt structure, per-format templates, performance rules, and brand consistency rules for AI image generation (Gemini).
 
+## Designer-brain mandate (MANDATORY — added 2026-04-29)
+
+**The skill must think like a top-tier brand-spec director writing for a senior graphic designer, not like a scene-describer for a text-to-image model.** Every prompt below this line is a design hand-off, not a vibes paragraph.
+
+The Digischola Self-Audit prompt library is the reference floor for "designer-brain depth": pixel-anchored composition grids, exact-copy strings with type / weight / size / colour / position, gradient and overlay specifications, vector flourish vocabulary, light direction with hardness and falloff, surface materials, negative constraints. The same depth applies to every client — the *vocabulary* changes per business (paisley motifs for a temple, dashboard gauges for a SaaS audit, woven-cotton textures for a wellness retreat) but the *depth* never drops.
+
+### The seven required blocks per prompt (HARD FLOOR — validator CRITICAL-fails if any missing)
+
+Every spec-prose AND JSON prompt MUST include all seven, or explicitly mark a block as `intentionally omitted because <reason>`:
+
+1. **BRAND DESIGN SYSTEM** — palette (named hex roles: background / accent / primary-text / body-text / panel / etc), typography (display font + weight + letter-spacing, body font + weight), photography style (lens, focal length where applicable, depth-of-field cue, lighting direction archetype, shadow treatment), motif vocabulary the brand uses (e.g. "paisley flourish" / "dashboard gauge" / "woven texture")
+2. **COMPOSITION GRID** — aspect ratio + exact pixel dimensions, grid system (12-column with gutters / rule-of-thirds / golden-spiral), zone breakdown by % or pixel ranges (top zone / middle zone / bottom zone), outer margins in pixels
+3. **SUBJECT** — what's in the frame, with frame coordinates ("face positioned so eyes land on upper-left rule-of-thirds intersection" not "in the background"), rendered surface materials, colour grading direction
+4. **LIGHT + SURFACE** — light direction with degrees ("upper-left at -45°"), hardness (0=hard / 1=soft), falloff direction, surface materials touched by the light ("matte black desk surface" / "brushed cotton mat" / "polished marble"), atmospheric notes (steam / haze / golden cast)
+5. **TEXT ELEMENTS** — every embedded text piece as a structured block: `exact_copy` / font + weight / size in px / colour as hex / position as anchor + offset in px / letter-spacing if non-default. Special-character emphasis (₹ glyph colour, → arrow size, • bullet weight) called out explicitly
+6. **DECORATIVE / VECTOR ELEMENTS** — gradient overlays (linear / radial / mesh, colour stops with position %, opacity), section dividers, sectional bands, motif placements with size / opacity / corner anchor, callout arrows, dashed lines, badge geometry — drawn from the brand's vector vocabulary (see Sector Vocabulary Library below). If a card is intentionally minimal, declare `decorative_elements: none — minimalist register intentional` to satisfy the validator
+7. **NEGATIVE CONSTRAINTS** + **RENDER QUALITY** — explicit exclusions (no <competitor logos> / no <sensitive imagery for the platform> / no <off-brand stock cliches>) AND a final clause stating render fidelity ("Premium polished advertising creative for Meta feed placement, magazine-grade colour grading, suitable for slow scroll-stop")
+
+### The four input signals — adaptation logic the skill applies per prompt
+
+The same brand can produce wildly different prompts depending on these four signals. The skill MUST read all four for every prompt and let them shift the spec choices.
+
+**Signal 1 — Conversion goal** (read from `creative-brief.json` `campaigns[].primary_conversion_event`):
+- `Lead` / `RSVP` / `CompleteRegistration` → single CTA prominence; trust-strip integration; reduce decorative noise around the form-action surface; "no-friction" visual cues (cream gradient bands, soft golden pulls)
+- `Purchase` → product detail focus; price + arrow + CTA button as a tightly-grouped unit; texture/material fidelity raised; trust-pillars (rating, reviews, refund) inline-chip-stacked
+- `App Install` → screen-mockup hero treatment; OS chrome shown; rating-stars badge; download-CTA prominence
+- `Awareness / Reach` → editorial mood; copy-light; subject-led storytelling; minimal CTA
+
+**Signal 2 — Emotional register** (infer from creative angle / persona / brand voice):
+- **Calm / contemplative** → soft natural light (hardness 0.4+), low-saturation palette, italic display typography, sparse decorative flourish, breathing whitespace, single-subject framing
+- **Aspirational / warm** → golden-hour light (+200-400K), saturated cream/gold palette, mid-frequency decorative motifs, family / community subjects, soft gradient bands
+- **Urgent / scroll-stop** → high-contrast palette, bold display weight (700+), shorter type stack, sharp-edged composition zones, ambient glow accents, high-impact CTA pill
+- **Authoritative / educational** → flat / frontal subject framing, monospace or serif body typography, data-led decorative system (charts, gauges, callouts), restrained palette
+- **Devotional / cultural** → warm interior light, gold + navy + cream brand palette, traditional motif corners (paisley / lotus / geometric border), Sanskrit/devanagari punctuation as decorative typography, no figurative deity close-ups
+
+**Signal 3 — Audience tier** (read from `creative-brief.json` audience metadata):
+- **Cold prospecting** → maximum scroll-stop impact: high contrast, bold subject, embedded headline larger size, decorative system simplified to one strong motif, single CTA
+- **Lookalike (warm-cold)** → editorial register: subject-led, mid-decoration, lighter type weight, secondary supporting copy allowed
+- **Warm retargeting** → intimate framing (closer crop, faces visible), more sensory detail (steam, texture, food close-ups), softer lighting, narrative-style copy, reference to prior campaign engagement allowed in copy ("you came for X, here's Y")
+- **Customer / retention** → established-relationship register: insider language, sponsorship/upsell CTAs, tighter brand-system adherence (no scroll-stop tricks), refined typography
+
+**Signal 4 — Cultural / sector context** (derive from brand-config.json + offerings.md):
+- **Temple / cultural-org** (ISKM): paisley motifs, gold + navy + cream, Sanskrit punctuation, golden-hour interior, no deity close-ups in cold/LAL, family / community subjects
+- **SaaS / B2B audit** (Digischola): pure black background, sky-blue accents, dashboard gauges + leak-marker dashed circles + sky-blue annotation lines, monospace + Space Grotesk type stack, founder portrait with reference attachment, ₹ glyph + → arrow as design elements
+- **Wellness / retreat**: cream-and-sage palette, hand-drawn brushstroke flourishes, woven-cotton textures, soft natural light, body-led subjects, italic serif display
+- **Local services / fitness / studio**: action photography, motion blur on movement, branded apparel, before-after split screens, results-stat callouts, bold sans-serif display
+- **Restaurant / food**: overhead flatlay or 45° plate angle, steam visible, hand-serving framing, warm wood / linen surfaces, ASMR-style sensory detail
+- **D2C product**: clean studio backdrop or contextual lifestyle, packaging as hero, colour-graded to match brand palette, ingredient/feature callouts via thin-line annotations
+- **Professional services / B2B**: editorial portrait, neutral palette, credibility chips (years / clients / certifications), restrained typography, single CTA pill
+
+The skill picks one or more cell entries from this library for every prompt. If the client's sector isn't listed, the skill infers from offerings.md + brand-config.json and authors a custom vocabulary block — flagged as `[INFERRED sector vocabulary — confirm with analyst]` in the prompt header.
+
+### Designer-brain authoring process (sequence the skill follows for each prompt)
+
+1. **Read four signals.** Conversion goal, emotional register (from creative angle), audience tier, sector context.
+2. **Derive design system floor.** Read `brand-config.json` `design_system` (or fall back to `colors` + `fontFamily` + infer the rest from sector vocabulary).
+3. **Layer campaign overrides.** Read `creative-brief.json` `visual_direction.design_system_overrides` for this campaign — campaign-specific palette tilt, motif emphasis, type-scale shift.
+4. **Author the seven blocks.** For each block, make a design choice the four signals justify. Don't copy-paste a template; *think* — would a top art director put a gold gradient band here, or a sharp navy divider? Why?
+5. **Embellish with authority.** If brief is silent, the skill adds gradient overlays / vector motifs / typography emphasis that the brand vocabulary supports and the campaign goal requires. Author flourishes that serve scroll-stop, hierarchy, or emotional register — not decoration for its own sake.
+6. **Negative constraints from sector + Meta policy.** Pull negative constraints from sector vocabulary (no Krishna close-ups for temple cold/LAL; no founder face for product-led prompts; no Google logo for ex-Google credibility creative) plus universal Meta sensitive-content policy.
+7. **Render quality clause.** Final sentence in both spec-prose and JSON ends with a fidelity directive matching the placement.
+
+### Design-system schema floor (in brand-config.json)
+
+The brand-config.json `design_system` block defines the floor every prompt inherits. If absent, the skill scaffolds a minimum from existing `colors` + `fontFamily` + sector inference, and writes it back to brand-config.json so subsequent runs build on the locked floor.
+
+```json
+{
+  "design_system": {
+    "palette": {
+      "background": "#ffffff",
+      "accent_primary": "#f1c66e",
+      "accent_secondary": "#1f3671",
+      "headline_text": "#071442",
+      "body_text": "#1f3671",
+      "panel_bg": "#f8eae1"
+    },
+    "typography": {
+      "display_font": "Cardo",
+      "display_weight": "italic-regular",
+      "display_letter_spacing": "-0.01em",
+      "body_font": "Noto Sans",
+      "body_weight": 400,
+      "type_scale": {"hero": 56, "h1": 42, "h2": 32, "body": 18, "caption": 14}
+    },
+    "photography": {
+      "default_lens": "35mm",
+      "default_lighting": "warm interior natural light, hardness 0.4",
+      "default_falloff": "soft cream falloff into navy shadow",
+      "default_grading": "+200K warm, +20% saturation"
+    },
+    "motif_library": [
+      "paisley flourish (gold, 64x64px corner accent, 15% opacity)",
+      "geometric border pattern (gold, 8px height, top/bottom strip)",
+      "Sanskrit devanagari punctuation as decorative typography",
+      "warm cream gradient overlay (linear, vertical, #f8eae1cc to transparent)"
+    ],
+    "vector_vocabulary": ["dot bullet (gold, 8px circle)", "gold thin divider line (1-2px, 30/100/30 opacity gradient through height)"],
+    "emphasis_rules": {
+      "special_characters": "₹ glyph in accent_primary; → arrow same size as adjacent text",
+      "hierarchy_separator": "8px gold dot bullet between phrases",
+      "trust_chips": "rounded-pill border 1px accent_primary, dark panel_bg, body_font 600 18px"
+    },
+    "render_quality_clause": "Premium editorial advertising creative, magazine-grade colour grading, suitable for slow scroll-stop"
+  }
+}
+```
+
+The `creative-brief.json` `visual_direction.design_system_overrides` block lets paid-media-strategy author campaign-specific deviations on top:
+
+```json
+{
+  "visual_direction": {
+    "design_system_overrides": {
+      "palette_tilt": "shift accent toward crimson #d31f36 for festival emphasis",
+      "motif_emphasis": "festival garland motif takes priority over paisley for this campaign",
+      "type_scale_shift": "+20% display size for scroll-stop in cold-prospecting tier",
+      "emotional_register_lock": "aspirational warmth"
+    }
+  }
+}
+```
+
+If neither file has a design_system block, the skill scaffolds a sector-default floor and writes it back to `brand-config.json` (logged in `_engine/wiki/log.md` as a SKILL-AUTHORED entry).
+
+---
+
 ## Performance Rules (from creative-research.md — apply to EVERY prompt)
 
 These override aesthetic preferences when they conflict:
@@ -58,43 +185,88 @@ Every prompt MUST be available in TWO formats:
 
 A/B test result (2026-04-27): JSON and prose tied on Gemini, prose edged JSON on ChatGPT. Different analysts and different cells will favor different formats. The HTML prompt library MUST present both formats per card with a tab toggle.
 
-## Reference-image flagging (MANDATORY — added 2026-04-28)
+## Reference-image flagging (MANDATORY — added 2026-04-28, sector-aware defaults 2026-04-29)
 
-Every prompt MUST carry two metadata fields the HTML library renders as an animated badge:
+Every prompt MUST carry these metadata fields:
 
 - `requires_reference_image: true | false`
-- `reference_subject: string` — describes WHAT the user must attach (e.g., "Mayank's portrait photo", "actual product packaging shot", "venue exterior photo", "team member headshot")
+- `reference_subject: string` — what the analyst must attach (e.g., "Mayank's portrait photo")
+- `reference_file_id: string | null` — the manifest entry ID (e.g., `WLF-REF-CLASS-HALL`) when an actual file exists in the client's reference manifest
+- `reference_file_path: string | null` — relative path to the file when known
 
-**When to flag `true`:**
-- Founder / team-member portraits — for likeness consistency across creatives
-- Product shots — when the brand sells a specific physical product
-- Venue / location shots — when a specific place is being depicted
-- Custom logos or brand artifacts — when the artifact is unique and non-typographic
+**Sector-aware reference-flag default (added 2026-04-29 — replaces the prior universal "generic = false" fallback).** Reference images are brand-consistency anchors, not optional decoration. Without them, every Gemini render produces a slightly different room, slightly different teacher, slightly different food vessel — death for brand recognition across 6-8 quarterly creatives. The skill MUST apply this sector default unless the prompt depicts an abstract concept with no specific real-world subject:
 
-**When to flag `false`:**
-- Generic UI / dashboard / chart mockups (abstract, no specific real-world subject)
-- Conceptual illustrations
-- Abstract data visualizations
-- Stock-style scenes with no specific likeness requirement
+| Sector | Default for `requires_reference_image` | Reference subjects expected in manifest |
+|---|---|---|
+| Temple / cultural-org | **TRUE** for prompts depicting interior space, congregation, kirtana, prasadam, classes | Actual temple hall interior, class space, prasadam serving moment, kirtana lead, devotee community shots |
+| SaaS / B2B audit | **TRUE** for founder-portrait creatives; **FALSE** for UI/dashboard mockups (those are conceptual) | Founder face, team headshots; UI mockups can be conceptual |
+| D2C product | **TRUE** always — product packaging is the brand | Product packaging shot, lifestyle context with the product |
+| Wellness retreat | **TRUE** for venue exterior + treatment-room interior; **FALSE** for abstract lifestyle | Actual retreat venue, treatment room, signature practice space |
+| Local services / studio | **TRUE** for storefront + studio interior | Actual storefront / studio space, signature class moment |
+| Restaurant / food | **TRUE** for plated dishes + interior | Plated signature dish, restaurant interior, chef portrait |
+| Professional services / B2B | **TRUE** for team / founder portrait creatives | Founder + senior team headshots |
 
-The HTML library MUST render flagged cards with a pulsing/animated badge in the card head, the reference subject visible at a glance. The analyst should not have to dig into the JSON to discover a card needs an attachment.
+**The skill must override the sector default only with explicit reason in the prompt header, e.g.:**
+- `requires_reference_image: false — abstract conceptual illustration, no real-world subject depicted`
+- `requires_reference_image: false — text-only typographic card, no photographic content`
 
-This logic generalizes across all clients — whatever subject specificity the brand demands (founder face for personal-brand clients, product packaging for D2C clients, venue exteriors for event/wellness clients, team member headshots for professional services), the same flag system applies.
+A bare `requires_reference_image: false` without a reason on a sector that defaults to TRUE is a validator CRITICAL fail.
 
-## HTML prompt-library deliverable (MANDATORY — added 2026-04-27, expanded 2026-04-28)
+### Reference manifest convention (MANDATORY when sector-default is TRUE)
 
-Alongside the markdown image-prompts file, the skill MUST also generate `prompt-library.html` (at the client/program folder root — folder location already encodes client + program) — a one-page dashboard with:
+The skill maintains a manifest at `{client-folder}/_engine/references/images/manifest.json` that lists every available reference image, its subject, source location, license, and suggested-prompts. The manifest is the single source of truth for `reference_file_id` lookups in prompts.
 
-- One card per prompt (cell)
-- **Two-tab toggle per card: JSON / Spec-prose** — both formats with their own copy buttons
-- Per-card "Copy full prompt" button per format tab (one click → clipboard)
-- Per-card metadata visible at a glance: aspect ratio, priority, intended placement
-- **Animated reference-image badge** on cards where `requires_reference_image: true` (pulse animation, sky-blue or amber accent, paperclip icon, "Attach: {reference_subject}" text)
-- Filter chips (priority, angle, reference-required-only)
+Manifest schema:
+
+```json
+{
+  "version": "1.0",
+  "client": "<business name>",
+  "program": "<program name or null for single-program>",
+  "references": [
+    {
+      "id": "WLF-REF-CLASS-HALL",
+      "subject": "Bhagavad-Gita class in actual ISKM Geylang temple hall — adult discourse with notebooks visible",
+      "file_path": "<relative path from manifest.json to actual file, OR external URL>",
+      "source": "Lovable mirror gallery / client-supplied / generated and approved 2026-04-28",
+      "license": "Owned by client (ISKM Singapore) — use across all ISKM creatives",
+      "suggested_for_prompts": ["WLF-AD-01-CARD-2", "WLF-AD-04-BEGINNERS-WISDOM"],
+      "deity_imagery": false,
+      "audience_safe_for_cold_LAL": true,
+      "audience_restriction_note": null
+    }
+  ]
+}
+```
+
+**Per-prompt reference resolution at authoring time:**
+
+1. The skill reads `manifest.json`.
+2. For each prompt, the skill matches by `suggested_for_prompts` OR by subject overlap.
+3. The matched reference's `id`, `subject`, and `file_path` are written into the prompt's metadata header.
+4. The dashboard (`scripts/render_ad_copy_dashboard.py`) renders an animated reference badge with the `reference_subject` text and (if available) a small thumbnail / "open" link to the file.
+
+**`audience_safe_for_cold_LAL` flag**: this is a Meta-policy + brand-voice gate. References that include deity close-ups (Krishna, Radha, Nṛsiṁhadeva) get flagged `false` — the skill must NOT use them in cold/LAL prompts. They can be used in strict-retarget prompts (Festival Follow-On targeting Nṛsiṁha pixel) where audience self-selected and rejection risk is lower.
+
+If a sector-defaults-TRUE prompt has no matching reference in the manifest, the skill writes `requires_reference_image: true` + `reference_file_id: null` + `reference_subject: <description of what to attach>`. The dashboard surfaces this as a "MISSING REFERENCE" state with a different badge colour, prompting the analyst to upload before generating.
+
+This logic generalizes across all clients — whatever subject specificity the brand demands (founder face / product packaging / venue exterior / team headshots / temple interior), the same flag system + manifest applies.
+
+## HTML dashboard deliverable (MANDATORY — added 2026-04-27, expanded 2026-04-28, broader scope 2026-04-29)
+
+Alongside the markdown image-prompts file, the skill MUST also generate `ad-copy-dashboard.html` (at the client/program folder root — folder location already encodes client + program) via `scripts/render_ad_copy_dashboard.py`. The dashboard now covers ALL ad-copywriter outputs in one presentable, not just image prompts:
+
+- **Hero KPIs:** ads count, variants count, image-prompts count, storyboards count + Gate A/B status pills
+- **Per-ad cards:** framework + persona + audience + format + ID + primary-text variants with 📋 Copy buttons + headlines/descriptions in collapsibles + CTA pill
+- **Image prompt grid:** one card per prompt with full prompt visible (brand visual_direction prefix substituted) + 📋 Copy full prompt button per card
+- **Video storyboards:** frame-by-frame layer tables (Visual / Motion / Text overlay / Voiceover / Voice direction / Music) + Combined VO script with dedicated copy button
+- **Gate audit summary:** voice / character / sensitivity audit list extracted from the inline `## Gate Audit` section of `ad-copy-report.md`
 - Brand-config-derived styling (read from `_engine/brand-config.json` at the client root)
 - Mobile-readable (founder may copy from phone)
 
-The MD file remains as the analyst-readable archive. The HTML is the production tool.
+The MD files remain as the analyst-readable archives. The HTML is the production tool.
+
+**Legacy filename `prompt-library.html`:** earlier versions of this reference declared a narrower image-only dashboard called `prompt-library.html`. As of 2026-04-29 the dashboard is broader (ad copy + prompts + storyboards + Gate audit unified) and renamed to `ad-copy-dashboard.html`. Validator accepts both names for backwards-compat.
 
 **Validation (CRITICAL):**
 - HTML must NOT contain `[universal prefix]` placeholder strings inside any prompt block
