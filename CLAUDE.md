@@ -111,11 +111,11 @@ Never silently paper over a protocol gap with judgment and ship — that's how s
 When a skill is re-run on the same client / same case (e.g. updating a strategy because business-analysis corrected an offering, or refreshing market-research after a brief change), update existing files in place — overwrite, don't accumulate. No v1/v2/v3, no `-{date}` parallel filenames, no "follow-up" or "revised" variants, no dated section headers preserving prior content inside the same file. One file per role, current state only.
 
 The persistent state lives in:
-- `wiki/strategy.md`, `wiki/business.md`, etc. — the analyzed truth
-- `wiki/log.md` — by-design append-only change log (this is where dated audit history lives, NOT in sources/ filenames or in content sections of other files)
-- `outputs/*.html` and `working/*.md` — overwritten in place each iteration
+- `_engine/wiki/strategy.md`, `_engine/wiki/business.md`, etc. — the analyzed truth
+- `_engine/wiki/log.md` — by-design append-only change log (this is where dated audit history lives, NOT in `_engine/sources/` filenames or in content sections of other files)
+- `*.html` (folder root) and `_engine/working/*.md` — overwritten in place each iteration
 
-The one exception is `wiki/briefs.md` — append-only by design, with `[ACTIVE]` / `[SUPERSEDED]` markers — because client briefs themselves accumulate as the client iterates over time. That is a brief-history pattern, not a re-run pattern.
+The one exception is `_engine/wiki/briefs.md` — append-only by design, with `[ACTIVE]` / `[SUPERSEDED]` markers — because client briefs themselves accumulate as the client iterates over time. That is a brief-history pattern, not a re-run pattern.
 
 If you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead. The folder shape is the source-of-truth; if it gets a new file, ask whether overwrite-in-place is the same operation.
 
