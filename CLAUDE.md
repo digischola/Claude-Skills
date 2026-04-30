@@ -119,6 +119,12 @@ The one exception is `_engine/wiki/briefs.md` — append-only by design, with `[
 
 If you find yourself about to create a new file for an output that has the same logical role as an existing one, stop and overwrite the existing file instead. The folder shape is the source-of-truth; if it gets a new file, ask whether overwrite-in-place is the same operation.
 
+## Skill Corrections Log (Always Active)
+
+When patching any skill mid-session (per the 7+3 rule), also append one line to `Desktop/.claude/skills/_skill-corrections-log.md` describing the correction. Format: `YYYY-MM-DD | skill | type | one-line summary | files-touched`. Tag conventions in that file's header (scope-creep, mode-confusion, validator-gap, validator-false-positive, prompt-drift, deliverable-gap, path-detection, output-format, voice-rule, other).
+
+This is part of the patch — not a separate step. The point is cross-skill pattern memory: after a few weeks of entries, recurring mistake types become visible and we harden against them. Mayank reads the log monthly to spot patterns.
+
 ## Session Start Audit (Always Active)
 
 When activating any skill at the start of a session:

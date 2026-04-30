@@ -677,6 +677,394 @@ def validate_video_storyboards(path):
 
     log_info(f"Video storyboard stats: ~{max(len(videos),1)} videos, {len(frames)} frames, {len(vo_sections)} VO sections, {total_vo_words} VO words")
 
+def validate_format_aspect_consistency(image_prompts_path, creative_brief_path=None):
+    """Cross-check image-prompts.md aspect ratios against creative-brief.json format_priority.
+
+    Patched 2026-04-30 after WLF-AD-01 carousel cards shipped at 4:5 (single-image format)
+    instead of 1:1 (Meta carousel mandatory). Reference image-prompt-patterns.md line 329:
+    "1:1 Square — Feed Fallback / Carousel Cards" — rule already documented but not enforced.
+
+    Format → required aspect ratio mapping (Meta + Google specs):
+      - carousel / carousel_5_card / lp_redirect_carousel  → 1:1 ONLY (all cards must match)
+      - single_image                                         → 4:5 preferred (1:1 acceptable)
+      - single_image_1_1                                     → 1:1
+      - video_15s_reel / video_9_16_reel / vertical          → 9:16
+      - video_1_1                                            → 1:1
+      - google_display                                       → 1.91:1 or 1:1
+      - google_display_square                                → 1:1
+    """
+    if not os.path.exists(image_prompts_path):
+        return
+    with open(image_prompts_path, 'r') as f:
+        prompts_text = f.read()
+
+    brief = None
+    if creative_brief_path and os.path.exists(creative_brief_path):
+        try:
+            with open(creative_brief_path, 'r') as f:
+                brief = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+
+    # Build format → required aspect map from creative-brief
+    creative_aspect_map = {}  # creative_id → set of allowed aspect ratios
+    if brief:
+        for creative in brief.get("creatives", []):
+            cid = creative.get("id", "")
+            formats = creative.get("format_priority", [])
+            allowed_aspects = set()
+            for fmt in formats:
+                fmt_lower = fmt.lower()
+                if "carousel" in fmt_lower:
+                    allowed_aspects.add("1:1")
+                elif "9_16" in fmt_lower or "9:16" in fmt_lower or "reel" in fmt_lower or "story" in fmt_lower:
+                    allowed_aspects.add("9:16")
+                elif "1_1" in fmt_lower or "1:1" in fmt_lower or "square" in fmt_lower:
+                    allowed_aspects.add("1:1")
+                elif "single_image" in fmt_lower or "feed" in fmt_lower:
+                    allowed_aspects.update(["4:5", "1:1"])
+                elif "1.91" in fmt_lower or "display" in fmt_lower:
+                    allowed_aspects.add("1.91:1")
+            if allowed_aspects:
+                creative_aspect_map[cid] = allowed_aspects
+
+    # Parse image-prompts.md for prompt blocks: heading + their aspect ratio
+    # Pattern: "## Prompt N — {creative_id}-CARD-N" or "## Prompt N — {creative_id}"
+    prompt_blocks = re.findall(
+        r'^## Prompt \d+\s+[—-]\s+([A-Z][A-Z0-9-]*)\b.*?(?=^## Prompt|\Z)',
+        prompts_text,
+        re.MULTILINE | re.DOTALL,
+    )
+    full_blocks = re.split(r'^## Prompt \d+\s+[—-]\s+', prompts_text, flags=re.MULTILINE)[1:]
+
+    mismatches = []
+    for block in full_blocks:
+        # First line is the heading: "{CREATIVE_ID} (...)"
+        heading_m = re.match(r'([A-Z][A-Z0-9-]*)', block)
+        if not heading_m:
+            continue
+        prompt_id = heading_m.group(1)
+        # Strip "-CARD-N" suffix to get parent creative ID
+        parent_id = re.sub(r'-CARD-\d+$', '', prompt_id)
+
+        # Find aspect ratio in this prompt block
+        aspect_m = re.search(r'(?:Aspect(?:\s+ratio)?|aspect_ratio)["\s:*]+(\d+:\d+(?:\.\d+)?|1\.91:1)', block)
+        if not aspect_m:
+            continue
+        actual_aspect = aspect_m.group(1)
+
+        # Check against creative-brief.json mapping
+        if parent_id in creative_aspect_map:
+            allowed = creative_aspect_map[parent_id]
+            if actual_aspect not in allowed:
+                mismatches.append({
+                    "prompt_id": prompt_id,
+                    "parent_creative": parent_id,
+                    "actual_aspect": actual_aspect,
+                    "allowed_aspects": sorted(allowed),
+                })
+
+    if mismatches:
+        for m in mismatches:
+            log_critical(
+                f"Aspect-ratio mismatch: {m['prompt_id']} uses {m['actual_aspect']}, "
+                f"but parent creative {m['parent_creative']}'s format_priority requires "
+                f"{'/'.join(m['allowed_aspects'])}. Reference: image-prompt-patterns.md §carousel-cards-1:1-rule."
+            )
+    else:
+        log_info(f"Format/aspect-ratio cross-check passed ({len(creative_aspect_map)} creatives mapped from creative-brief.json)")
+
+
+def validate_carousel_card_count(image_prompts_path, creative_brief_path=None):
+    """Cross-check carousel card count: brief's `carousel_N_card` must match N CARD-X prompts.
+
+    Patched 2026-04-30 after WLF-AD-01 shipped 4 carousel cards (CARD-1, 2, 4, 5) when
+    creative-brief.json specified `format_priority: ["carousel_5_card", ...]` — analyst-brain
+    decided 4 cards told the story, no validator caught the gap. Same failure class as the
+    4:5/1:1 aspect bug: brief format-spec ignored at authoring time, no enforcement.
+
+    Detection rule:
+      - Parse creative-brief.json for creatives whose format_priority contains `carousel_N_card`
+        (or `carousel_N_card_static`) where N is an integer.
+      - For each such creative, count distinct `{creative_id}-CARD-K` prompts in image-prompts.md.
+      - CRITICAL on count mismatch (expected N, found M ≠ N).
+      - Also CRITICAL if CARD-K indices have gaps (e.g. CARD-1, 2, 4, 5 missing CARD-3).
+      - `lp_redirect_carousel` / bare `carousel` (no _N_card pattern) → WARNING only (count implicit).
+    """
+    if not os.path.exists(image_prompts_path):
+        return
+    with open(image_prompts_path, 'r') as f:
+        prompts_text = f.read()
+
+    brief = None
+    if creative_brief_path and os.path.exists(creative_brief_path):
+        try:
+            with open(creative_brief_path, 'r') as f:
+                brief = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    if not brief:
+        return
+
+    # Build creative_id → expected_card_count map.
+    # Rule: only enforce the P1 (primary) format — format_priority[0]. P2+ formats are
+    # advisory/optional per SKILL.md Step 6 "P1/P2 priority" convention. If P1 is
+    # `carousel_N_card`, N is mandatory. If P1 is bare `carousel`/`lp_redirect_carousel`,
+    # warn only. If P1 is non-carousel, even P2 carousel is advisory (skip enforcement).
+    expected_counts = {}  # creative_id → int (expected card count)
+    soft_carousel = []    # creative_id list — P1 is bare carousel, no N specified
+    for creative in brief.get("creatives", []):
+        cid = creative.get("id", "")
+        formats = creative.get("format_priority", [])
+        if not formats:
+            continue
+        primary = formats[0].lower()
+        m = re.search(r'carousel_(\d+)_card', primary)
+        if m:
+            expected_counts[cid] = int(m.group(1))
+        elif "carousel" in primary:
+            soft_carousel.append(cid)
+        # else: P1 is non-carousel → even if P2 is carousel, treat as advisory; skip
+
+    if not expected_counts and not soft_carousel:
+        log_info("Carousel card-count check skipped — no P1 carousel formats in creative-brief.json")
+        return
+
+    # Count distinct CARD-K indices per creative_id in image-prompts.md.
+    # ID aliasing: prompts often use a stem prefix (e.g. `WLF-AD-01-CARD-1`) where the brief's
+    # full creative_id is `WLF-AD-01-FAMILY-FUTURE`. We accept either:
+    #   (a) full match: `{full_cid}-CARD-N`
+    #   (b) stem match: first 3 dash-segments of `{cid}` followed by `-CARD-N`
+    #       (e.g. `WLF-AD-01` from `WLF-AD-01-FAMILY-FUTURE`)
+    card_pattern = re.compile(r'\b([A-Z][A-Z0-9-]*?)-CARD-(\d+)\b')
+    found_cards_by_id = {}  # exact-id-match → set of K
+    for m in card_pattern.finditer(prompts_text):
+        prompt_cid, k = m.group(1), int(m.group(2))
+        found_cards_by_id.setdefault(prompt_cid, set()).add(k)
+
+    def cards_for_creative(cid):
+        """Resolve cards belonging to a creative_id, accepting stem-prefix matches."""
+        if cid in found_cards_by_id:
+            return found_cards_by_id[cid]
+        # Try the 3-segment stem (e.g. WLF-AD-01 from WLF-AD-01-FAMILY-FUTURE)
+        parts = cid.split("-")
+        if len(parts) >= 3:
+            stem = "-".join(parts[:3])
+            if stem in found_cards_by_id:
+                return found_cards_by_id[stem]
+        return set()
+
+    issues_found = False
+    for cid, expected_n in expected_counts.items():
+        cards = sorted(cards_for_creative(cid))
+        if not cards:
+            log_critical(
+                f"Carousel card count: {cid} requires {expected_n} cards "
+                f"(`carousel_{expected_n}_card` in brief) but ZERO `{cid}-CARD-N` prompts "
+                f"found in image-prompts.md."
+            )
+            issues_found = True
+            continue
+        if len(cards) != expected_n:
+            log_critical(
+                f"Carousel card count mismatch: {cid} requires {expected_n} cards "
+                f"(`carousel_{expected_n}_card` in brief) but only {len(cards)} authored "
+                f"({cid}-CARD-{','.join(str(c) for c in cards)}). Author the missing cards "
+                f"or correct the brief's format_priority."
+            )
+            issues_found = True
+            continue
+        # Count matches but check for gaps in indices: must be contiguous 1..N
+        expected_indices = set(range(1, expected_n + 1))
+        actual_indices = set(cards)
+        if actual_indices != expected_indices:
+            missing = sorted(expected_indices - actual_indices)
+            extra = sorted(actual_indices - expected_indices)
+            msg = f"Carousel card indices not contiguous 1..{expected_n} for {cid}: "
+            if missing:
+                msg += f"missing CARD-{','.join(str(c) for c in missing)}"
+            if extra:
+                msg += f" extra CARD-{','.join(str(c) for c in extra)}"
+            log_critical(msg)
+            issues_found = True
+
+    for cid in soft_carousel:
+        if not cards_for_creative(cid):
+            log_warning(
+                f"Carousel format declared for {cid} but no `{cid}-CARD-N` prompts found "
+                f"(format_priority lists bare `carousel` / `lp_redirect_carousel` — "
+                f"card count not explicit; verify intent)."
+            )
+
+    if not issues_found:
+        log_info(
+            f"Carousel card-count check passed "
+            f"({len(expected_counts)} numbered carousel + {len(soft_carousel)} soft carousel)"
+        )
+
+
+def validate_voice_library_compliance(image_prompts_path, ad_copy_report_path, creative_brief_path, voice_library_path):
+    """Cross-check generated copy against client voice-library.json.
+
+    Bedrock added 2026-04-30 after WLF flag: 5 carousel cards / 5 different trust-line strings /
+    3× "Reserve a seat" CTA reuse / fresh-invented headlines drifting from proven $0.71 CPL voice.
+    Spec: ~/.claude/shared-context/voice-library-spec.md.
+
+    Five sub-checks (see spec §"Validator rules"):
+      1. event_facts.canonical_string appears (≥80% similarity) on every variant of an event campaign
+      2. heading word-count ≤ voice_rules.max_headline_words
+      3. no voice_rules.forbidden_phrases anywhere in generated copy
+      4. when creative-brief sets voice_anchor.pattern_id, generated headline broadly matches the pattern's max_words
+      5. cta_pill copy matches a verb+noun pair from voice-library; generic "Reserve now" / "Learn More" / "Click here"
+         on a designated CTA card = CRITICAL; >40% of carousel cards using the SAME generic CTA = WARNING
+    """
+    if not os.path.exists(voice_library_path):
+        log_warning(
+            f"voice-library.json not found at {voice_library_path} — bedrock voice-compliance check "
+            f"skipped. business-analysis Step 8 must run first to populate the library."
+        )
+        return
+    try:
+        with open(voice_library_path, 'r') as f:
+            voice = json.load(f)
+    except (json.JSONDecodeError, IOError) as e:
+        log_warning(f"Could not parse voice-library.json: {e}")
+        return
+
+    brief = None
+    if os.path.exists(creative_brief_path):
+        try:
+            with open(creative_brief_path, 'r') as f:
+                brief = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+
+    voice_rules = voice.get("voice_rules", {})
+    forbidden = [p.lower() for p in voice_rules.get("forbidden_phrases", [])]
+    max_headline_words = int(voice_rules.get("max_headline_words", 12))
+    max_cta_words = int(voice_rules.get("max_cta_words", 5))
+
+    # Combine generated text we want to scan
+    text_blobs = []
+    for p in (image_prompts_path, ad_copy_report_path):
+        if os.path.exists(p):
+            with open(p, 'r') as f:
+                text_blobs.append(f.read())
+    full_text = "\n".join(text_blobs).lower()
+
+    # CHECK 3 — forbidden phrases
+    forbidden_hits = [p for p in forbidden if p in full_text]
+    if forbidden_hits:
+        for p in forbidden_hits:
+            log_critical(
+                f"Voice-library FORBIDDEN phrase '{p}' appeared in generated copy. "
+                f"Source: voice-library.json voice_rules.forbidden_phrases. Rewrite to remove."
+            )
+
+    # CHECK 1 — event-fact anchor consistency (only when brief declares event campaign type).
+    # Updated 2026-04-30 to accept per_card_variants_allowed for schedule_walk carousels —
+    # each card may have its OWN time-specific event component (e.g. 5pm gathering / 5:30 class /
+    # 6:30 ārati / 7:15 feast) rather than repeating one canonical line. The check now accepts
+    # ANY of the brief's allowed variants, not just the strict canonical_string.
+    event_facts = (brief or {}).get("event_facts") if brief else None
+    if event_facts and event_facts.get("must_appear_on_every_variant"):
+        canonical = (event_facts.get("canonical_string") or "").lower().strip()
+        # Build the list of acceptable trust-line strings: canonical + per_card_variants_allowed
+        acceptable_variants = [canonical] if canonical else []
+        for v in (event_facts.get("per_card_variants_allowed") or []):
+            v_low = v.lower().strip()
+            if v_low and v_low not in acceptable_variants:
+                acceptable_variants.append(v_low)
+        if acceptable_variants and image_prompts_path and os.path.exists(image_prompts_path):
+            with open(image_prompts_path, 'r') as f:
+                prompts_text = f.read()
+            blocks = re.split(r'^## Prompt \d+\s+[—-]\s+', prompts_text, flags=re.MULTILINE)[1:]
+            misses = []
+            for i, block in enumerate(blocks, start=1):
+                block_low = block.lower()
+                # For each variant, compute token overlap. Pass if ANY variant clears 50% threshold.
+                best_ratio = 0.0
+                best_variant = ""
+                for variant in acceptable_variants:
+                    var_tokens = [t for t in re.split(r'\W+', variant) if len(t) >= 3]
+                    if not var_tokens:
+                        continue
+                    hits = sum(1 for t in var_tokens if t in block_low)
+                    ratio = hits / len(var_tokens)
+                    if ratio > best_ratio:
+                        best_ratio = ratio
+                        best_variant = variant
+                if best_ratio < 0.5:
+                    label_m = re.match(r'([A-Z0-9-]+)', block)
+                    label = label_m.group(1) if label_m else f"prompt {i}"
+                    misses.append((label, round(best_ratio, 2)))
+            if misses:
+                variants_count = len(acceptable_variants)
+                for label, ratio in misses:
+                    log_critical(
+                        f"Voice-library event_facts: {label} did not match any of the "
+                        f"{variants_count} accepted trust-line variants (best overlap {ratio:.0%}, need ≥50%). "
+                        f"Either add a per_card_variant to creative-brief.json event_facts.per_card_variants_allowed, "
+                        f"or rewrite the prompt's trust line to include day/time/place tokens from one of the variants."
+                    )
+
+    # CHECK 2 — headline cadence (max words). Sample exact_copy heading entries from image-prompts.
+    if image_prompts_path and os.path.exists(image_prompts_path):
+        with open(image_prompts_path, 'r') as f:
+            prompts_text = f.read()
+        # Match lines like:  "exact_copy": "While they learn, so do you." within a heading block
+        for m in re.finditer(r'"id":\s*"heading[^"]*"[^}]*?"exact_copy":\s*"([^"]+)"', prompts_text):
+            headline = m.group(1)
+            wc = len(headline.split())
+            if wc > max_headline_words:
+                log_critical(
+                    f"Voice-library max_headline_words={max_headline_words} exceeded: "
+                    f"'{headline}' is {wc} words. Tighten or split."
+                )
+
+    # CHECK 5 — CTA semantic-specificity. Count generic vs specific.
+    cta_pairs = voice.get("cta_verb_noun_pairs", [])
+    valid_verbs = {p.get("verb", "").lower() for p in cta_pairs}
+    valid_pairs_strs = []
+    for p in cta_pairs:
+        v = p.get("verb", "")
+        for n in (p.get("nouns") or []):
+            valid_pairs_strs.append(f"{v} {n}".lower())
+
+    if image_prompts_path and os.path.exists(image_prompts_path):
+        with open(image_prompts_path, 'r') as f:
+            prompts_text = f.read()
+        cta_copies = re.findall(r'"id":\s*"cta_pill"[^}]*?"exact_copy":\s*"([^"]+)"', prompts_text)
+        if cta_copies:
+            generic_re = re.compile(r'^\s*(reserve now|learn more|click here|book now|sign up|shop now)\s*[→\->\s]*$', re.IGNORECASE)
+            generic_hits = [c for c in cta_copies if generic_re.search(c)]
+            if generic_hits:
+                # Count by exact value to detect repetition
+                from collections import Counter
+                counts = Counter(c.strip() for c in cta_copies)
+                most_common, n = counts.most_common(1)[0]
+                if n / len(cta_copies) > 0.4 and len(cta_copies) >= 3:
+                    log_warning(
+                        f"CTA reuse: '{most_common}' appears on {n}/{len(cta_copies)} prompts "
+                        f"(>40% of carousel set). Voice-library cta_verb_noun_pairs.object_specificity_rule "
+                        f"requires noun to match each card's visual subject."
+                    )
+            # Strict pair check (advisory)
+            unmatched = [c for c in cta_copies if c.strip().lower() not in valid_pairs_strs and not generic_re.search(c)]
+            if unmatched:
+                log_warning(
+                    f"CTA pills not in voice-library cta_verb_noun_pairs: {unmatched[:3]}{'...' if len(unmatched) > 3 else ''}. "
+                    f"Verify these are intentional voice extensions; if so, add to voice-library."
+                )
+
+    if not forbidden_hits:
+        log_info(
+            f"Voice-library compliance: {len(voice.get('headline_patterns', []))} patterns, "
+            f"{len(cta_pairs)} CTA pairs, {len(forbidden)} forbidden-phrase rules "
+            f"(bootstrapping={voice.get('bootstrapping')})"
+        )
+
+
 def validate_dashboard(path):
     """Validate the ad-copy HTML dashboard."""
     if not os.path.exists(path):
@@ -833,6 +1221,44 @@ def main():
         print(f"{'='*60}")
         validate_cross_file(files)
         flush_logs()
+
+    # Format/aspect-ratio cross-check (patched 2026-04-30 — catches carousel-must-be-1:1 violations)
+    if 'image_prompts' in files:
+        # Try to find creative-brief.json next to image-prompts.md
+        ip_dir = os.path.dirname(os.path.abspath(files['image_prompts']))
+        cb_path = os.path.join(ip_dir, 'creative-brief.json')
+        if os.path.exists(cb_path):
+            print(f"\n{'='*60}")
+            print("  Format / Aspect-Ratio Cross-Check")
+            print(f"{'='*60}")
+            validate_format_aspect_consistency(files['image_prompts'], cb_path)
+            flush_logs()
+
+            # Carousel card-count cross-check (patched 2026-04-30 — catches carousel_5_card spec'd
+            # but only 4 cards authored, or non-contiguous CARD-1,2,4,5 indices missing CARD-3)
+            print(f"\n{'='*60}")
+            print("  Carousel Card-Count Cross-Check")
+            print(f"{'='*60}")
+            validate_carousel_card_count(files['image_prompts'], cb_path)
+            flush_logs()
+
+            # Voice-library compliance (bedrock 2026-04-30 — cross-skill voice anchoring)
+            # Resolve voice-library.json: try program-folder wiki first, then client-root wiki (multi-program)
+            print(f"\n{'='*60}")
+            print("  Voice-Library Compliance (bedrock)")
+            print(f"{'='*60}")
+            # image_prompts path: <client>/<program>/_engine/working/image-prompts.md
+            engine_dir = os.path.dirname(os.path.dirname(os.path.abspath(files['image_prompts'])))   # <program>/_engine
+            program_folder = os.path.dirname(engine_dir)                                              # <program>
+            client_root = os.path.dirname(program_folder)                                             # <client>
+            vl_program = os.path.join(engine_dir, 'wiki', 'voice-library.json')                      # single-program
+            vl_client_root = os.path.join(client_root, '_engine', 'wiki', 'voice-library.json')      # multi-program
+            voice_library_path = vl_program if os.path.exists(vl_program) else vl_client_root
+            ad_copy_md = files.get('ad_copy_report') or files.get('ad_copy') or ''
+            validate_voice_library_compliance(
+                files['image_prompts'], ad_copy_md, cb_path, voice_library_path
+            )
+            flush_logs()
 
     # Gate A — Phase-0 leakage prevention
     print(f"\n{'='*60}")

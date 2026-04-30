@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "sector": "temple-cultural-org",
+  "sector_lens_ref": "business-analysis/references/sector-lenses/temple-cultural-org.md",
+  "extracted_from": [
+    {
+      "source": "ISKM Singapore Nrsimha Caturdasi 2026 ($0.71 CPL, 222 leads) + 3 manually-authored proven WLF reference creatives",
+      "performance": "Reference performer for the sector — patterns generalised from this dataset",
+      "extraction_date": "2026-04-30",
+      "method": "sector_seed_from_proven_winner"
+    }
+  ],
+  "headline_patterns": [
+    {
+      "id": "parallel_verb_emotion",
+      "name": "Parallel verb + emotion",
+      "structure": "{Verb}ed with {emotion-noun}. {Verb}ed with {emotion-noun}.",
+      "examples": ["Prepared with care. Served with love."],
+      "max_words": 8,
+      "tone_tags": ["calm", "devotional", "sensory", "intimate"],
+      "best_for_audience_tier": ["warm", "lookalike", "retention"],
+      "best_for_card_type": ["sensory hero", "prasadam / food", "kīrtan / ritual activity"]
+    },
+    {
+      "id": "objection_reassurance",
+      "name": "Newcomer objection question + reassurance",
+      "structure": "{Negation/objection}? {Direct reassurance}.",
+      "examples": [
+        "Never been to a temple? That's exactly who this is for.",
+        "Not Hindu? You're still welcome here."
+      ],
+      "max_words": 12,
+      "tone_tags": ["welcoming", "newcomer-safe", "inclusive", "low-friction"],
+      "best_for_audience_tier": ["cold", "cultural-affinity-cold"],
+      "best_for_card_type": ["beginner / FAQ / cultural-bridge"]
+    },
+    {
+      "id": "constancy_claim",
+      "name": "Same X. Every Y.",
+      "structure": "{Same/Every} {temporal-noun}. {Same/Every} {temporal-noun}.",
+      "examples": [
+        "Same warm room. Every weekend.",
+        "Every weekend. Not once a year."
+      ],
+      "max_words": 6,
+      "tone_tags": ["grounding", "reassuring", "rhythmic", "anti-hype"],
+      "best_for_audience_tier": ["warm-retarget", "festival-follow-on", "retention"],
+      "best_for_card_type": ["community / always-on cadence"]
+    },
+    {
+      "id": "direct_specifier_action",
+      "name": "Time/place specifier + simple action",
+      "structure": "{Day} {time}. {Imperative action}.",
+      "examples": ["Saturday 5pm. Bring the kids."],
+      "max_words": 7,
+      "tone_tags": ["practical", "action-led"],
+      "best_for_audience_tier": ["lookalike", "mid-funnel"],
+      "best_for_card_type": ["family / RSVP / scheduling"]
+    },
+    {
+      "id": "festival_continuation",
+      "name": "Festival → recurring program continuation",
+      "structure": "Loved {festival}? It happens every {cadence} — {qualifier}.",
+      "examples": ["Loved Nṛsiṁha Caturdaśī? It happens every weekend — quieter, smaller, just as deep."],
+      "max_words": 18,
+      "tone_tags": ["devotional", "warm-continuation"],
+      "best_for_audience_tier": ["festival-follow-on warm retarget"],
+      "best_for_card_type": ["retention bridge from festival → recurring program"]
+    }
+  ],
+  "trust_line_template": {
+    "format": "{day-or-day-pair} · {time-range} · {free-or-price} · {language-or-location-qualifier}",
+    "examples": [
+      "Sat or Sun · 5 to 7:30 PM · Free · Geylang",
+      "Bhagavad-Gita class · in English · Saturdays 5:30pm",
+      "Free Prasadam · Sat or Sun, 7:15 PM"
+    ],
+    "separator": "·",
+    "rules": [
+      "always_include_day_for_event_campaigns",
+      "always_include_time_for_event_campaigns",
+      "include_in_english_qualifier_when_targeting_cold_or_cultural-affinity audiences",
+      "include_free_qualifier_when_event_has_no_entry_fee",
+      "no_brand_fluff_phrases"
+    ],
+    "forbidden_in_trust_line": [
+      "world-class kīrtan", "renowned spiritual experience", "transformative",
+      "premier temple", "best-in-class", "stat-fluff phrases",
+      "any non-factual brand claim"
+    ]
+  },
+  "cta_verb_noun_pairs": [
+    {"verb": "Reserve", "nouns": ["a plate", "a seat", "a class spot", "your spot"], "context": "primary RSVP — pair noun to visual subject"},
+    {"verb": "Save", "nouns": ["your seat", "a place"], "context": "secondary RSVP variant"},
+    {"verb": "Read", "nouns": ["the FAQs", "the schedule"], "context": "objection / newcomer card"},
+    {"verb": "RSVP", "nouns": ["this weekend", "for the feast"], "context": "warm retarget — assumes prior engagement"}
+  ],
+  "voice_rules": {
+    "max_headline_words": 8,
+    "max_subhead_words": 12,
+    "max_trust_line_words": 14,
+    "max_cta_words": 5,
+    "tone": ["conversational", "contracted", "english-direct", "warm-not-grandiose"],
+    "forbidden_phrases": [
+      "world-class", "transformative", "premier", "renowned", "best-in-class", "next-level",
+      "experience the divine", "spiritual journey", "soulful experience", "sacred journey"
+    ],
+    "punctuation_style": "declarative period at end of every short clause; no em-dashes (universal kernel rule); middle-dot · for trust-line separators only",
+    "language_handling_default": "If client uses Sanskrit / regional language terms, transliterate only. NO devanagari script unless explicitly approved by client. Diacritics OK in headlines/copy but not on CTA pills (legibility).",
+    "cultural_sensitivity_rule": "Avoid prescriptive religious language ('come pray', 'worship with us') for cold/LAL audiences. Lead with community / family / food / education framing — reserve overtly devotional copy for warm retarget."
+  },
+  "campaign_type_anchor_pattern": {
+    "event": {
+      "anchor_field": "event_facts.canonical_string",
+      "must_appear_on_every_variant": true,
+      "drift_tolerance": 0.8,
+      "rationale": "Cold scrollers see one variant. Day/time/place/free/language MUST appear on every card or the ad fails standalone."
+    }
+  },
+  "carousel_narrative_rule": {
+    "applies_to": "carousel_N_card formats",
+    "structure": "Card 1 = emotional hook (headline-dominant). Cards 2..(N-1) = unfold the promise (subject-dominant). Card N = CTA-dominant.",
+    "trust_line_consistency": "All cards must include the canonical event_facts trust-line. Drift = CRITICAL.",
+    "cta_pill_variation_rule": "Verb may stay consistent; noun MUST swap to match each card's visual subject."
+  },
+  "competitor_voice_reference": {
+    "usage": "differentiate_from",
+    "common_competitor_voice": [
+      "'Welcome to our sacred temple' — formal-traditional",
+      "'Experience divine grace' — overly grandiose",
+      "'Premier spiritual destination' — generic-marketing"
+    ],
+    "differentiation_rule": "Voice-library patterns above are deliberately the inverse: conversational, factual, warm-not-grandiose. If a generated headline could plausibly appear on a competitor's website without changes, it has failed the differentiation test."
+  }
+}

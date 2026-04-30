@@ -126,8 +126,10 @@ def check_blank_fields(client_dir):
         if md_file.name in ("index.md", "log.md"):
             continue
         content = md_file.read_text()
-        # Find BLANK markers without explanations
-        blanks = re.findall(r'BLANK(?!\s*[—\-–:])', content)
+        # Find BLANK markers without explanations.
+        # Allowed separators (per kernel BLANK-tag rule): em-dash, hyphen, en-dash,
+        # colon, pipe (for table cells), opening paren.
+        blanks = re.findall(r'BLANK(?!\s*[—\-–:|(])', content)
         if blanks:
             issues.append(f"{md_file.name}: {len(blanks)} BLANK field(s) without explanation")
 

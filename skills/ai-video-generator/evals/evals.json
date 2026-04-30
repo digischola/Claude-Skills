@@ -1,0 +1,113 @@
+{
+  "skill": "ai-video-generator",
+  "version": "1.0",
+  "test_cases": [
+    {
+      "id": "tc-01-storyboard-form-a",
+      "name": "Form A: ad-copywriter storyboard JSON for Thrive Retreats reel",
+      "input": {
+        "type": "storyboard_json",
+        "path": "evals/fixtures/thrive-retreat-storyboard.json",
+        "client": "Thrive Retreats",
+        "project": "Nrsimha Caturdasi 2026",
+        "force_aspect": "9:16",
+        "force_duration": 30
+      },
+      "expected": {
+        "scene_count_range": [4, 6],
+        "estimated_credits_range": [60, 130],
+        "models_present": ["kling-3.0"],
+        "hero_scene_uses": "veo-3.1",
+        "manifest_source_labels_complete": true,
+        "validate_output_exit": 0
+      }
+    },
+    {
+      "id": "tc-02-markdown-form-b",
+      "name": "Form B: free-form markdown brief for ISKM event teaser",
+      "input": {
+        "type": "markdown_brief",
+        "raw": "client: ISKM Singapore\nproject: Nrsimha Caturdasi 2026\nformat: 9:16 reel, 20 seconds\nmood: devotional, warm, communal\nkey shots:\n  - wide aerial shot of temple at sunrise\n  - hands offering flowers in puja\n  - laughing children eating prasad\n  - text reveal: Register at iskmsingapore.com"
+      },
+      "expected": {
+        "scene_count": 4,
+        "aspect": "9:16",
+        "total_duration_sec": 20,
+        "models_present": ["kling-3.0"],
+        "hero_scene_uses": "veo-3.1",
+        "validate_output_exit": 0
+      }
+    },
+    {
+      "id": "tc-03-mcp-not-connected",
+      "name": "Skill aborts cleanly when Higgsfield MCP not registered",
+      "input": {
+        "type": "any",
+        "mcp_state": "absent"
+      },
+      "expected": {
+        "step_1_aborts": true,
+        "exit_code": 1,
+        "stderr_contains": ["mcp.higgsfield.ai", "claude mcp add"]
+      }
+    },
+    {
+      "id": "tc-04-cost-guardrail-trigger",
+      "name": "Cost guardrail aborts at >500 credits without --confirm-cost",
+      "input": {
+        "type": "synthetic_high_cost",
+        "scenes": 12,
+        "all_force_model": "veo-3.1"
+      },
+      "expected": {
+        "estimated_credits_min": 600,
+        "abort_without_flag": true,
+        "exit_code": 2
+      }
+    },
+    {
+      "id": "tc-05-idempotent-rerun",
+      "name": "Re-run skips scenes whose MP4 already exists; preserves manifest",
+      "input": {
+        "type": "rerun_after_partial_failure",
+        "pre_existing_scenes": ["01", "02"],
+        "failed_scenes": ["03"]
+      },
+      "expected": {
+        "credits_burned_on_rerun": 0,
+        "manifest_preserved": true,
+        "queue_only_regenerates_failed": ["03"]
+      }
+    },
+    {
+      "id": "tc-06-watermark-blocks-delivery",
+      "name": "validate_output catches Higgsfield watermark and blocks delivery",
+      "input": {
+        "type": "synthetic_watermarked_mp4"
+      },
+      "expected": {
+        "validate_output_exit": 1,
+        "delivery_blocked": true,
+        "stderr_contains": ["watermark"]
+      }
+    },
+    {
+      "id": "tc-07-digischola-rejection",
+      "name": "Skill refuses to run for Digischola personal-brand client (hard rule)",
+      "input": {
+        "type": "storyboard_json",
+        "client": "Digischola"
+      },
+      "expected": {
+        "step_1_aborts": true,
+        "exit_code": 1,
+        "reason_contains": "Digischola visual-generator is photo-free"
+      }
+    }
+  ],
+  "fixtures_needed": [
+    "evals/fixtures/thrive-retreat-storyboard.json",
+    "evals/fixtures/synthetic-watermarked.mp4"
+  ],
+  "notes": "Test cases tc-01 and tc-02 require a connected Higgsfield MCP. tc-03 / tc-04 / tc-05 / tc-07 are pure-Python and can run without MCP."
+}

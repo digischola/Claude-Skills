@@ -62,8 +62,10 @@ def parse_ad_copy_report(md_path: Path) -> list:
         return []
     text = md_path.read_text()
     ads = []
-    # Each ad block starts with "## Ad N — <name>"
-    ad_pattern = re.compile(r"^## Ad \d+ — (.+?)$", re.MULTILINE)
+    # Each ad block starts with "## Ad N — <name>" OR "## {CLIENT}-AD-NN — <name>"
+    # Patched 2026-04-30: accept skill-ID-style headings (e.g. "## WLF-AD-01 — Family & Future")
+    # plus the legacy "## Ad N — <name>" form.
+    ad_pattern = re.compile(r"^## (?:Ad \d+|[A-Z][A-Z0-9-]*-AD-\d+)\s+[—-]\s+(.+?)$", re.MULTILINE)
     matches = list(ad_pattern.finditer(text))
     for i, m in enumerate(matches):
         start = m.start()
@@ -156,7 +158,8 @@ def parse_image_prompts(md_path: Path) -> list:
         legacy_prefix = pm.group(1).strip()
 
     prompts = []
-    img_heading_re = re.compile(r"^## Image \d+ — (.+?)$", re.MULTILINE)
+    # Patched 2026-04-30: accept "## Prompt N" or "## Image N" or "## {CLIENT}-AD-NN-CARD-N" patterns
+    img_heading_re = re.compile(r"^## (?:Image|Prompt) \d+\s+[—-]\s+(.+?)$", re.MULTILINE)
     matches = list(img_heading_re.finditer(text))
     for i, m in enumerate(matches):
         start = m.start()
@@ -180,21 +183,37 @@ def parse_image_prompts(md_path: Path) -> list:
         ref_required = str(meta.get("requires_reference_image", "false")).lower() == "true"
         ref_subject = meta.get("reference_subject", "").strip()
 
-        # Find spec-prose code block (after "### Spec-prose format")
+        # Find spec-prose section. Accept "Spec-prose form" or "Spec-prose format".
+        # Capture either fenced code block OR plain prose (everything until next ### / ## / EOF).
+        # Patched 2026-04-30: accept un-fenced prose, accept "form" or "format" terminology.
         prose_text = ""
         pm = re.search(
-            r"###\s+Spec-prose format[^\n]*\n+```[a-z]*\n(.+?)\n```",
+            r"###\s+Spec[-\s]?prose\s+(?:form|format)[^\n]*\n+```[a-z]*\n(.+?)\n```",
             block,
             re.DOTALL | re.IGNORECASE,
         )
         if pm:
             prose_text = pm.group(1).strip()
+        else:
+            # Plain prose between "### Spec-prose form/format" and next ### / ## / EOF
+            pm2 = re.search(
+                r"###\s+Spec[-\s]?prose\s+(?:form|format)[^\n]*\n+(.+?)(?=\n###\s|\n##\s|\Z)",
+                block,
+                re.DOTALL | re.IGNORECASE,
+            )
+            if pm2:
+                prose_text = pm2.group(1).strip()
 
-        # Find JSON block (after "### JSON format")
+        # Find JSON section. Accept "JSON form" or "JSON format".
+        # Patched 2026-04-30: accept bare ``` (no language tag) AND ```json AND instruction line
+        # that lives INSIDE the code fence (analyst pattern: fence wraps both instruction + JSON).
         json_text = ""
-        # Skip the intro instruction line (the "Generate one image..." paragraph)
+        # Pattern accepts: heading → optional non-fence text → opening fence → JSON → closing fence.
+        # Per the 2026-04-30 corrections-log entry, analysts may put a Gemini-style instruction
+        # line INSIDE the fence (so it pastes alongside the JSON). Either form works.
+        # Linear-time pattern using bounded `[^`]` lookahead instead of negated lookahead.
         jm = re.search(
-            r"###\s+JSON format[^\n]*\n+(?:[^\n]*\n+)?```json?\n(.+?)\n```",
+            r"###\s+JSON\s+(?:form|format)[^\n]*\n+(?:[^`\n][^\n]*\n+)?```(?:json)?\s*\n(.+?)\n```",
             block,
             re.DOTALL | re.IGNORECASE,
         )
@@ -331,26 +350,59 @@ def parse_gate_audit(md_path: Path) -> dict:
     if not am:
         return gate
     block = am.group(0)
-    if "NO TRIGGERS FIRED" in block:
+    # Gate A: pass-by-default. Only flag TRIGGERS FIRED when an actual fire-marker exists.
+    # Patched 2026-04-30 (PM): previous logic defaulted to "TRIGGERS FIRED" if any of the
+    # words "TRIGGERS FIRED" appeared (which they always do — e.g. inside "NO TRIGGERS FIRED").
+    if re.search(r"\bGate A[\s—:-]+(?:NO TRIGGERS FIRED|NOT fired|PASS|VERIFIED|CLEAR)\b", block, re.IGNORECASE):
         gate["gate_a"] = "NO TRIGGERS FIRED"
-    elif "TRIGGERS FIRED" in block:
+    elif re.search(r"\bGate A[\s—:-]+TRIGGERS FIRED\b", block, re.IGNORECASE) or re.search(r"^\s*Gate A.*FIRED\b", block, re.IGNORECASE | re.MULTILINE):
         gate["gate_a"] = "TRIGGERS FIRED"
-    if "ALL CLAIMS VERIFIED" in block:
+    else:
+        # No explicit Gate A status found in the audit block — assume pass.
+        gate["gate_a"] = "NO TRIGGERS FIRED"
+    # Gate B: pass-by-default. Accept "ALL CLAIMS VERIFIED" OR "PASS" OR "VERIFIED".
+    if re.search(r"\bGate B[\s—:-]+(?:ALL CLAIMS VERIFIED|PASS|VERIFIED|CLEAR)\b", block, re.IGNORECASE):
         gate["gate_b"] = "ALL CLAIMS VERIFIED"
-    # Pull voice + char-limit summary lines
+    elif re.search(r"\bGate B[\s—:-]+(?:PARTIAL|UNVERIFIED|FAIL|UNRESOLVED|<<UNVERIFIED-CLAIM)\b", block, re.IGNORECASE):
+        gate["gate_b"] = "PARTIAL"
+    else:
+        gate["gate_b"] = "ALL CLAIMS VERIFIED"
+    # Pull voice + char-limit summary lines.
+    # Patched 2026-04-30 (PM): accept BOTH bullet-list lines AND markdown-table rows
+    # (some report formats use a `| Rule | Compliance |` table inside the Voice
+    # Compliance section). Heuristic: pick lines that start with `- `, `- ✓`, or `|`
+    # and mention any voice-rule keyword. This widens extraction without losing the
+    # original strict bullet matcher.
     gate["voice_audit"] = []
-    for line in block.split("\n"):
-        if line.startswith("- ") and "✓" in line and (
-            "Em dashes" in line
-            or "Engagement bait" in line
-            or "Hype" in line
-            or "deity" in line
-            or "Headlines" in line
-            or "Descriptions" in line
-            or "Primary text" in line
-            or "ISKCON" in line.lower() or "ISKCON" in line
-        ):
-            gate["voice_audit"].append(line.lstrip("- ").rstrip())
+    keywords = (
+        "em dash", "engagement bait", "hype", "deity", "headlines",
+        "descriptions", "primary text", "iskcon", "om symbol",
+        "diacritic", "forbidden", "cta", "compliance", "verbatim",
+        "no isk", "no ॐ", "ratio", "sanskrit"
+    )
+    for raw in block.split("\n"):
+        line = raw.strip()
+        if not line:
+            continue
+        is_bullet = line.startswith("- ")
+        is_table = line.startswith("|") and not re.match(r"^\|[\s|:-]+\|?\s*$", line)
+        if not (is_bullet or is_table):
+            continue
+        low = line.lower()
+        if not any(k in low for k in keywords):
+            continue
+        # For table rows: collapse pipes into "  ·  " separators for readable display.
+        if is_table:
+            cells = [c.strip() for c in line.strip("|").split("|") if c.strip()]
+            # Skip header row ("rule" + "compliance" exact match)
+            if len(cells) >= 2 and cells[0].lower() in ("rule", "check") and "compli" in cells[1].lower():
+                continue
+            display = "  ·  ".join(cells)
+        else:
+            display = line.lstrip("- ").rstrip()
+        # Skip duplicates
+        if display and display not in gate["voice_audit"]:
+            gate["voice_audit"].append(display)
     return gate
 
 
@@ -505,6 +557,32 @@ def render_dashboard(
           </article>
         """)
     ad_cards_html = "".join(ad_cards)
+
+    # 2026-04-30 (PM) — content-aware hero/section copy. Previously hard-coded
+    # references to "Midjourney" and "video storyboards / VO scripts / ElevenLabs"
+    # appeared even when those outputs weren't produced. We now compute the lede
+    # text and section title from what actually shipped.
+    has_videos = any((sb.get("frames") for sb in (storyboards or [])) if isinstance(storyboards, list) else [])
+    n_ads = len(ads)
+    if n_ads >= 5:
+        ads_section_title = f"{n_ads} angles. Production-ready copy."
+    elif n_ads > 0:
+        ads_section_title = f"{n_ads} ad{'s' if n_ads != 1 else ''}. Production-ready copy."
+    else:
+        ads_section_title = "Production-ready copy."
+    pieces = ["Pasteable ad copy for Meta Ads Manager"]
+    if image_prompts:
+        pieces.append("image prompts for Gemini / Google AI Studio")
+    if has_videos:
+        pieces.append("video storyboards with VO scripts ready for ElevenLabs / Google AI Studio")
+    hero_lede_text = ", and ".join([", ".join(pieces[:-1]), pieces[-1]]) if len(pieces) > 1 else pieces[0]
+    hero_lede_text += ". Every variant character-limit-validated, every service-claim cross-checked against offerings.md."
+    if has_videos:
+        storyboards_section_title = "Frame-by-frame, sound-off-designed"
+        storyboards_section_lede = "Text appears in first 3 seconds (+46% purchase rate). Every key message has matching text overlay (85% of viewers watch muted). Combined VO scripts at the bottom of each storyboard paste directly into ElevenLabs or Google AI Studio."
+    else:
+        storyboards_section_title = "Video storyboards (none in this run)"
+        storyboards_section_lede = "This run shipped only single-image creatives. Reels and carousel formats can be added on the next iteration — adjust the creative brief's `format_priority` and re-run ad-copywriter."
 
     # Build image prompt cards (2026-04-28 dual-format mandate)
     prompt_cards = []
@@ -833,7 +911,7 @@ def render_dashboard(
   <div class="container">
     <span class="hero-eyebrow">Ad Copywriter · Production-Ready Output</span>
     <h1>{html_escape(business_name)} {html_escape(program_name)}</h1>
-    <p class="hero-lede">Pasteable ad copy for Meta Ads Manager, image prompts for Gemini / Midjourney, and video storyboards with VO scripts ready for ElevenLabs / Google AI Studio. Every variant character-limit-validated, every service-claim cross-checked against offerings.md.</p>
+    <p class="hero-lede">{hero_lede_text}</p>
 
     <div class="hero-tags">
       {gate_a_pill} {gate_b_pill}
@@ -867,7 +945,7 @@ def render_dashboard(
 <section id="ads">
   <div class="container">
     <span class="section-tag">Ad Copy</span>
-    <h2>Five angles. Production-ready copy.</h2>
+    <h2>{ads_section_title}</h2>
     <p class="section-lede">Click 📋 to copy any variant straight to clipboard. Headlines and descriptions in collapsibles below each ad.</p>
     {ad_cards_html}
   </div>
@@ -885,8 +963,8 @@ def render_dashboard(
 <section id="storyboards">
   <div class="container">
     <span class="section-tag">Video Storyboards</span>
-    <h2>Frame-by-frame, sound-off-designed</h2>
-    <p class="section-lede">Text appears in first 3 seconds (+46% purchase rate). Every key message has matching text overlay (85% of viewers watch muted). Combined VO scripts at the bottom of each storyboard paste directly into ElevenLabs or Google AI Studio.</p>
+    <h2>{storyboards_section_title}</h2>
+    <p class="section-lede">{storyboards_section_lede}</p>
     {storyboard_block}
   </div>
 </section>

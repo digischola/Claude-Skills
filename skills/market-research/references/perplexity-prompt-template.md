@@ -106,16 +106,9 @@ Service gaps: adjacent services that could be bundled
 Digital marketing gaps: are competitors weak on {platform_type} Ads, SEO, content, Google Business Profile?
 Adjacent service opportunities for bundling
 
-11. STRATEGIC RECOMMENDATIONS FOR {PLATFORM} ADS
+SCOPE BOUNDARY — DO NOT GENERATE STRATEGIC RECOMMENDATIONS
 
-Campaign structure recommendation
-Priority keyword/audience groups and why
-Landing page strategy
-Budget allocation across campaigns
-Top 3 verticals/segments to target first
-Ad copy angles for {buyer_type}
-Recommended conversion actions
-Quick wins (0-3 months) vs medium-term (3-6) vs long-term (6-12)
+This research stops at Dimension 10. Do NOT add an 11th "Strategic Recommendations" section covering campaign structure, budget allocation, landing-page strategy, ad-copy angles, phased plan, or quick-wins-vs-long-term timing. Those belong to the next skill (paid-media-strategy), not this prompt. End each of dimensions 1-10 with a one-line "Marketing Implication" if useful, but stop there.
 
 Format: Clear headers, data tables where appropriate, cite all sources with URLs. Include a summary matrix or scorecard where possible.
 
@@ -123,7 +116,8 @@ Research quality rules:
 - For every statistic or number, include exact source name, date, and URL. If no verifiable source, say "No reliable data found" rather than estimating.
 - Clearly distinguish between {primary_market}-specific data, {country}-wide data, and global data. Do not present {fallback_region} benchmarks as if they apply to {country} without caveat.
 - If a question cannot be answered with available data, say so directly and explain what the closest available data point is.
-- For the strategic recommendation section, label each recommendation as either "data-supported" (backed by specific numbers above) or "directional" (informed opinion based on patterns but no hard number).
+- For each dimension's findings, label specific claims as either "data-supported" (backed by specific numbers above) or "directional" (informed opinion based on patterns but no hard number).
+- Stay in research mode. The skill that consumes this output (paid-media-strategy) will translate findings into a campaign plan — do not pre-empt that with prescriptive recommendations.
 ```
 
 ---

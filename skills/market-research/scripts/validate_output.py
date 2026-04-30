@@ -54,7 +54,9 @@ def validate_markdown(filepath):
         "severity": "CRITICAL" if confidence_count == 0 else "WARNING" if confidence_count < 8 else "OK"
     })
 
-    # 4. All 11 research dimensions covered
+    # 4. All 10 research dimensions covered
+    # SCOPE BOUNDARY (2026-04-30): market-research stops at Dimension 10 (Blue Ocean).
+    # Strategic Recommendations belong to paid-media-strategy. Do NOT add an 11th check here.
     dimensions = [
         ("Market Size & Demand", r'[Mm]arket\s+[Ss]ize|TAM|SAM|SOM'),
         ("Porter's Five Forces", r'[Pp]orter|[Ff]ive\s+[Ff]orce'),
@@ -66,7 +68,6 @@ def validate_markdown(filepath):
         ("Buyer Personas", r'[Bb]uyer\s+[Pp]ersona|[Pp]urchase\s+[Jj]ourney'),
         ("Channel Partners & Referral", r'[Cc]hannel\s+[Pp]artner|[Rr]eferral\s+[Ee]cosystem'),
         ("Blue Ocean Opportunities", r'[Bb]lue\s+[Oo]cean|[Uu]nderserved'),
-        ("Strategic Recommendations", r'[Ss]trategic\s+[Rr]ecommendation|[Cc]ampaign\s+[Ss]tructure'),
     ]
     found_dimensions = []
     missing_dimensions = []

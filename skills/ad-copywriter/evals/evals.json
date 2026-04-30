@@ -221,6 +221,122 @@
           "description": "Google/Meta CSVs contain only refresh rows, not a full campaign rewrite"
         }
       ]
+    },
+    {
+      "id": 8,
+      "name": "FORMAT-ASPECT-CAROUSEL-1-1 — carousel aspect-ratio enforcement",
+      "prompt": "Generate ad copy + image prompts for a creative whose creative-brief.json sets `format_priority: ['carousel_5_card', 'lp_redirect_carousel']`. Skill must author every card at 1:1 (1080×1080) — never 4:5. Validator must CRITICAL-fail any prompt where format includes 'carousel' but aspect_ratio != '1:1'.",
+      "inputs": {
+        "creative_brief_format_priority": ["carousel_5_card", "lp_redirect_carousel"],
+        "card_count": 5,
+        "platform": "meta"
+      },
+      "assertions": [
+        {
+          "name": "all_carousel_cards_1_1",
+          "description": "Every prompt for the carousel creative has aspect_ratio = '1:1' in both spec-prose ('1:1 square' / '1080×1080') and JSON (composition.aspect_ratio = '1:1')"
+        },
+        {
+          "name": "no_4_5_for_carousel",
+          "description": "Zero prompts in the carousel creative reference 4:5 / 1080×1350 / 'vertical' aspect — Meta unit-of-card mandate"
+        },
+        {
+          "name": "audit_table_aspect_consistency",
+          "description": "image-prompts.md audit table shows uniform aspect ratio across all carousel-card rows"
+        },
+        {
+          "name": "validator_format_aspect_check",
+          "description": "validate_output.py validate_format_aspect_consistency() runs and produces zero CRITICAL on a correct 1:1 carousel run"
+        },
+        {
+          "name": "validator_catches_mismatch",
+          "description": "If a prompt for the same carousel creative is authored at 4:5, validate_format_aspect_consistency() emits a CRITICAL referencing the prompt + format + expected vs actual aspect"
+        },
+        {
+          "name": "single_image_4_5_allowed",
+          "description": "For a sibling creative whose format_priority is single_image / feed (not carousel), 4:5 is accepted without CRITICAL — validator only enforces 1:1 when format substring includes 'carousel'"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "CAROUSEL-CARD-COUNT-MATCH — N-card spec enforced",
+      "prompt": "Generate image prompts for a creative whose creative-brief.json sets `format_priority: ['carousel_5_card', 'single_image']`. Skill must author exactly 5 prompts with contiguous CARD-1, CARD-2, CARD-3, CARD-4, CARD-5 IDs. Validator must CRITICAL-fail any of: count mismatch (e.g. 4 cards authored), missing index (CARD-1, 2, 4, 5 with no CARD-3), or extra index (CARD-1..5 + CARD-6).",
+      "inputs": {
+        "creative_brief_format_priority": ["carousel_5_card", "single_image"],
+        "expected_card_count": 5,
+        "platform": "meta"
+      },
+      "assertions": [
+        {
+          "name": "exactly_n_cards_authored",
+          "description": "image-prompts.md contains exactly N `{creative_id}-CARD-K` prompts where N matches the digit in carousel_N_card pattern"
+        },
+        {
+          "name": "contiguous_card_indices",
+          "description": "CARD-K indices are 1, 2, 3, ..., N with no gaps (e.g. no skip from CARD-2 to CARD-4 missing CARD-3)"
+        },
+        {
+          "name": "no_extra_cards_beyond_n",
+          "description": "No CARD-K with K > N (extra cards beyond brief spec are CRITICAL — over-delivery is also a contract violation)"
+        },
+        {
+          "name": "validator_card_count_check",
+          "description": "validate_carousel_card_count() runs and produces zero CRITICAL on a correct N-card carousel"
+        },
+        {
+          "name": "validator_catches_undercount",
+          "description": "If only N-1 cards authored, validator emits CRITICAL naming the missing CARD index and the expected count from carousel_N_card"
+        },
+        {
+          "name": "validator_catches_index_gap",
+          "description": "If count is correct but indices have a gap (e.g. CARD-1, 2, 4, 5, 6 with no CARD-3), validator emits CRITICAL naming the missing index"
+        },
+        {
+          "name": "soft_carousel_warning_only",
+          "description": "For `lp_redirect_carousel` or bare `carousel` (no _N_card pattern), validator emits WARNING not CRITICAL — count not explicit in spec"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "VOICE-LIBRARY-COMPLIANCE — bedrock voice anchoring across all client copy",
+      "prompt": "Generate ad copy + image prompts for a client whose `_engine/wiki/voice-library.json` carries headline_patterns, trust_line_template, cta_verb_noun_pairs, voice_rules.forbidden_phrases, and campaign_type_anchor_pattern.event = must_appear_on_every_variant. Brief carries event_facts.canonical_string + per-creative voice_anchor.pattern_id + cta_verb_noun_pair.",
+      "inputs": {
+        "voice_library_present": true,
+        "campaign_type": "event",
+        "voice_anchor_patterns_used": ["objection_reassurance", "constancy_claim", "parallel_verb_emotion"]
+      },
+      "assertions": [
+        {
+          "name": "event_fact_anchor_on_every_variant",
+          "description": "Every prompt's text-elements (heading + trust_line + cta) contains ≥80% token overlap with event_facts.canonical_string. validate_voice_library_compliance() emits zero CRITICAL on a correct run."
+        },
+        {
+          "name": "max_headline_words_respected",
+          "description": "No heading exact_copy exceeds voice_rules.max_headline_words. CRITICAL on violation."
+        },
+        {
+          "name": "no_forbidden_phrases",
+          "description": "No copy in image-prompts.md OR ad-copy-report.md contains any voice_rules.forbidden_phrases. CRITICAL on hit."
+        },
+        {
+          "name": "cta_verb_noun_specificity",
+          "description": "CTA pills match voice-library cta_verb_noun_pairs; generic 'Reserve now' / 'Learn More' on >40% of carousel cards = WARNING."
+        },
+        {
+          "name": "headline_pattern_compliance",
+          "description": "Generated headlines broadly match the structure / max_words of the brief's voice_anchor.pattern_id."
+        },
+        {
+          "name": "missing_voice_library_emits_warning",
+          "description": "If voice-library.json is absent, validator emits WARNING (not CRITICAL) and points to business-analysis Step 8."
+        },
+        {
+          "name": "multi_program_path_resolution",
+          "description": "Validator finds voice-library.json at single-program path OR at client-root path (multi-program) without manual config."
+        }
+      ]
     }
   ]
 }

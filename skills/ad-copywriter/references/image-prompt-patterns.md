@@ -1,5 +1,15 @@
 # Image Prompt Patterns Reference
 
+## Table of Contents
+
+- [Designer-brain mandate](#designer-brain-mandate-mandatory--added-2026-04-29) — seven required blocks per prompt
+- [Prompt structure](#prompt-structure)
+- [Per-format templates](#per-format-templates)
+- [Performance rules](#performance-rules)
+- [Brand consistency rules](#brand-consistency-rules)
+- [Negative constraints](#negative-constraints)
+- [Validator hooks](#validator-hooks)
+
 Load this file in Step 6 of the ad-copywriter skill. Also load `references/creative-research.md` for performance-backed rules.
 
 Defines prompt structure, per-format templates, performance rules, and brand consistency rules for AI image generation (Gemini).
@@ -326,7 +336,9 @@ Clean space at top 15% and bottom 15% for headline and CTA.
 
 Research note: Lower CPM than feed but more volatile CPA. Hook must land in first 1.5s — make the image itself the pattern interrupt.
 
-### 1:1 Square — Feed Fallback / Carousel Cards
+### 1:1 Square — Carousel Cards (MANDATORY) / Feed Fallback
+
+> **🛑 LOAD-BEARING RULE (validator-enforced, patched 2026-04-30):** When a creative's `format_priority` in `creative-brief.json` includes `carousel`, `carousel_5_card`, `lp_redirect_carousel`, or any value containing the substring `carousel`, EVERY card MUST be 1:1 (1080×1080). Meta requires uniform aspect ratio across all cards in a carousel — mixing 4:5 with 1:1 breaks the unit. Default to 4:5 only when format is `single_image` / `feed`. `validate_format_aspect_consistency()` in `scripts/validate_output.py` cross-checks every prompt's aspect against the brief's `format_priority` per creative_id and CRITICAL-fails on mismatch. See `SKILL.md` Step 6 for the full format → aspect mapping table.
 
 ```
 [prefix]. [Subject/scene in 1-2 sentences]. Ultra-realistic photograph, shot on [lens]mm, 
@@ -334,7 +346,7 @@ Research note: Lower CPM than feed but more volatile CPA. Hook must land in firs
 Clean space in [bottom-left/top-right] quadrant for text overlay. High contrast.
 ```
 
-Research note: Use as fallback or for carousel cards. Tighter framing works better in square.
+Research note: Carousel cards = 1:1 ONLY (Meta unit-of-card mandate). 1:1 also works as a feed fallback when 4:5 is unavailable; tighter framing works better in square.
 
 ### 1.91:1 Landscape — Google Display/Demand Gen
 

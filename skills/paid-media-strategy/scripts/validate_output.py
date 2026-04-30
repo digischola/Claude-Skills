@@ -111,8 +111,10 @@ def validate_dashboard(filepath):
     if "chart.min.js" in content and "chart.umd.min.js" not in content:
         issues["CRITICAL"].append("WRONG Chart.js CDN: using chart.min.js (ESM) instead of chart.umd.min.js (UMD). Charts will break.")
 
-    if "cdnjs.cloudflare.com" in content and "chart" in content.lower():
-        issues["CRITICAL"].append("Chart.js loaded from cdnjs (ESM-only). Must use jsdelivr UMD build.")
+    # Specific check: Chart.js itself loaded from cdnjs (NOT just any cdnjs reference like Font Awesome).
+    # Must inspect the actual chart.js script-src URL, not the page-wide content.
+    if re.search(r'<script[^>]+cdnjs\.cloudflare\.com/[^"\']*chart[^"\']*\.js', content, re.IGNORECASE):
+        issues["CRITICAL"].append("Chart.js itself loaded from cdnjs (ESM-only). Must use jsdelivr UMD build.")
 
     if "cdn.jsdelivr.net/npm/chart.js" not in content and "chart" in content.lower():
         issues["WARNING"].append("Chart.js not loaded from recommended jsdelivr CDN")

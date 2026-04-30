@@ -136,34 +136,29 @@ Every market research output covers these 11 dimensions. The Perplexity prompt r
 
 **Why it matters for marketing:** Reveals the easiest wins — where competition is lowest and demand is real. Shapes which verticals and geographies to target first.
 
-## 11. Strategic Recommendations for Ad Platform(s)
+---
 
-**What to uncover:**
-- Campaign structure recommendation (Search, Display, Local, P-Max, or Meta campaign types)
-- Priority keyword/audience groups ranked by opportunity
-- Landing page strategy (single vs service-specific)
-- Budget allocation across campaigns
-- Top 3 verticals/segments to target first
-- Ad copy angles for the target buyer
-- Recommended conversion actions (call, form, chat, purchase)
-- Phased plan: quick wins (0-3mo), medium-term (3-6mo), long-term (6-12mo)
-- Label each recommendation: "data-supported" or "directional"
+## SCOPE BOUNDARY — Strategic Recommendations are NOT a market-research dimension
 
-**Why it matters for marketing:** This is the "so what" section — everything above converges into actionable campaign strategy.
+The skill historically carried an 11th "Strategic Recommendations for Ad Platform(s)" dimension covering campaign structure, budget allocation, ad copy angles, conversion actions, phased plan. **That belongs to `paid-media-strategy`, the next skill in the pipeline — not here.** This boundary was reasserted 2026-04-30 after a scope-creep audit on the ISKM Weekend Love Feast run.
+
+market-research stops at Dimension 10. The deliverable's role is to produce the **research substrate** (market size, forces, PESTEL, SWOT, competitors, keywords, benchmarks, personas, channels, blue ocean) that paid-media-strategy then converts into a campaign plan. The dashboard's "what's next" section should be a forward-pointer to paid-media-strategy, NOT a campaign timeline with budget splits.
+
+If the analyst feels strong about a strategic implication, the right move is a **one-line "Marketing Implication"** at the end of each of dimensions 1-10 (calling out the takeaway), NOT a separate Dimension 11 prescribing the campaign. Cross-skill connections live in the wiki + the strategy.md handoff line, not in market-research's report.
 
 ---
 
 ## Cross-Referencing Across Dimensions
 
-Findings in one dimension should inform others:
-- Market size (1) validates the budget recommendations in (11)
-- Porter's (2) reveals if buyer power is high → shapes pricing/positioning in (11)
-- PESTEL (3) compliance requirements → become ad messaging angles in (11)
-- SWOT (4) strengths → become ad copy angles in (11)
-- Competitors (5) gaps → become positioning strategy in (10) and (11)
-- Keywords (6) volume + benchmarks (7) costs → determine budget allocation in (11)
-- Buyer personas (8) concerns → shape landing page and creative strategy in (11)
-- Referral ecosystem (9) → informs partnership and display targeting in (11)
-- Blue ocean (10) → prioritizes which verticals/geos to target first in (11)
+Findings in one dimension should inform others, AND inform what paid-media-strategy will recommend downstream:
+- Market size (1) validates whether the brief's budget is realistic
+- Porter's (2) reveals if buyer power is high — shapes pricing/positioning posture
+- PESTEL (3) compliance requirements become ad-messaging guard-rails
+- SWOT (4) strengths become ad-copy angle candidates (paid-media-strategy chooses)
+- Competitors (5) gaps inform positioning leverage points
+- Keywords (6) volume + benchmarks (7) costs feed paid-media-strategy budget math
+- Buyer personas (8) concerns shape landing-page + creative strategy (paid-media-strategy + landing-page-builder)
+- Referral ecosystem (9) informs partnership / non-paid channel mix
+- Blue ocean (10) prioritises which verticals/geos paid-media-strategy targets first
 
-Every finding should trace to a practical marketing implication.
+Every finding should trace to a **practical marketing implication** — but the implication is a one-line takeaway, NOT a campaign prescription.

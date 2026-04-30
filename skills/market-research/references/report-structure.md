@@ -1,6 +1,8 @@
 # Research Report Structure (Markdown)
 
-The markdown report is the comprehensive data document covering all 11 research dimensions. Every section follows the same pattern: findings with source labels, confidence rating, and honest gaps.
+The markdown report is the comprehensive data document covering all 10 research dimensions. Every section follows the same pattern: findings with source labels, confidence rating, and honest gaps.
+
+**SCOPE BOUNDARY:** market-research stops at Dimension 10 (Blue Ocean). Strategic recommendations — campaign structure, budget allocation, audience tier definitions, phased plan, ad copy angles — are the **paid-media-strategy** skill's job, downstream. Do NOT add an 11th "Strategic Recommendations" section to this report. The "Marketing Implications" one-liner per dimension is the acceptable level of strategic flag — anything more belongs in paid-media-strategy.
 
 ## Table of Contents
 
@@ -15,8 +17,8 @@ The markdown report is the comprehensive data document covering all 11 research 
 9. [Buyer Personas & Purchase Journey](#8-buyer-personas--purchase-journey)
 10. [Channel Partners & Referral Ecosystem](#9-channel-partners--referral-ecosystem)
 11. [Blue Ocean Opportunities](#10-blue-ocean-opportunities)
-12. [Strategic Recommendations](#11-strategic-recommendations)
-13. [Data Gaps & Limitations](#data-gaps--limitations)
+12. [Data Gaps & Limitations](#data-gaps--limitations)
+13. [Handoff to paid-media-strategy](#handoff-to-paid-media-strategy)
 
 ---
 
@@ -256,29 +258,6 @@ The markdown report is the comprehensive data document covering all 11 research 
 
 ---
 
-## 11. Strategic Recommendations
-**Confidence: {HIGH/MEDIUM/LOW}**
-
-### Quick Wins (0-3 months) [data-supported / directional]
-{Immediate actions with expected impact}
-
-### Medium-Term (3-6 months) [data-supported / directional]
-{Build-out actions}
-
-### Long-Term (6-12 months) [data-supported / directional]
-{Strategic expansion}
-
-### Campaign Structure
-{Platform-specific campaign architecture}
-
-### Budget Allocation
-{Where to spend and why}
-
-### Top 3 Verticals/Segments
-{Priority targets ranked by opportunity}
-
----
-
 ## Data Gaps & Limitations
 
 {Explicit list of what we don't know, what was BLANK and why, and what additional research would fill the gaps. This is not a weakness — it's an honest assessment that builds trust.}
@@ -286,6 +265,20 @@ The markdown report is the comprehensive data document covering all 11 research 
 ## Sources
 
 {List of all sources cited, organized by dimension}
+
+---
+
+## Handoff to paid-media-strategy
+
+This research stops at Dimension 10. The next skill in the pipeline — `paid-media-strategy` — converts the findings above into:
+- Campaign architecture (campaign types, ad-set structure, naming convention)
+- Bidding strategy + budget allocation
+- Audience tier definitions (Tier A/B/C/etc.)
+- Creative direction + ad copy angles
+- Phased execution plan with exit-criteria gates
+- Measurement plan + reporting cadence
+
+Open inputs ready for paid-media-strategy: full report above + `_engine/wiki/strategy.md` + ACTIVE briefs.md entries + brand-config.json.
 ```
 
 ---

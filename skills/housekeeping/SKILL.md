@@ -9,6 +9,14 @@ Universal cross-track skill. Runs every Saturday 10:00 IST. Scans three zones �
 
 Safety posture: **never rm -rf, always move-to-quarantine, always log, always validate**. The rollback window is the real safety net — you can undo any delete within 7 days via `scripts/rollback.py`.
 
+## Context Loading
+
+Read these shared context files before starting:
+- `shared-context/analyst-profile.md` — workflow, client types, what counts as a deliverable vs scratch
+- `shared-context/accuracy-protocol.md` — when in doubt, don't delete (3x penalty applies to false-positive purges)
+
+Both files anchor the cleanup decisions: PROTECTED rules derive from analyst-profile's deliverable taxonomy, and the AMBIGUOUS tier defaults to "ask" per the accuracy-protocol's blank-when-uncertain rule.
+
 ## Process Steps
 
 1. **Pre-check.** Ensure quarantine root `Desktop/.housekeeping-quarantine/` exists. Read `housekeeping.state.json` from the skill dir. Skip if last run < 24 hours ago (idempotency — prevents double-fires). Print "last run: {timestamp}".

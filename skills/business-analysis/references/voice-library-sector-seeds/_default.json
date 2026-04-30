@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "sector": "_default",
+  "sector_lens_ref": null,
+  "extracted_from": [
+    {
+      "source": "Universal floor — no sector specialization",
+      "performance": "n/a",
+      "extraction_date": "2026-04-30",
+      "method": "sector_seed_universal_floor"
+    }
+  ],
+  "headline_patterns": [
+    {
+      "id": "parallel_verb_emotion",
+      "name": "Parallel verb + emotion",
+      "structure": "{Verb}ed with {emotion}. {Verb}ed with {emotion}.",
+      "examples": ["Built with care. Shipped with confidence."],
+      "max_words": 8,
+      "tone_tags": ["calm", "intimate", "sensory"],
+      "best_for_audience_tier": ["warm", "retention"]
+    },
+    {
+      "id": "objection_reassurance",
+      "name": "Objection question + reassurance",
+      "structure": "{Negation/objection}? {Reassurance}.",
+      "examples": ["Never tried this before? That's exactly who this is for."],
+      "max_words": 12,
+      "tone_tags": ["welcoming", "newcomer-safe"],
+      "best_for_audience_tier": ["cold"]
+    },
+    {
+      "id": "constancy_claim",
+      "name": "Same X. Every Y.",
+      "structure": "{Same/Every} {noun}. {Same/Every} {noun}.",
+      "examples": ["Same quality. Every order."],
+      "max_words": 6,
+      "tone_tags": ["grounding", "anti-hype"],
+      "best_for_audience_tier": ["warm-retarget", "retention"]
+    },
+    {
+      "id": "before_after_bridge",
+      "name": "Before → after",
+      "structure": "{Status quo}. {Shift}. {Outcome}.",
+      "examples": ["Stuck at 2%. Tested 3 hooks. Hit 11%."],
+      "max_words": 12,
+      "tone_tags": ["proof-led", "transformation"],
+      "best_for_audience_tier": ["lookalike", "mid-funnel"]
+    },
+    {
+      "id": "direct_specifier_action",
+      "name": "Specifier + action",
+      "structure": "{Specifier}. {Imperative action}.",
+      "examples": ["Tuesday 6pm. Save your seat."],
+      "max_words": 7,
+      "tone_tags": ["practical", "action-led"],
+      "best_for_audience_tier": ["mid-funnel", "warm"]
+    }
+  ],
+  "trust_line_template": {
+    "format": "{primary-fact} · {secondary-fact} · {qualifier?}",
+    "examples": ["Free trial · No credit card · Cancel anytime"],
+    "separator": "·",
+    "rules": [
+      "lead_with_the_strongest_fact",
+      "no_brand_fluff_phrases",
+      "facts_only_no_claims"
+    ],
+    "forbidden_in_trust_line": [
+      "world-class", "transformative", "premier", "renowned", "best-in-class", "next-level"
+    ]
+  },
+  "cta_verb_noun_pairs": [
+    {"verb": "Get", "nouns": ["the guide", "your trial", "started"], "context": "lead-magnet / trial"},
+    {"verb": "Book", "nouns": ["a call", "your slot", "a session"], "context": "consultation / appointment"},
+    {"verb": "Save", "nouns": ["your seat", "a spot", "your place"], "context": "RSVP / event"},
+    {"verb": "Try", "nouns": ["it free", "the demo"], "context": "trial / demo"},
+    {"verb": "Read", "nouns": ["the case study", "more"], "context": "objection / newcomer card"}
+  ],
+  "voice_rules": {
+    "max_headline_words": 8,
+    "max_subhead_words": 12,
+    "max_trust_line_words": 14,
+    "max_cta_words": 5,
+    "tone": ["conversational", "contracted", "english-direct"],
+    "forbidden_phrases": [
+      "world-class", "transformative", "premier", "renowned", "best-in-class", "next-level",
+      "game-changing", "revolutionary", "cutting-edge", "synergy", "leverage"
+    ],
+    "punctuation_style": "declarative period; no em-dashes (universal kernel rule); middle-dot · for trust-line separators"
+  },
+  "campaign_type_anchor_pattern": {
+    "event": {
+      "anchor_field": "event_facts.canonical_string",
+      "must_appear_on_every_variant": true,
+      "drift_tolerance": 0.8
+    },
+    "evergreen": {
+      "anchor_field": "core_offer_facts.canonical_string",
+      "must_appear_on_every_variant": false,
+      "drift_tolerance": 0.6
+    },
+    "promotional": {
+      "anchor_field": "promo_facts.canonical_string",
+      "must_appear_on_every_variant": true,
+      "drift_tolerance": 0.9
+    }
+  },
+  "carousel_narrative_rule": {
+    "applies_to": "carousel_N_card formats",
+    "structure": "Card 1 = hook. Cards 2..(N-1) = unfold. Card N = CTA-dominant.",
+    "trust_line_consistency": "All cards must include the canonical anchor string. Drift = CRITICAL.",
+    "cta_pill_variation_rule": "Verb may stay consistent; noun should swap to match each card's visual."
+  }
+}
