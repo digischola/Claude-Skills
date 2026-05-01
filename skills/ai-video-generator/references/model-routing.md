@@ -4,13 +4,22 @@ Every scene in the scene_plan gets a `model_choice`. The router picks based on s
 
 **Model IDs verified against Higgsfield `models_explore` 2026-04-30.** Update this file if Higgsfield changes IDs.
 
-## Model matrix (Higgsfield 2026-04-30)
+## Plan tier (2026-05-01 — Ultra)
+
+Mayank moved to Higgsfield Ultra plan ($99/mo) on 2026-05-01. Ultra includes:
+- 3,000 credits/month
+- **30-day unlimited Nano Banana 2** (image — used by ai-image-generator sibling skill)
+- **3 unlimited video models: Kling 2.5 / Seedance 1.0 / Hailuo 2.3 — 0 credits**
+
+Routing default tier flipped: cheap clips no longer cost credits. Reserve credits for Veo 3.1 hero shots and Marketing Studio Video.
+
+## Model matrix (Higgsfield 2026-05-01, Ultra-aware)
 
 | Model ID                | Credits/clip* | Strengths                                    | Best for                          |
 |-------------------------|---------------|----------------------------------------------|-----------------------------------|
-| `kling3_0`              | 6             | Cheap, fast, decent realism, multi-shot      | Default B-roll, lifestyle, action |
+| `kling3_0`              | **0 (Ultra)** | Cheap, fast, decent realism, multi-shot      | **Default B-roll, lifestyle, action — UNLIMITED on Ultra** |
 | `kling2_6`              | 8             | Cinematic motion, advanced physics           | Premium-feel B-roll               |
-| `minimax_hailuo`        | 10            | Natural physics, facial emotion              | Dialogue, character-driven        |
+| `minimax_hailuo`        | **0 (Ultra)** | Natural physics, facial emotion              | **Dialogue, character-driven — UNLIMITED on Ultra** |
 | `seedance_1_5`          | 18            | Reliable motion, versatile                   | General-purpose                   |
 | `veo3_1_lite`           | 20            | Budget Veo, fast, batch                      | **Cheap establishing shots**      |
 | `seedance_2_0`          | 25            | Reference-driven, consistent identity        | Product shots, multi-SKU          |

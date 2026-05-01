@@ -115,6 +115,34 @@ Use `image_gen_prompt_prefix` from creative brief as base prompt. Append per-ad:
 
 Save as `{client-folder}/_engine/working/image-prompts.md`. The Step 7.5 dashboard renders both formats per prompt with tab toggles + reference-attachment badges.
 
+**ALSO emit `{client-folder}/_engine/working/image-prompts.json` (sibling)** for direct consumption by `ai-image-generator` (client-track skill that fires the actual Higgsfield generations). JSON shape:
+
+```json
+{
+  "client": "...",
+  "project": "...",
+  "image_prompts": [
+    {
+      "creative_id": "WLF-AD-01",
+      "concept_name": "Prasadam invite — atmospheric brass thali",
+      "intent": "cover_slide",
+      "creative_direction": "...",
+      "intended_placement": ["meta_feed", "instagram_feed"],
+      "tags": ["prasadam", "atmospheric", "typography_medium"],
+      "prompt": "...standalone-pasteable spec-prose...",
+      "negative_prompt": "no AI faces, no inappropriate religious imagery",
+      "aspect_ratios": ["1:1", "4:5"],
+      "requires_reference_image": true,
+      "reference_subject": "prasadam thali real photo",
+      "reference_image_ids": [],
+      "model_preference": null
+    }
+  ]
+}
+```
+
+`reference_image_ids` is left empty here; ai-image-generator's `inventory_references.py` populates it via `auto_attach_to_concepts_with_intent` when the analyst has a Reference Library folder. `model_preference` lets ad-copywriter override routing per concept if a specific Higgsfield model is wanted; usually null. Run `scripts/render_image_prompts_json.py "<program-folder>"` to emit the JSON sibling from the .md.
+
 ### Step 7: Generate Video Storyboards
 
 Read `references/video-storyboard-spec.md` AND `references/creative-research.md` (Section 6: Video Creative Science).
@@ -153,7 +181,7 @@ Run `scripts/validate_output.py` against all deliverables. Fix any CRITICAL fail
 Update `{client-folder}/_engine/wiki/log.md` — add AD-COPYWRITER COMPLETE entry.
 Update `{client-folder}/_engine/wiki/index.md` — update downstream status.
 
-Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts.
+Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts. **ai-image-generator skill** (client-track) consumes `image-prompts.json` directly to fire Higgsfield generations.
 
 ## Output Checklist
 
@@ -176,6 +204,8 @@ Flag downstream: campaign-setup skill can consume the CSV sheets + image prompts
 ## Learnings & Rules
 
 <!-- Pruned 2026-04-30: 9 entries collapsed to one-liners (encoded into validators / references / kernel). Full text in git history. Keep ≤30 lines per kernel. -->
+
+- [2026-05-01] [downstream handoff to ai-image-generator] Added image-prompts.json sibling output via `scripts/render_image_prompts_json.py "<program-folder>"`. Step 6 now requires both .md (analyst review) AND .json (downstream consumption by ai-image-generator). JSON shape: image_prompts[] with creative_id / concept_name / intent / creative_direction / intended_placement / tags / prompt / negative_prompt / aspect_ratios / requires_reference_image / reference_subject / reference_image_ids / model_preference. ai-image-generator parse_brief.py --form A consumes this directly. No more manual translation between skills. Mayank moved to Higgsfield Ultra plan 2026-05-01 (3,000 credits + unlimited Nano Banana 2 Flash + 3 unlimited video models) which makes ai-image-generator economically viable for every campaign — every ad-copywriter run now has a no-extra-cost path to actual rendered creatives.
 
 - [2026-04-30] [carousel aspect-ratio bug] Authored WLF carousel cards at 4:5 instead of mandatory 1:1. Patched: format→aspect mapping table in Step 6 + `validate_format_aspect_consistency()` in validator + elevated rule in `references/image-prompt-patterns.md` line 329 + eval #8. **RULE:** Carousel = 1:1 ONLY. All cards in one carousel must share aspect. Validator enforces every run.
 

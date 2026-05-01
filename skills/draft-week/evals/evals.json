@@ -1,0 +1,110 @@
+{
+  "skill": "draft-week",
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "plan-week-default",
+      "mode": "plan-week",
+      "input": {
+        "target_week": "2026-W19",
+        "idea_bank_state": "10 raw entries across 3 pillars"
+      },
+      "expected": {
+        "calendar_file": "brand/calendars/2026-W19.md",
+        "slot_count_min": 10,
+        "slot_count_max": 12,
+        "channels_covered": ["linkedin", "x", "instagram"],
+        "pillar_distribution_balanced": true,
+        "entries_flipped_to_shaped": true
+      }
+    },
+    {
+      "id": "write-post-linkedin-text",
+      "mode": "write-post",
+      "input": {
+        "entry_id": "3a3c9bac",
+        "channel": "linkedin",
+        "format": "text-post"
+      },
+      "expected": {
+        "draft_file_pattern": "brand/queue/pending-approval/YYYY-MM-DD-3a3c9bac-linkedin-text-post.md",
+        "frontmatter_required_keys": ["channel", "format", "entry_id", "pillar", "voice_framework", "hook_pattern", "scheduled_at", "posting_status"],
+        "validator_exit_code_in": [0, 1]
+      }
+    },
+    {
+      "id": "validate-blocks-em-dash",
+      "mode": "validate",
+      "input": {
+        "body_contains": "Visitors decide in 5 seconds — fix the headline."
+      },
+      "expected": {
+        "exit_code": 2,
+        "error_includes": "Em dashes found"
+      }
+    },
+    {
+      "id": "validate-blocks-hype-word",
+      "mode": "validate",
+      "input": {
+        "body_contains": "This will revolutionize your conversion rate."
+      },
+      "expected": {
+        "exit_code": 2,
+        "error_includes": "Hype words detected"
+      }
+    },
+    {
+      "id": "validate-blocks-engagement-bait",
+      "mode": "validate",
+      "input": {
+        "body_contains": "Comment yes if you want the framework."
+      },
+      "expected": {
+        "exit_code": 2,
+        "error_includes": "Engagement bait"
+      }
+    },
+    {
+      "id": "validate-warns-no-numbers",
+      "mode": "validate",
+      "input": {
+        "body": "Most LPs fail because the offer is unclear. Fix the offer first. Conversion follows."
+      },
+      "expected": {
+        "exit_code": 1,
+        "warning_includes": "No specific numbers"
+      }
+    },
+    {
+      "id": "repurpose-li-to-x-thread",
+      "mode": "repurpose",
+      "input": {
+        "source_file": "2026-05-04-3a3c9bac-linkedin-text-post.md",
+        "target": "x-thread"
+      },
+      "expected": {
+        "variant_file_suffix": "-x-thread-repurpose.md",
+        "preserves_hook_verbatim": true,
+        "variant_frontmatter_repurpose_source": "<source-filename>",
+        "source_frontmatter_repurposed_into_appended": true
+      }
+    },
+    {
+      "id": "case-study-bundle-thrive",
+      "mode": "case-study",
+      "input": {
+        "entry_id": "thrive-188-win",
+        "client_handle": "wellness_AU"
+      },
+      "expected": {
+        "bundle_dir_pattern": "brand/queue/pending-approval/case-study-thrive-188-win/",
+        "deliverables_count": 4,
+        "deliverable_channels": ["linkedin", "x", "blog", "instagram"],
+        "manifest_file": "manifest.json",
+        "shared_hook_consistent": true,
+        "shared_metrics_consistent": true
+      }
+    }
+  ]
+}

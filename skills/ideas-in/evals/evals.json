@@ -1,0 +1,101 @@
+{
+  "skill": "ideas-in",
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "capture-client-win",
+      "mode": "capture",
+      "input": {
+        "raw_note": "Thrive Retreats: +188% sales, -37% CPA after LP fix (shorter hero, phone above fold, form 6→2 fields).",
+        "type": "client-win"
+      },
+      "expected": {
+        "entry_type": "client-win",
+        "suggested_pillar": "Landing-Page Conversion Craft",
+        "channel_fit_includes": ["LinkedIn", "X"],
+        "captured_at_present": true,
+        "id_format": "uuid-shortened"
+      }
+    },
+    {
+      "id": "capture-build-log",
+      "mode": "capture",
+      "input": {
+        "raw_note": "Locked Path C: AI illustrations allowed for non-photographic on Digischola only.",
+        "type": "build-log"
+      },
+      "expected": {
+        "entry_type": "build-log",
+        "suggested_pillar": "Solo Freelance Ops",
+        "channel_fit_includes": ["LinkedIn", "X"]
+      }
+    },
+    {
+      "id": "trend-scan-add-with-url",
+      "mode": "trend-scan",
+      "input": {
+        "pillar": "Landing-Page Conversion Craft",
+        "headline": "Wellness retreat LP benchmarks 2026 — top quartile hits 8% conv.",
+        "url": "https://example.com/wellness-lp-benchmarks-2026",
+        "score": 8
+      },
+      "expected": {
+        "entry_type": "trend",
+        "source_url_present": true,
+        "relevance_score": 8
+      }
+    },
+    {
+      "id": "trend-scan-skip-low-score",
+      "mode": "trend-scan",
+      "input": {
+        "pillar": "Solo Freelance Ops",
+        "headline": "Random irrelevant article",
+        "url": "https://example.com/irrelevant",
+        "score": 3
+      },
+      "expected": {
+        "appended": false,
+        "reason": "score < 6"
+      }
+    },
+    {
+      "id": "trend-scan-skip-dup-url",
+      "mode": "trend-scan",
+      "input": {
+        "pillar": "Landing-Page Conversion Craft",
+        "headline": "(same headline, second run)",
+        "url": "https://example.com/wellness-lp-benchmarks-2026",
+        "score": 8
+      },
+      "expected": {
+        "appended": false,
+        "reason": "duplicate source_url"
+      }
+    },
+    {
+      "id": "peer-scan-pattern-borrow",
+      "mode": "peer-scan",
+      "input": {
+        "creator": "@justinwelsh",
+        "pattern_formula": "3-line hook → numbered list → personal CTA",
+        "source_url": "https://linkedin.com/in/justin-welsh/posts/abc123"
+      },
+      "expected": {
+        "entry_type": "peer-pattern",
+        "creator_handle": "@justinwelsh",
+        "pattern_formula_present": true
+      }
+    },
+    {
+      "id": "validate-rejects-bad-type",
+      "mode": "validate",
+      "input": {
+        "type": "not-a-real-type"
+      },
+      "expected": {
+        "exit_code": 2
+      }
+    }
+  ]
+}

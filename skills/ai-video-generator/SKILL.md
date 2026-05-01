@@ -12,7 +12,7 @@ End-to-end pipeline. Storyboard or brief in, polished MP4 out. Scenes routed per
 ## Prerequisites — read first
 
 1. **Higgsfield MCP must be connected.** See `references/mcp-setup.md`. The skill runs `scripts/check_mcp.py` on launch and aborts loud if not connected.
-2. **Higgsfield account with credits.** Plus tier ($39/mo, 1,000 credits) recommended — Starter is too credit-starved. See cost matrix in `references/model-routing.md`.
+2. **Higgsfield account with credits.** Ultra tier ($99/mo, 3,000 credits + unlimited Nano Banana 2 Flash + 3 unlimited video models: Kling 2.5 / Seedance 1.0 / Hailuo 2.3) is the working baseline as of 2026-05-01. Plus ($39/mo, 1,000 credits) acceptable for low volume; Starter too credit-starved. Routing default tier flipped: cheap clips no longer cost credits. See cost matrix in `references/model-routing.md`.
 3. **Client wiki exists.** `Desktop/{Client}/{Project}/_engine/wiki/brand-identity.md`. If absent, fall back to a neutral spec and flag the missing brand.
 4. **ffmpeg + ChatterBox installed.** Same stack as visual-generator + video-edit.
 
@@ -183,5 +183,7 @@ Default safe budget: 100 credits per video (≈ $4 at Plus tier).
 ## Learnings & Rules
 
 Format: `[YYYY-MM-DD] [CLIENT-TYPE] Finding → Action`
+
+- [2026-05-01] [Ultra plan migration] Mayank moved to Higgsfield Ultra ($99/mo) — 3,000 credits + 30-day unlimited Nano Banana 2 Flash + 3 unlimited video models (Kling 2.5, Seedance 1.0, Hailuo 2.3). Updated `references/model-routing.md`: Kling 3.0 / kling2_6 cousins + Hailuo + Seedance variants now routed as default tier with 0-credit cost on Ultra; Veo 3.1 / Cinematic Studio 3.0 / Marketing Studio Video kept as paid escalation tier. Updated SKILL.md prerequisites to reflect Ultra as working baseline. Default budget comment in SKILL.md left at 100 credits per video, but practical: a typical 30-sec UGC ad now costs $0 on Ultra (all Kling/Hailuo) — credits reserved for hero Veo shots only. Sibling skill ai-image-generator built same day.
 
 - [2026-04-30] [SKILL CREATION] Skill v1.0 scaffolded. Pipeline architecture: Higgsfield MCP for clip generation → ChatterBox VO → ffmpeg stitch + captions + chip → optional video-edit polish. Cost-aware model routing prefers Kling 3.0 (6cr) over Veo 3.1 (50cr) by default; hero shots flag Veo. Default budget: 100 credits per video. Hard rule: never run on Digischola — that brand is photo-free by visual-generator policy.

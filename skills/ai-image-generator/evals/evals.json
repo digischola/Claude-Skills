@@ -1,0 +1,59 @@
+{
+  "skill_name": "ai-image-generator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate Meta image creatives for the ISKM Singapore Weekend Love Feast event. Goal is registrations. Use the reference image folder I'll provide.",
+      "expected_output": "Inventory references → build concept board with religious-grounded voice register → atmospheric / prasadam / typographic concepts only (no AI deity / face redraws) → 4-6 concepts × 2-3 variations × 1:1 + 4:5 → mostly nano_banana_flash unlimited + 1 gpt_image_2 hero per concept → dashboard.html with Sanskrit-safe typography",
+      "assertions": [
+        {"name": "religious_guardrail", "description": "No deity reference is asked to be AI-redrawn — only composite-into-design path"},
+        {"name": "voice_register", "description": "concept-board.json voice_register == 'religious-grounded'"},
+        {"name": "ultra_default_tier", "description": "majority of variations use nano_banana_flash (unlimited on Ultra)"},
+        {"name": "aspect_matrix", "description": "Each concept produces 1:1 + 4:5 for Meta feed placements"},
+        {"name": "no_em_dashes", "description": "No em dashes anywhere in generated prompts or text-on-image"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Take the ad-copywriter image-prompts.json output for Thrive Retreats and generate the actual creatives.",
+      "expected_output": "Form A path: parse_brief.py reads image-prompts.json → concept-board with auto-attached lifestyle/UGC references → marketing_studio_image for product hero, soul_2 for UGC variants → dashboard.html ready for Mayank to pick winners",
+      "assertions": [
+        {"name": "form_a_consumed", "description": "concept-board.json form == 'A'"},
+        {"name": "ad_copywriter_handoff_clean", "description": "Every image-prompt entry from ad-copywriter becomes at least one concept"},
+        {"name": "ugc_routing", "description": "UGC-tagged concepts route to soul_2 / marketing_studio_image, not nano_banana_flash"},
+        {"name": "manifest_sourcelabel", "description": "manifest.json entries source-labeled [GENERATED] with model + seed + prompt"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have 80 reference images for ISKM Singapore. Inventory and tag them so we can use them across all upcoming campaigns.",
+      "expected_output": "inventory_references.py walks folder → SHA-dedup → upload-queue → Claude in-session uploads via media_upload + media_confirm → patches manifest with UUIDs → reports sacred count, face count, consent-unknown count → blocks generation queue from using consent-unknown faces until resolved",
+      "assertions": [
+        {"name": "deity_locked_input_only", "description": "Every deity image has usage_scope=input_only_no_redraw + ai_redraw_allowed=false"},
+        {"name": "consent_blocking", "description": "Faces without cleared consent are blocked from paid use"},
+        {"name": "auto_attach_intents", "description": "Each image has auto_attach_to_concepts_with_intent populated based on subject_type"},
+        {"name": "idempotent_reupload", "description": "Re-running on same folder skips already-uploaded SHA matches"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Generate 12 ad creative variations for Thrive's autumn promo to test in Meta.",
+      "expected_output": "Concept board with 4 distinct angles × 3 variations each → cost-aware routing (8 free Nano Banana Flash + 4 paid Marketing Studio Image) → all under 60-credit budget → dashboard for Mayank to pick top 5",
+      "assertions": [
+        {"name": "variation_count", "description": "12 variations generated as requested, not arbitrary other number"},
+        {"name": "budget_under_threshold", "description": "Total credit estimate < 100; runs silently (no --confirm-cost)"},
+        {"name": "differentiation", "description": "Variations within a concept are meaningfully different (composition rotation, premium tier)"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I want a hero image for the Wabo landing page. 16:9 desktop and 9:16 mobile. Premium feel.",
+      "expected_output": "Single concept hero_landing intent → cinematic_studio_2_5 routing → 16:9 + 9:16 variations × 2 each → dashboard with 4 hero candidates → final picks moved to creatives/ for landing-page-builder to embed",
+      "assertions": [
+        {"name": "hero_routing", "description": "Routes to cinematic_studio_2_5 (premium hero) not nano_banana_flash"},
+        {"name": "aspect_pair", "description": "Both 16:9 desktop and 9:16 mobile generated"},
+        {"name": "downstream_flag", "description": "Output flags landing-page-builder as ready downstream consumer"}
+      ]
+    }
+  ]
+}
